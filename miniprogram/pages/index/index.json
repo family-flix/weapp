@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "f-video": "/components/video"
+  },
+  "pageOrientation": "auto"
+}

@@ -1,0 +1,1 @@
+<view data-state="{{open ? 'open' : 'closed'}}" class="{{className}}" style="{{style}}" bind:tap="handleClick" catch:touchmove="handleTouchMove" bind:animationend="handleAnimationEnd"></view>

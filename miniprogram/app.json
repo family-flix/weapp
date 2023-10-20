@@ -1,0 +1,15 @@
+{
+  "pages": ["pages/index/index", "pages/season/index", "pages/tv_play/index", "pages/logs/logs"],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationStyle": "custom"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "resolveAlias": {
+    "nzh/*": "/modules/nzh/*",
+    "mitt/*": "/modules/mitt/*",
+    "@/*": "/*"
+  },
+  "plugins": {}
+}

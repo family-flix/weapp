@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.js"],"names":[],"mappings":";;;;;;;AAAA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA","file":"index.js","sourcesContent":["\n\n\nif (process.env.NODE_ENV === 'production') {\n  module.exports = require('./tailwind-merge.cjs.production.min.js')\n} else {\n  module.exports = require('./tailwind-merge.cjs.development.js')\n}\n"]}

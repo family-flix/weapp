@@ -1,0 +1,13 @@
+  <video 
+    id="video" 
+    class="class"
+    style="width: 100%; {{style}}"
+    src="{{url}}" 
+    show-center-play-btn='{{false}}' 
+    show-play-btn="{{true}}" 
+    show-bottom-progress="{{false}}"
+    controls
+    picture-in-picture-mode="{{['push', 'pop']}}"
+    referrer-policy="no-referrer"
+    binderror="handleError"
+  ></video>

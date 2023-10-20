@@ -1,0 +1,87 @@
+<!-- <view style="z-index: 1; position: relative;">
+    <f-video _store="{{ player }}" bind:load="bindVideoContext"></f-video>
+</view> -->
+<!-- <cover-view style="z-index: 10;position: absolute; left: 0; top: 0; border: 1px solid red;">
+    <view style="color: #fff;">这是文本哈哈哈1</view>
+</cover-view>
+<cover-view style="z-index: 10; position: absolute; left: 0; top: 48rpx; border: 1px solid red;">
+    这是文本哈哈哈2
+</cover-view>
+<cover-view style="margin-top: 96rpx; border: 1px solid red;">这是文本哈哈哈3</cover-view> -->
+<scroll-view>
+    <view class="h-screen">
+        <view class="operations text-w-fg-1">
+            <view class="z-10 absolute inset-0">
+                <view class="flex items-center justify-between">
+                    <presence _store="{{topOperation}}" class="animate-in fade-in slide-in-from-top data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=closed]:fade-out">
+                        <show when="{{!view.query.hide_menu}}">
+                            <view>
+                                <view class="inline-block p-4" bind:tap="handleClickArrowLeft">
+                                    <icon name="arrow-left" class="w-6 h-6 text-2xl" />
+                                </view>
+                            </view>
+                        </show>
+                    </presence>
+                </view>
+                <view class="absolute bottom-12 w-full safe-bottom">
+                    <presence _store="{{bottomOperation}}" class="animate-in fade-in slide-in-from-bottom data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom data-[state=closed]:fade-out">
+                        <view class="">
+                            <view class="flex justify-between px-8 mt-18">
+                                <view class="flex flex-col items-center">
+                                    <icon name="arrow-big-left" class="w-8 h-8" />
+                                    <p class="mt-2 text-sm">上一集</p>
+                                </view>
+                                <view class="w-12 h-16">
+                                    <view class="flex flex-col items-center">
+                                        <icon name="arrow-big-right" class="w-8 h-8 " />
+                                        <p class="mt-2 text-sm ">下一集</p>
+                                    </view>
+                                </view>
+                            </view>
+                            <view class="grid grid-cols-5 gap-2 mt-12 w-full px-2">
+                                <view class="flex flex-col items-center">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="list" class="w-6 h-6 " />
+                                    </view>
+                                    <p class="mt-2 text-sm ">选集</p>
+                                </view>
+                                <view class="flex flex-col items-center">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="wand-2" class="w-6 h-6" />
+                                    </view>
+                                    <p class="mt-2 text-sm">切换源</p>
+                                </view>
+                                <view class="flex flex-col items-center">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="gauge" class="w-6 h-6 " />
+                                    </view>
+                                    <p class="mt-2 text-sm ">{{rate}}x</p>
+                                </view>
+                                <view class="flex flex-col items-center">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="glasses" class="w-6 h-6 " />
+                                    </view>
+                                    <p class="mt-2 text-sm ">{{curSource.typeText || "分辨率"}}</p>
+                                </view>
+                                <view class="flex flex-col items-center focus:outline-none focus:ring-0">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="more-horizontal" class="w-6 h-6 " />
+                                    </view>
+                                    <p class="mt-2 text-sm ">更多</p>
+                                </view>
+                            </view>
+                        </view>
+                    </presence>
+                </view>
+            </view>
+        </view>
+        <view class="video z-20 absolute w-full" style="top: 12%;">
+            <f-video style="width: 100%;" _store="{{ player }}" bind:load="bindVideoContext"></f-video>
+        </view>
+    </view>
+</scroll-view>
+<view class="mt-2 space-y-1">
+    <block wx:for="{{subtileState.texts}}" wx:for-item="text" wx:key="self">
+        <view class="text-center text-lg">{{text}}</view>
+    </block>
+</view>
