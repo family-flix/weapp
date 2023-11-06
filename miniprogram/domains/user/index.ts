@@ -24,8 +24,8 @@ type TheTypesOfEvents = {
 };
 type UserProps = {
   id: string;
-  username: string;
-  avatar: string;
+  username?: string;
+  avatar?: string;
   token: string;
 };
 type UserState = UserProps & {
@@ -41,9 +41,9 @@ export class UserCore extends BaseDomain<TheTypesOfEvents> {
   // debug = false;
 
   id: string;
-  username: string;
-  avatar: string;
   token: string;
+  username?: string;
+  avatar?: string;
   isLogin: boolean;
 
   get state(): UserState {
@@ -62,8 +62,8 @@ export class UserCore extends BaseDomain<TheTypesOfEvents> {
     this.id = id;
     this.username = username;
     this.avatar = avatar;
-    this.isLogin = !!token;
     this.token = token;
+    this.isLogin = !!token;
   }
   logout() {
     // this.validate()

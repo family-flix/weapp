@@ -145,7 +145,7 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, { ...this.state });
   }
   clear() {
-    console.log("[COMPONENT]ui/input/index - clear", this._defaultValue);
+    // console.log("[COMPONENT]ui/input/index - clear", this._defaultValue);
     this.value = this._defaultValue;
     // this.emit(Events.Change, this.value);
     this.emit(Events.Clear);

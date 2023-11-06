@@ -1,8 +1,10 @@
 import dayjs from "dayjs";
+
 // import "dayjs/locale/zh-cn";
 // import relative_time from "dayjs/plugin/relativeTime";
 import { cn as nzhcn } from "nzh/index";
 
+import { Result } from "@/types/index";
 
 export const formatTime = (date: Date) => {
   const year = date.getFullYear();
@@ -189,4 +191,31 @@ export function sleep(delay: number = 1000) {
       resolve(null);
     }, delay);
   });
+}
+export function wxResultify<
+  T extends (args: {
+    success: (result: any) => void;
+    fail: (error: { errmsg: string }) => void;
+    [key: string]: any;
+  }) => void
+>(
+  fn: T
+): (
+  args?: Omit<Parameters<T>[0], "success" | "fail">
+) => Promise<Result<Parameters<NonNullable<NonNullable<Parameters<T>[0]>["success"]>>[0]>> {
+  return (args?: Omit<NonNullable<Parameters<T>[0]>, "success" | "fail">) => {
+    const p = new Promise((resolve) => {
+      fn({
+        ...args,
+        success(d) {
+          resolve(Result.Ok(d));
+        },
+        fail(err) {
+          resolve(Result.Err(err.errmsg));
+        },
+      });
+    });
+    // return p;
+    return p as Promise<Result<Parameters<NonNullable<NonNullable<Parameters<T>[0]>["success"]>>[0]>>;
+  };
 }

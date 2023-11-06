@@ -1,6 +1,6 @@
 {
   "usingComponents": {
-    "f-video": "/components/video"
-  },
-  "pageOrientation": "auto"
+    "f-video": "/components/video",
+    "navigation-bar": "/components/ui/navigation-bar"
+  }
 }

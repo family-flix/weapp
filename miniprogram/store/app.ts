@@ -5,44 +5,34 @@
 import { ListCore } from "@/domains/list/index";
 import { Application } from "@/domains/app/index";
 import { LocalCache } from "@/domains/app/storage";
-import { UserCore } from "@/domains/user/index";
-import { NavigatorCore } from "@/domains/navigator/index";
-// import { NavigatorCore } from "@/domains/navigator";
-import { Result } from "@/types/index";
 
-// NavigatorCore.prefix = "/mobile";
 const cache = new LocalCache({ key: "global" });
-// const router = new NavigatorCore();
-const user = new UserCore(cache.get("user") || {
-  token: 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..hygHZsl86_hlWWsa.BRdG-tcb2YWwx3O9GSpD9AoEnyWi-NVMBVVlrU7rAsOA-pgc3MsbJeiym-h51yZiHCJznyewuW0dDnKyxypgPFDEnX2M20sotUbLEyapUBISA2YRQt0.ZFIfKHxLJpNBALOuXFU6PQ',
-});
+// const user = new UserCore(cache.get("user"));
 // user.onLogin((profile) => {
 // });
 // user.onLogout(() => {
 // });
-user.onExpired(() => {
-  app.tip({
-    text: ["token 已过期，请重新登录"],
-  });
-});
-user.onTip((msg) => {
-  app.tip(msg);
-});
+// user.onExpired(() => {
+//   app.tip({
+//     text: ["token 已过期，请重新登录"],
+//   });
+// });
+// user.onTip((msg) => {
+//   app.tip(msg);
+// });
 
 export const app = new Application({
-  user,
-  router: new NavigatorCore(),
+  // user,
+  // router: new NavigatorCore(),
   cache,
-  async beforeReady() {
-    // const { query } = router;
-    //     await user.validate(router.query.token, router.query.force);
-    if (!user.isLogin) {
-      app.emit(Application.Events.Error, new Error("请先登录"));
-      return Result.Ok(null);
-    }
-    app.emit(Application.Events.Ready);
-    return Result.Ok(null);
-  },
+  // async beforeReady() {
+  //   if (!user.isLogin) {
+  //     app.emit(Application.Events.Error, new Error("请先登录"));
+  //     return Result.Ok(null);
+  //   }
+  //   app.emit(Application.Events.Ready);
+  //   return Result.Ok(null);
+  // },
   //   onTip(msg: { icon: unknown; text: string[] }) {
   //     const { text } = msg;
   //     wx.showToast({
@@ -51,8 +41,17 @@ export const app = new Application({
   //   },
 });
 app.onTip((msg) => {
-  const { text } = msg;
+  const { icon, text } = msg;
   wx.showToast({
+    icon: (() => {
+      if (icon === "success") {
+        return "success";
+      }
+      if (icon === "loading") {
+        return "loading";
+      }
+      return "none";
+    })(),
     title: text.join("\n"),
   });
 });

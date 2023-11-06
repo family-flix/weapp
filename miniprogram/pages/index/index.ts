@@ -50,15 +50,21 @@ function recognize(body: { data: string }) {
 
 Page({
   data: {
+    loading: true,
     profile: null,
     source: null,
-    player: new PlayerCore({ screen: { width: 750, height: 1200 } }),
   } as {
+    loading: boolean;
     profile: TVCore["profile"];
-    player: PlayerCore;
   },
-  async onLoad() {
+  onReady() {
+    app.onReady(() => {
+      this.setData({
+        loading: false,
+      });
+    });
   },
+  async onLoad() {},
   onResize(res) {
     const {
       size: { windowWidth, windowHeight },
@@ -80,5 +86,10 @@ Page({
       recorderManager.stop();
     }, 3000);
     // this.data.player.requestFullScreen();
+  },
+  gotoSeasonListPage() {
+    wx.navigateTo({
+      url: "/pages/season/index",
+    });
   },
 });

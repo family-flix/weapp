@@ -7,7 +7,6 @@
     show-play-btn="{{true}}" 
     show-bottom-progress="{{false}}"
     controls
-    picture-in-picture-mode="{{['push', 'pop']}}"
     referrer-policy="no-referrer"
     binderror="handleError"
   ></video>

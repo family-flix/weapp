@@ -143,7 +143,6 @@ const dialog = new DialogCore({
 
 Page({
   data: {
-    loading: true,
     response: seasonList.response,
     hasSearch: (() => {
       const { language = [] } = app.cache.get("tv_search", {
@@ -154,56 +153,49 @@ Page({
     searchInput,
     btn,
     dialog,
-    backgroundBottomColor: "#111111",
   },
-  onReady() {
-    app.onReady(() => {
+  onLoad() {
+    //     if (menu) {
+    //       menu.onScrollToTop(() => {
+    //         scrollView.scrollTo({ top: 0 });
+    //       });
+    //       menu.onRefresh(async () => {
+    //         scrollView.startPullToRefresh();
+    //         await seasonList.refresh();
+    //         scrollView.stopPullToRefresh();
+    //       });
+    //     }
+    // scrollView.onPullToRefresh(async () => {
+    //   await seasonList.refresh();
+    //   app.tip({
+    //     text: ["刷新成功"],
+    //   });
+    //   scrollView.stopPullToRefresh();
+    // });
+    // scrollView.onReachBottom(() => {
+    //   seasonList.loadMore();
+    // });
+    seasonList.onStateChange((nextResponse) => {
       this.setData({
-        loading: false,
+        response: nextResponse,
       });
-      //     if (menu) {
-      //       menu.onScrollToTop(() => {
-      //         scrollView.scrollTo({ top: 0 });
-      //       });
-      //       menu.onRefresh(async () => {
-      //         scrollView.startPullToRefresh();
-      //         await seasonList.refresh();
-      //         scrollView.stopPullToRefresh();
-      //       });
-      //     }
-      // scrollView.onPullToRefresh(async () => {
-      //   await seasonList.refresh();
-      //   app.tip({
-      //     text: ["刷新成功"],
-      //   });
-      //   scrollView.stopPullToRefresh();
-      // });
-      // scrollView.onReachBottom(() => {
-      //   seasonList.loadMore();
-      // });
-      seasonList.onStateChange((nextResponse) => {
-        this.setData({
-          response: nextResponse,
-        });
-      });
-      //     mediaRequest.onTip((msg) => {
-      //       app.tip(msg);
-      //     });
-      const search = (() => {
-        const { language = [] } = app.cache.get("tv_search", {
-          language: [] as string[],
-        });
-        if (!language.length) {
-          return {};
-        }
-        return {
-          language: language.join("|"),
-        };
-      })();
-      seasonList.init(search);
     });
+    //     mediaRequest.onTip((msg) => {
+    //       app.tip(msg);
+    //     });
+    const search = (() => {
+      const { language = [] } = app.cache.get("tv_search", {
+        language: [] as string[],
+      });
+      if (!language.length) {
+        return {};
+      }
+      return {
+        language: language.join("|"),
+      };
+    })();
+    seasonList.init(search);
   },
-  onLoad() {},
   onReachBottom() {
     console.log(111);
     seasonList.loadMore();

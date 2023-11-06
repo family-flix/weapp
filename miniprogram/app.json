@@ -1,5 +1,5 @@
 {
-  "pages": ["pages/index/index", "pages/season/index", "pages/tv_play/index", "pages/logs/logs"],
+  "pages": ["pages/index/index", "pages/season/index", "pages/movie/index", "pages/tv_play/index", "pages/logs/logs"],
   "window": {
     "backgroundTextStyle": "light",
     "navigationStyle": "custom"
@@ -11,5 +11,22 @@
     "mitt/*": "/modules/mitt/*",
     "@/*": "/*"
   },
-  "plugins": {}
+  "plugins": {},
+  "darkmode": true,
+  "tabBar": {
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/season/index",
+        "text": "电视剧"
+      },
+      {
+        "pagePath": "pages/movie/index",
+        "text": "电影"
+      }
+    ]
+  }
 }

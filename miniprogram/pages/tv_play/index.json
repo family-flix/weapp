@@ -2,6 +2,8 @@
   "usingComponents": {
     "lazy-image": "/components/ui/image",
     "f-video": "/components/video",
-    "icon": "/components/ui/icon/index"
+    "navigation-bar": "/components/ui/navigation-bar",
+    "icon": "/components/ui/icon/index",
+    "sheet": "/components/ui/sheet/index"
   }
 }

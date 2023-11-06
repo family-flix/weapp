@@ -30,7 +30,7 @@ Component({
   lifetimes: {
     attached() {
       const store = this.data._store as InputCore;
-      console.log("[COMPONENT]ui/input - ready", store);
+      // console.log("[COMPONENT]ui/input - ready", store);
       if (!store) {
         return;
       }

@@ -1,3 +1,6 @@
-<view class="container">
-    <view>首页</view>
-</view>
+<page-meta>
+    <navigation-bar>
+        <view>首页</view>
+    </navigation-bar>
+    <view>{{loading ? '登录中...' : ''}}</view>
+</page-meta>

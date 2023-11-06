@@ -92,8 +92,8 @@ type DeviceSizeTypes = keyof typeof mediaSizes;
 type ThemeTypes = "dark" | "light" | "system";
 
 export class Application extends BaseDomain<TheTypesOfEvents> {
-  user: UserCore;
-  router: NavigatorCore;
+  user?: UserCore;
+  router?: NavigatorCore;
   cache: LocalCache;
   lifetimes: Partial<{
     beforeReady: () => Promise<Result<null>>;
@@ -102,6 +102,12 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
 
   ready = false;
   screen: {
+    statusBarHeight?: number;
+    menuButton?: {
+      width: number;
+      left: number;
+      right: number;
+    };
     width: number;
     height: number;
   } = {
@@ -112,10 +118,12 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
     wechat: boolean;
     ios: boolean;
     android: boolean;
+    prod: "develop" | "trial" | "release";
   } = {
     wechat: false,
     ios: false,
     android: false,
+    prod: "develop",
   };
   curDeviceSize: DeviceSizeTypes = "md";
   theme: ThemeTypes = "system";
@@ -138,8 +146,8 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
 
   constructor(
     options: {
-      user: UserCore;
-      router: NavigatorCore;
+      user?: UserCore;
+      router?: NavigatorCore;
       cache: LocalCache;
     } & Application["lifetimes"]
   ) {
@@ -157,7 +165,9 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
   /** 启动应用 */
   async start(options: { width: number; height: number }) {
     const { width, height } = options;
-    this.screen = { width, height };
+    if (this.screen.width === 0) {
+      this.screen = { ...this.screen, width, height };
+    }
     this.curDeviceSize = getCurrentDeviceSize(width);
     const { beforeReady } = this.lifetimes;
     if (beforeReady) {
@@ -307,6 +317,9 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
    * ----------------
    */
   onReady(handler: Handler<TheTypesOfEvents[Events.Ready]>) {
+    if (this.ready) {
+      handler();
+    }
     return this.on(Events.Ready, handler);
   }
   onDeviceSizeChange(handler: Handler<TheTypesOfEvents[Events.DeviceSizeChange]>) {

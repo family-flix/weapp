@@ -2,12 +2,12 @@
 
 import { TVGenresOptions, TVSourceOptions } from "@/constants/index";
 import { ListCore } from "@/domains/list/index";
+import { fetchMovieList, MovieItem } from "@/domains/movie/services";
 import { RequestCore } from "@/domains/request/index";
-import { SeasonItem, fetchSeasonList } from "@/domains/tv/services";
 import { ButtonCore, CheckboxGroupCore, DialogCore, InputCore } from "@/domains/ui/index";
 import { app } from "@/store/app";
 
-const seasonList = new ListCore(new RequestCore(fetchSeasonList), {
+const movieList = new ListCore(new RequestCore(fetchMovieList), {
   pageSize: 20,
   beforeSearch() {
     searchInput.setLoading(true);
@@ -16,7 +16,7 @@ const seasonList = new ListCore(new RequestCore(fetchSeasonList), {
     searchInput.setLoading(false);
   },
 });
-seasonList.onError((tip) => {
+movieList.onError((tip) => {
   wx.showToast({
     title: tip.message,
     icon: "none",
@@ -45,18 +45,18 @@ const settingsSheet = new DialogCore();
 const searchInput = new InputCore({
   placeholder: "请输入关键字搜索电视剧",
   onEnter(v) {
-    seasonList.search({
+    movieList.search({
       name: v,
     });
   },
   onBlur(v) {
-    seasonList.search({
+    movieList.search({
       name: v,
     });
   },
   onClear() {
     // console.log("[PAGE]home/index - onClear", helper, helper.response.search);
-    seasonList.search({
+    movieList.search({
       name: "",
     });
   },
@@ -79,7 +79,7 @@ const sourceCheckboxGroup = new CheckboxGroupCore({
       language: options,
     });
     //     setHasSearch(!!options.length);
-    seasonList.search({
+    movieList.search({
       language: options.join("|"),
     });
   },
@@ -92,7 +92,7 @@ const genresCheckboxGroup = new CheckboxGroupCore({
     // });
     //     setHasSearch(!!options.length);
     // settingsSheet.hide();
-    seasonList.search({
+    movieList.search({
       genres: options.join("|"),
     });
   },
@@ -143,8 +143,7 @@ const dialog = new DialogCore({
 
 Page({
   data: {
-    loading: true,
-    response: seasonList.response,
+    response: movieList.response,
     hasSearch: (() => {
       const { language = [] } = app.cache.get("tv_search", {
         language: [] as string[],
@@ -156,64 +155,57 @@ Page({
     dialog,
     backgroundBottomColor: "#111111",
   },
-  onReady() {
-    app.onReady(() => {
+  onLoad() {
+    //     if (menu) {
+    //       menu.onScrollToTop(() => {
+    //         scrollView.scrollTo({ top: 0 });
+    //       });
+    //       menu.onRefresh(async () => {
+    //         scrollView.startPullToRefresh();
+    //         await seasonList.refresh();
+    //         scrollView.stopPullToRefresh();
+    //       });
+    //     }
+    // scrollView.onPullToRefresh(async () => {
+    //   await seasonList.refresh();
+    //   app.tip({
+    //     text: ["刷新成功"],
+    //   });
+    //   scrollView.stopPullToRefresh();
+    // });
+    // scrollView.onReachBottom(() => {
+    //   seasonList.loadMore();
+    // });
+    movieList.onStateChange((nextResponse) => {
       this.setData({
-        loading: false,
+        response: nextResponse,
       });
-      //     if (menu) {
-      //       menu.onScrollToTop(() => {
-      //         scrollView.scrollTo({ top: 0 });
-      //       });
-      //       menu.onRefresh(async () => {
-      //         scrollView.startPullToRefresh();
-      //         await seasonList.refresh();
-      //         scrollView.stopPullToRefresh();
-      //       });
-      //     }
-      // scrollView.onPullToRefresh(async () => {
-      //   await seasonList.refresh();
-      //   app.tip({
-      //     text: ["刷新成功"],
-      //   });
-      //   scrollView.stopPullToRefresh();
-      // });
-      // scrollView.onReachBottom(() => {
-      //   seasonList.loadMore();
-      // });
-      seasonList.onStateChange((nextResponse) => {
-        this.setData({
-          response: nextResponse,
-        });
-      });
-      //     mediaRequest.onTip((msg) => {
-      //       app.tip(msg);
-      //     });
-      const search = (() => {
-        const { language = [] } = app.cache.get("tv_search", {
-          language: [] as string[],
-        });
-        if (!language.length) {
-          return {};
-        }
-        return {
-          language: language.join("|"),
-        };
-      })();
-      seasonList.init(search);
     });
+    //     mediaRequest.onTip((msg) => {
+    //       app.tip(msg);
+    //     });
+    const search = (() => {
+      const { language = [] } = app.cache.get("tv_search", {
+        language: [] as string[],
+      });
+      if (!language.length) {
+        return {};
+      }
+      return {
+        language: language.join("|"),
+      };
+    })();
+    movieList.init(search);
   },
-  onLoad() {},
   onReachBottom() {
-    console.log(111);
-    seasonList.loadMore();
+    movieList.loadMore();
   },
-  handleClickSeason(event: { currentTarget: { dataset: { data: SeasonItem } } }) {
+  handleClickMovie(event: { currentTarget: { dataset: { data: MovieItem } } }) {
     const { data } = event.currentTarget.dataset;
     console.log(data);
-    const { tv_id, id } = data;
+    const { id } = data;
     wx.navigateTo({
-      url: `/pages/tv_play/index?tv_id=${tv_id}&season_id=${id}`,
+      url: `/pages/movie_play/index?id=${id}`,
     });
   },
 });

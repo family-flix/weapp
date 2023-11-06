@@ -1,0 +1,15 @@
+<dialog-primitive-root _store="{{_store}}">
+    <dialog-primitive-portal name="_in_dialog" _store="{{_store}}" class-name="fixed inset-0 z-50 flex items-end">
+        <dialog-primitive-overlay _store="{{_store}}" class-name="dialog__overlay {{overlayClassName}}"></dialog-primitive-overlay>
+        <dialog-primitive-content _store="{{_store}}" class-name="dialog__content {{contentClassName}}">
+            <dialog-primitive-header class-name="dialog__header flex flex-col space-y-2 text-left">
+                <dialog-primitive-close _store="{{_store}}" class-name="dialog__close flex-col space-y-2 text-center sm:text-left flex">
+                    <view class="p-4 self-end">
+                        <icon name="x" class-name="text-2xl text-w-fg-1" />
+                    </view>
+                </dialog-primitive-close>
+            </dialog-primitive-header>
+            <slot />
+        </dialog-primitive-content>
+    </dialog-primitive-portal>
+</dialog-primitive-root>

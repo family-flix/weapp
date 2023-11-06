@@ -385,6 +385,7 @@ Page({
     player,
     bottomOperation,
     topOperation,
+    episodesSheet,
   },
   onLoad(query) {
     const view = {
@@ -410,5 +411,8 @@ Page({
   // },
   handleClickArrowLeft() {
     wx.navigateBack();
+  },
+  handleClickEpisodesMenu() {
+    episodesSheet.show();
   },
 });

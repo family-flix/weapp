@@ -13,9 +13,10 @@ enum BaseEvents {
   Tip = "__tip",
   Destroy = "__destroy",
 }
+type TipIcons = "success" | "warning" | "error" | "loading";
 type TheTypesOfBaseEvents = {
   [BaseEvents.Tip]: {
-    icon?: unknown;
+    icon?: TipIcons;
     text: string[];
   };
   [BaseEvents.Destroy]: void;
@@ -72,16 +73,10 @@ export class BaseDomain<Events extends Record<EventType, unknown>> {
       ...args
     );
   }
-  off<Key extends keyof BaseDomainEvents<Events>>(
-    event: Key,
-    handler: Handler<BaseDomainEvents<Events>[Key]>
-  ) {
+  off<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>) {
     this._emitter.off(event, handler);
   }
-  on<Key extends keyof BaseDomainEvents<Events>>(
-    event: Key,
-    handler: Handler<BaseDomainEvents<Events>[Key]>
-  ) {
+  on<Key extends keyof BaseDomainEvents<Events>>(event: Key, handler: Handler<BaseDomainEvents<Events>[Key]>) {
     const unlisten = () => {
       this.listeners = this.listeners.filter((l) => l !== unlisten);
       this.off(event, handler);
@@ -90,14 +85,11 @@ export class BaseDomain<Events extends Record<EventType, unknown>> {
     this._emitter.on(event, handler);
     return unlisten;
   }
-  emit<Key extends keyof BaseDomainEvents<Events>>(
-    event: Key,
-    value?: BaseDomainEvents<Events>[Key]
-  ) {
+  emit<Key extends keyof BaseDomainEvents<Events>>(event: Key, value?: BaseDomainEvents<Events>[Key]) {
     // @ts-ignore
     this._emitter.emit(event, value);
   }
-  tip(content: { icon?: unknown; text: string[] }) {
+  tip(content: { icon?: TipIcons; text: string[] }) {
     // @ts-ignore
     this._emitter.emit(BaseEvents.Tip, content);
     return content.text.join("\n");
@@ -130,8 +122,7 @@ export function applyMixins(derivedCtor: any, constructors: any[]) {
       Object.defineProperty(
         derivedCtor.prototype,
         name,
-        Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
-          Object.create(null)
+        Object.getOwnPropertyDescriptor(baseCtor.prototype, name) || Object.create(null)
       );
     });
   });

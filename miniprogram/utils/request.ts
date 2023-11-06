@@ -5,11 +5,12 @@
 import { JSONObject, Result } from "@/types/index";
 import { app } from "@/store/app";
 
-// const base = "https://video.funzm.com";
-// const base = "https://api-t.funzm.com";
-// const base = "http://127.0.0.1:3200";
-// const base = "http://10.100.64.15:3200";
-const base = "http://media.funzm.com";
+function getHostname() {
+  if (app.env.prod === "develop") {
+    return "https://media-t.funzm.com";
+  }
+  return "https://media.funzm.com";
+}
 
 type RequestClient = {
   get: <T>(url: string, query?: JSONObject) => Promise<Result<T>>;
@@ -18,13 +19,14 @@ type RequestClient = {
 export const request = {
   get: (endpoint, query) => {
     const r = new Promise((resolve) => {
+      const base = getHostname();
       wx.request({
         url: base + endpoint,
         data: query,
         method: "GET",
         dataType: "json",
         header: {
-          Authorization: app.user.token,
+          Authorization: app.user?.token,
         },
         success(resp) {
           const { code, msg, data } = resp.data as {
@@ -48,13 +50,14 @@ export const request = {
   },
   post: async (url, body, headers) => {
     const r = new Promise((resolve) => {
+      const base = getHostname();
       wx.request({
         url: base + url,
         data: body,
         method: "POST",
         dataType: "json",
         header: {
-          Authorization: app.user.token,
+          Authorization: app.user?.token,
           ...headers,
         },
         success(resp) {
