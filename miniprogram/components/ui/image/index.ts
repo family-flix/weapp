@@ -3,7 +3,7 @@ import { ImageCore, ImageStep } from "@/domains/ui/index";
 Component({
   externalClasses: ["class"],
   options: {
-    pureDataPattern: /^_/,
+    // pureDataPattern: /^_/,
     virtualHost: true,
     styleIsolation: "apply-shared",
   },

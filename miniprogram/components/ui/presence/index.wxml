@@ -1,5 +1,5 @@
 <block wx:if="{{mounted}}">
-    <view class="presence class" role="presentation" data-state="{{open ? 'open' : 'closed'}}" bind:animationend="handleAnimationEnd">
+    <view class="presence class-name {{open ? openClassName : closedClassName}}" role="presentation" data-state="{{open ? 'open' : 'closed'}}" bind:animationend="handleAnimationEnd">
         <slot />
     </view>
 </block>

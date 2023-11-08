@@ -1,27 +1,33 @@
-// import type {} from 'miniprogram-api-typings/types/index';
-
+import { storage } from "@/store/storage";
+import { client } from "@/store/request";
 import { TVGenresOptions, TVSourceOptions } from "@/constants/index";
-import { ListCore } from "@/domains/list/index";
-import { fetchMovieList, MovieItem } from "@/domains/movie/services";
-import { RequestCore } from "@/domains/request/index";
 import { ButtonCore, CheckboxGroupCore, DialogCore, InputCore } from "@/domains/ui/index";
-import { app } from "@/store/app";
+import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/domains/media/services";
+import { RequestCoreV2 } from "@/domains/request/v2";
+import { ListCoreV2 } from "@/domains/list/v2";
 
-const movieList = new ListCore(new RequestCore(fetchMovieList), {
-  pageSize: 20,
-  beforeSearch() {
-    searchInput.setLoading(true);
-  },
-  afterSearch() {
-    searchInput.setLoading(false);
-  },
-});
-movieList.onError((tip) => {
-  wx.showToast({
-    title: tip.message,
-    icon: "none",
-  });
-});
+const movieList = new ListCoreV2(
+  new RequestCoreV2({
+    fetch: fetchSeasonList,
+    process: fetchSeasonListProcess,
+    client,
+  }),
+  {
+    pageSize: 20,
+    beforeSearch() {
+      searchInput.setLoading(true);
+    },
+    afterSearch() {
+      searchInput.setLoading(false);
+    },
+  }
+);
+// movieList.onError((tip) => {
+//   wx.showToast({
+//     title: tip.message,
+//     icon: "none",
+//   });
+// });
 // const scrollView = new ScrollViewCore({
 //   onScroll(pos) {
 //     if (!menu) {
@@ -61,7 +67,7 @@ const searchInput = new InputCore({
     });
   },
 });
-const { language = [] } = app.cache.get("tv_search", {
+const { language = [] } = storage.get("tv_search", {
   language: [] as string[],
 });
 const sourceCheckboxGroup = new CheckboxGroupCore({
@@ -75,7 +81,7 @@ const sourceCheckboxGroup = new CheckboxGroupCore({
     };
   }),
   onChange(options) {
-    app.cache.merge("tv_search", {
+    storage.merge("tv_search", {
       language: options,
     });
     //     setHasSearch(!!options.length);
@@ -145,7 +151,7 @@ Page({
   data: {
     response: movieList.response,
     hasSearch: (() => {
-      const { language = [] } = app.cache.get("tv_search", {
+      const { language = [] } = storage.get("tv_search", {
         language: [] as string[],
       });
       return language.length !== 0;
@@ -185,7 +191,7 @@ Page({
     //       app.tip(msg);
     //     });
     const search = (() => {
-      const { language = [] } = app.cache.get("tv_search", {
+      const { language = [] } = storage.get("tv_search", {
         language: [] as string[],
       });
       if (!language.length) {
@@ -200,9 +206,8 @@ Page({
   onReachBottom() {
     movieList.loadMore();
   },
-  handleClickMovie(event: { currentTarget: { dataset: { data: MovieItem } } }) {
+  handleClickMovie(event: { currentTarget: { dataset: { data: SeasonItem } } }) {
     const { data } = event.currentTarget.dataset;
-    console.log(data);
     const { id } = data;
     wx.navigateTo({
       url: `/pages/movie_play/index?id=${id}`,

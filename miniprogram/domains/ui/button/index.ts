@@ -133,7 +133,7 @@ export class ButtonInListCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.cur.setLoading(loading);
   }
 
-  onClick(handler: Handler<TheTypesOfEvents<T>[Events.Click]>) {
+  onClick = (handler: Handler<TheTypesOfEvents<T>[Events.Click]>) => {
     return this.on(Events.Click, handler);
   }
   onStateChange = (handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) => {

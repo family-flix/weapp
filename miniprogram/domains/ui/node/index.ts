@@ -56,10 +56,10 @@ export class NodeCore<T = unknown> extends BaseDomain<TheTypesOfEvents<T>> {
   }
   handleMouseDown = () => {
     console.log("[DOMAIN]ui/node/index - handleMouseDown");
-    this.longPressTimer = setTimeout(() => {
-      console.log("[DOMAIN]ui/node/index - bingo", this);
-      this.emit(Events.LongPress);
-    }, 1000);
+    // this.longPressTimer = setTimeout(() => {
+    //   console.log("[DOMAIN]ui/node/index - bingo", this);
+    //   this.emit(Events.LongPress);
+    // }, 1000);
   };
   handleMouseUp() {
     console.log("[DOMAIN]ui/node/index - handleMouseUp");
@@ -174,13 +174,13 @@ export class NodeInListCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.cur.setLoading(loading);
   }
 
-  onClick(handler: Handler<TheTypesOfEvents<T>[Events.Click]>) {
+  onClick = (handler: Handler<TheTypesOfEvents<T>[Events.Click]>) => {
     return this.on(Events.Click, handler);
-  }
-  onLongPress(handler: Handler<TheTypesOfEvents<T>[Events.LongPress]>) {
+  };
+  onLongPress = (handler: Handler<TheTypesOfEvents<T>[Events.LongPress]>) => {
     return this.on(Events.LongPress, handler);
-  }
-  onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) {
+  };
+  onStateChange = (handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) => {
     return this.on(Events.StateChange, handler);
-  }
+  };
 }

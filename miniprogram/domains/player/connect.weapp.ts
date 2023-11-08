@@ -4,56 +4,52 @@ import { PlayerCore } from "@/domains/player/index";
 
 /** 连接 $video 标签和 player 领域 */
 export function connect($video: VideoContext, player: PlayerCore) {
-  console.log("[COMPONENT]VideoPlayer/connect", $video, player, player.bindAbstractNode);
+  // console.log("[COMPONENT]VideoPlayer/connect", $video, player, player.bindAbstractNode);
   $video.onloadstart = () => {
-    console.log("[COMPONENT]VideoPlayer/connect - $video.onloadstart");
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.onloadstart");
   };
-  $video.onloadedmetadata = (event) => {
-    console.log("[COMPONENT]VideoPlayer/connect - $video.onloadedmetadata");
+  $video.onloadedmetadata = (event: { detail: { width: number; height: number } }) => {
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.onloadedmetadata");
     const { width, height } = event.detail;
     player.handleLoadedmetadata({ width, height });
   };
   $video.onload = () => {
-    console.log("[COMPONENT]VideoPlayer/connect - $video.onload");
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.onload");
     player.handleLoad();
   };
   // 这个居然会在调整时间进度后调用？？？
-  $video.oncanplay = (event) => {
-    console.log("[COMPONENT]VideoPlayer/connect - $video.oncanplay");
+  $video.oncanplay = () => {
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.oncanplay");
     // const { duration } = event.currentTarget as HTMLVideoElement;
     // console.log("[COMPONENT]VideoPlayer/connect - listen $video can play");
     player.handleCanPlay();
   };
   $video.onplay = () => {
-    console.log("[COMPONENT]VideoPlayer/connect - $video.onplay");
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.onplay");
     // player.emit(PlayerCore.Events.Play);
   };
   $video.onplaying = () => {
-    console.log("[COMPONENT]VideoPlayer/connect - $video.onplaying");
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.onplaying");
   };
-  $video.ontimeupdate = (event) => {
-    // const { currentTime, duration } = event.currentTarget as HTMLVideoElement;
-    //     console.log(
-    //       "[COMPONENT]VideoPlayer/connect - $video.ontimeupdate",
-    //       currentTime,
-    //       duration
-    //     );
+  $video.ontimeupdate = () => {
+    // const { currentTime, duration } = event.currentTarget;
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.ontimeupdate");
     // player.handleTimeUpdate({ currentTime, duration });
   };
-  $video.onpause = (event) => {
+  $video.onpause = () => {
     // const { currentTime, duration } = event.currentTarget as HTMLVideoElement;
     // player.handlePause({ currentTime, duration });
   };
   $video.onwaiting = () => {
-    console.log("[COMPONENT]VideoPlayer/connect - $video.onwaiting");
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.onwaiting");
     //     player.emitEnded();
   };
   $video.onended = () => {
-    console.log("[COMPONENT]VideoPlayer/connect - $video.onended");
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.onended");
     // player.handleEnd();
   };
-  $video.onvolumechange = (event) => {
-    console.log("[COMPONENT]VideoPlayer/connect - $video.onvolumechange");
+  $video.onvolumechange = () => {
+    // console.log("[COMPONENT]VideoPlayer/connect - $video.onvolumechange");
     // const { volume } = event.currentTarget as HTMLVideoElement;
     // const cur_volume = volume;
     // player.handleVolumeChange(cur_volume);
@@ -63,7 +59,7 @@ export function connect($video: VideoContext, player: PlayerCore) {
     // console.log("[]Video - onResize", videoWidth, videoHeight);
     player.handleResize({ width: videoWidth, height: videoHeight });
   };
-  $video.onerror = (event) => {
+  $video.onerror = () => {
     // const msg = (() => {
     //   console.log("[COMPONENT]VideoPlayer/connect - $video.onerror");
     //   if (typeof event === "string") {
@@ -95,7 +91,7 @@ export function connect($video: VideoContext, player: PlayerCore) {
       }
     },
     pause() {
-      // $video.pause();
+      $video.pause();
     },
     canPlayType(type: string) {
       return true;
@@ -104,20 +100,30 @@ export function connect($video: VideoContext, player: PlayerCore) {
       $video.src = url;
       // $video.load();
     },
-    requestFullScreen() {
-      console.log("bind requestFullScreen");
-      $video.requestFullScreen();
-    },
     setCurrentTime(currentTime: number) {
       // $video.currentTime = currentTime;
+      $video.seek(currentTime);
+    },
+    setRate(rate: number) {
+      $video.playbackRate(rate);
     },
     setVolume(volume: number) {
       // $video.volume = volume;
+    },
+    requestFullscreen() {
+      // console.log("bind requestFullScreen");
+      $video.requestFullScreen();
+    },
+    exitFullscreen() {
+      $video.exitFullScreen();
     },
     disableFullscreen() {},
     enableFullscreen() {},
     showSubtitle() {},
     hideSubtitle() {},
-    setRate(v: number) {},
+    showAirplay() {
+      $video.startCasting();
+    },
+    pictureInPicture() {},
   });
 }

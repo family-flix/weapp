@@ -1,7 +1,7 @@
 import { Handler } from "mitt";
 
 import { BaseDomain } from "@/domains/base";
-import { app } from "@/store/app";
+import { app } from "@/store/index";
 
 type AbsNode = {};
 enum Events {

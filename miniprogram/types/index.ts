@@ -22,6 +22,9 @@ export const Result = {
       data,
       code,
       error: (() => {
+        if (!message) {
+          return new BizError("未知错误");
+        }
         if (typeof message === "string") {
           const e = new BizError(message, code, data);
           return e;
@@ -64,8 +67,15 @@ export type ListResponse<T> = {
   no_more: boolean;
   list: T[];
 };
+export type ListResponseWithCursor<T> = {
+  page_size: number;
+  total: number;
+  next_marker?: string;
+  list: T[];
+};
 
 export type RequestedResource<T extends (...args: any[]) => any> = UnpackedResult<Unpacked<ReturnType<T>>>;
+export type Shift<T extends any[]> = ((...args: T) => void) extends (arg1: any, ...rest: infer R) => void ? R : never;
 
 export type Rect = {
   width: number;

@@ -1,13 +1,10 @@
-import { Handler } from "mitt";
-// import axios from "axios";
-
-import { BaseDomain } from "@/domains/base";
+import { Handler, BaseDomain } from "@/domains/base";
+import { HttpClientCore } from "@/domains/http_client/index";
 import { Result } from "@/types/index";
+import { MediaOriginCountry } from "@/constants/index";
 
-// import { fetch_subtitle_url } from "./services";
 import { parseSubtitleContent, parseSubtitleUrl, timeStrToSeconds } from "./utils";
-import { SubtitleParagraph } from "./types";
-import { request } from "@/utils/request";
+import { SubtitleFileSuffix, SubtitleFileTypes, SubtitleParagraph } from "./types";
 
 enum Events {
   StateChange,
@@ -18,8 +15,8 @@ type TheTypesOfEvents = {
 type SubtitleLine = SubtitleParagraph;
 type SubtitleProps = {
   filename: string;
-  lang?: string;
-  suffix?: string;
+  language: MediaOriginCountry[];
+  suffix?: SubtitleFileSuffix;
   lines: SubtitleLine[];
 };
 type SubtitleState = {
@@ -28,39 +25,16 @@ type SubtitleState = {
 
 export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
   static async New(
-    subtitle: { id: string; type: number; url: string; name: string; lang: string },
-    extra: Partial<{ currentTime: number }> = {}
+    subtitle: { id: string; type: SubtitleFileTypes; url: string; name: string; language: MediaOriginCountry[] },
+    extra: { client: HttpClientCore; currentTime?: number }
   ) {
-    const { id, type, url, lang } = subtitle;
+    const { id, name, type, url, language } = subtitle;
+    const { client } = extra;
     const content_res = await (async () => {
-      if (type === 1) {
+      if (type === SubtitleFileTypes.MediaInnerFile) {
         const r = await (async () => {
           try {
-            const r = await request.get(url);
-            return Result.Ok(r.data);
-          } catch (err) {
-            const e = err as Error;
-            return Result.Err(e.message);
-          }
-        })();
-        if (r.error) {
-          return Result.Err(r.error);
-        }
-        return Result.Ok({
-          name: url,
-          content: r.data,
-        });
-      }
-      if (type === 2) {
-        const mod = await import("./services");
-        const r1 = await mod.fetch_subtitle_url({ id });
-        if (r1.error) {
-          return Result.Err(r1.error);
-        }
-        const { name, url: download_url } = r1.data;
-        const r = await (async () => {
-          try {
-            const r = await request.get(download_url);
+            const r = await client.fetch<string>({ url, method: "GET" });
             return Result.Ok(r.data);
           } catch (err) {
             const e = err as Error;
@@ -75,6 +49,18 @@ export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
           content: r.data,
         });
       }
+      if (type === SubtitleFileTypes.LocalFile) {
+        try {
+          const r = await client.fetch<string>({ url, method: "GET" });
+          return Result.Ok({
+            name,
+            content: r.data,
+          });
+        } catch (err) {
+          const e = err as Error;
+          return Result.Err(e.message);
+        }
+      }
       return Result.Err("未知字幕类型");
     })();
     if (content_res.error) {
@@ -82,10 +68,11 @@ export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
     }
     const { content, name: subtitle_name } = content_res.data;
     const suffix = parseSubtitleUrl(subtitle_name);
-    const paragraphs = parseSubtitleContent(content as string, suffix);
+    const paragraphs = parseSubtitleContent(content, suffix);
+    // console.log("[DOMAIN]subtitle/index - paragraphs", paragraphs);
     const store = new SubtitleCore({
       filename: subtitle_name,
-      lang,
+      language,
       suffix,
       lines: paragraphs,
     });
@@ -96,7 +83,7 @@ export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
   }
 
   filename: string = "";
-  lang?: string;
+  lang: MediaOriginCountry[];
   suffix?: string;
   /** 字幕文件列表 */
   files: {
@@ -124,11 +111,11 @@ export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
   constructor(props: Partial<{ _name: string }> & SubtitleProps) {
     super(props);
 
-    const { filename, lines, suffix, lang } = props;
+    const { filename, lines, suffix, language } = props;
     this.filename = filename;
     this.lines = lines;
     this.suffix = suffix;
-    this.lang = lang;
+    this.lang = language;
     this.targetLine = lines[0];
   }
 

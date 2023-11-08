@@ -1,6 +1,38 @@
-<page-meta>
-    <navigation-bar>
-        <view>首页</view>
+<page-meta class="" page-style="" background-color="{{backgroundBottomColor}}">
+    <navigation-bar class-name="bg-w-bg-0" fixed="{{true}}">
+        <!-- <view class="decoration" style="left: 30px; top: 50px;"></view> -->
     </navigation-bar>
-    <view>{{loading ? '登录中...' : ''}}</view>
+    <view class="flex items-center justify-between w-full py-2 px-4 text-w-fg-2 space-x-3">
+        <view class="w-0 flex-1">
+            <view class="flex items-center border rounded-xl px-2 h-8" bind:tap="handleClickSearchIcon">
+                <icon name="search" size="{{18}}"></icon>
+                <view class="ml-2 text-sm">请输入关键字搜索</view>
+            </view>
+        </view>
+        <view class="relative">
+            <icon name="user" size="{{20}}"></icon>
+        </view>
+    </view>
+    <!-- <view>{{loading ? '登录中...' : ''}}</view> -->
+    <view class="px-4">
+        <view class="mt-2 px-2 py-2 rounded-md bg-w-bg-3">
+            <calendar _store="{{calendar}}" class-name="mt-4" />
+        </view>
+        <view class="mt-4 bg-w-bg-3">
+            <block wx:for="{{response.dataSource}}" wx:for-item="diary" wx:key="id">
+                <view class="border px-4 py-2 rounded-sm">
+                    <view>{{diary.profile.name}}</view>
+                    <view>{{diary.profile.season_text}}/{{diary.profile.episode_text}}</view>
+                    <view class="text-sm text-w-fg-2">{{diary.created}}</view>
+                </view>
+            </block>
+        </view>
+        <swiper class="w-full" style="height: 1280rpx;" current="{{current}}" bind:change="handleSwiperChange">
+            <swiper-item></swiper-item>
+            <!-- <swiper-item>
+                <view class="p-4">Hello</view>
+            </swiper-item> -->
+        </swiper>
+    </view>
+    <!-- <view class="z-50 fixed inset-0 bg-w-brand" /> -->
 </page-meta>

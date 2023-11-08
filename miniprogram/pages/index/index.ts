@@ -1,16 +1,15 @@
 // index.ts
-
-import { PlayerCore } from "@/domains/player/index";
-import { TVCore } from "@/domains/tv/index";
-import { app } from "@/store/app";
-import { request } from "@/utils/request";
+import { app } from "@/store/index";
+import { fetchDiaryList } from "@/services/index";
+import { CalendarCore } from "@/domains/calendar/index";
+import { ListCore } from "@/domains/list/index";
+import { TabHeaderCore } from "@/domains/ui/tab-header/index";
+import { RequestCoreV2 } from "@/domains/request/v2";
+import { ListCoreV2 } from "@/domains/list/v2";
+import { client } from "@/store/request";
 
 // 获取应用实例
-const recorderManager = wx.getRecorderManager();
-
-function recognize(body: { data: string }) {
-  return request.post<string>("/api/recognize", body);
-}
+// const recorderManager = wx.getRecorderManager();
 
 // recorderManager.onStart(() => {
 //   console.log("recorder start");
@@ -48,48 +47,113 @@ function recognize(body: { data: string }) {
 //   console.log("frameBuffer.byteLength", frameBuffer.byteLength);
 // });
 
+const calendar = new CalendarCore({
+  today: new Date(),
+});
+
 Page({
   data: {
     loading: true,
-    profile: null,
-    source: null,
-  } as {
-    loading: boolean;
-    profile: TVCore["profile"];
+    calendar,
+    backgroundBottomColor: "#111111",
+
+    response: ListCore.defaultResponse(),
+    tab: null as null | TabHeaderCore<{ key: string; options: { id: string; text: string }[] }>,
   },
-  onReady() {
+  onReady() {},
+  async onLoad() {
+    const list = new ListCoreV2(
+      new RequestCoreV2({
+        fetch: fetchDiaryList,
+        client,
+      })
+    );
+    const tab = new TabHeaderCore({
+      key: "id",
+      options: [
+        {
+          id: "0",
+          text: "推荐",
+        },
+        {
+          id: "1",
+          text: "电视剧",
+        },
+        {
+          id: "2",
+          text: "电影",
+        },
+        {
+          id: "3",
+          text: "综艺",
+        },
+        {
+          id: "4",
+          text: "动漫",
+        },
+        {
+          id: "5",
+          text: "11月豆瓣电视剧排行榜",
+        },
+      ],
+    });
+    tab.onChange((v) => {
+      this.setData({
+        current: v.index,
+      });
+    });
+    this.setData({
+      response: list.response,
+      tab,
+      current: tab.current,
+    });
+    list.onStateChange((v) => {
+      this.setData({
+        response: v,
+      });
+    });
     app.onReady(() => {
       this.setData({
         loading: false,
       });
+      list.init();
     });
-  },
-  async onLoad() {},
-  onResize(res) {
-    const {
-      size: { windowWidth, windowHeight },
-    } = res;
-    // this.data.player.requestFullScreen();
-    console.log("[]", windowWidth, windowHeight);
+    this.data.tab = tab;
   },
   start() {
-    const options = {
-      duration: 10000,
-      sampleRate: 44100,
-      numberOfChannels: 1,
-      encodeBitRate: 192000,
-      format: "aac",
-      frameSize: 50,
-    };
+    // const options = {
+    //   duration: 10000,
+    //   sampleRate: 44100,
+    //   numberOfChannels: 1,
+    //   encodeBitRate: 192000,
+    //   format: "aac",
+    //   frameSize: 50,
+    // };
     // recorderManager.start(options);
-    setTimeout(() => {
-      recorderManager.stop();
-    }, 3000);
+    // setTimeout(() => {
+    //   recorderManager.stop();
+    // }, 3000);
     // this.data.player.requestFullScreen();
   },
-  gotoSeasonListPage() {
+  // handleMoveSwiper(event: { detail: { dx: number; dy: number } }) {
+  //   console.log(event.detail);
+  //   const tab = this.tab as TabsCore<{ id: string; text: string }>;
+  // },
+  handleSwiperChange(event: { detail: { current: number; source: unknown } }) {
+    const { current, source } = event.detail;
+    const tab = this.data.tab;
+    if (!tab) {
+      return;
+    }
+    if (source !== "touch") {
+      // source 表示切换的原因，touch 就是手动切换
+      return;
+    }
+    tab.select(current);
+  },
+  handleClickSearchIcon() {
     wx.navigateTo({
-      url: "/pages/season/index",
+      url: "/pages/search/index",
     });
   },
 });

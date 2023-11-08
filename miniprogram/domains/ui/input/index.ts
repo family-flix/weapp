@@ -27,6 +27,7 @@ type InputProps = {
   disabled: boolean;
   defaultValue: string;
   placeholder: string;
+  focus?: boolean;
   type: string;
   onChange: (v: string) => void;
   onEnter: (v: string) => void;
@@ -40,6 +41,7 @@ type InputState = {
   loading: boolean;
   type: string;
   allowClear: boolean;
+  focus: boolean;
 };
 
 export class InputCore extends BaseDomain<TheTypesOfEvents> {
@@ -48,6 +50,7 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
   placeholder: string;
   disabled: boolean;
   allowClear: boolean = true;
+  focus: boolean = false;
   type: string;
   loading = false;
   valueUsed = "";
@@ -59,6 +62,7 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
       disabled: this.disabled,
       loading: this.loading,
       type: this.type,
+      focus: this.focus,
       allowClear: this.allowClear,
     };
   }
@@ -72,6 +76,7 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
       placeholder = "请输入",
       type = "string",
       disabled = false,
+      focus = false,
       onChange,
       onBlur,
       onEnter,
@@ -83,6 +88,7 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
     this.placeholder = placeholder;
     this.type = type;
     this.disabled = disabled;
+    this.focus = focus;
     if (defaultValue) {
       this._defaultValue = defaultValue;
     }
@@ -102,35 +108,41 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
       this.onClear(onClear);
     }
   }
-  setMounted() {
+  setMounted = () => {
     this.emit(Events.Mounted);
-  }
-  handleEnter() {
+  };
+  handleEnter = () => {
+    // wx.showToast({
+    //   title: "handleEnter",
+    // });
     // if (this.value === this.valueUsed) {
     //   return;
     // }
     this.valueUsed = this.value;
     this.emit(Events.Enter, this.value);
-  }
-  handleBlur() {
+  };
+  handleBlur = () => {
     if (this.value === this.valueUsed) {
       return;
     }
     this.valueUsed = this.value;
     this.emit(Events.Blur, this.value);
-  }
+  };
   handleChange = (value: string) => {
     this.value = value;
     this.emit(Events.Change, value);
     this.emit(Events.StateChange, { ...this.state });
   };
-  setLoading(loading: boolean) {
+  setLoading = (loading: boolean) => {
     this.loading = loading;
     this.emit(Events.StateChange, { ...this.state });
-  }
-  focus() {
-    console.log("请在 connect 中实现该方法");
-  }
+  };
+  setFocus = () => {
+    console.log("请在 connect 中实现 focus 方法");
+  };
+  setBlur = () => {
+    console.log("请在 connect 中实现 blur 方法");
+  };
   change = (value: string) => {
     this.value = value;
     this.emit(Events.Change, value);

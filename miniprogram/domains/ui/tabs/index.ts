@@ -1,6 +1,4 @@
-import { Handler } from "mitt";
-
-import { BaseDomain } from "@/domains/base";
+import { Handler, BaseDomain } from "@/domains/base";
 import { RovingFocusCore } from "@/domains/ui/roving-focus/index";
 import { Direction, Orientation } from "@/domains/ui/direction/index";
 import { PresenceCore } from "@/domains/ui/presence/index";

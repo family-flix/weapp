@@ -134,24 +134,24 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.StateChange, { ...this.state });
   };
 
-  onShow(handler: Handler<TheTypesOfEvents[Events.Show]>) {
+  onShow = (handler: Handler<TheTypesOfEvents[Events.Show]>) => {
     return this.on(Events.Show, handler);
-  }
-  onHidden(handler: Handler<TheTypesOfEvents[Events.Hidden]>) {
+  };
+  onHidden = (handler: Handler<TheTypesOfEvents[Events.Hidden]>) => {
     return this.on(Events.Hidden, handler);
-  }
-  onUnmounted(handler: Handler<TheTypesOfEvents[Events.Unmounted]>) {
+  };
+  onUnmounted = (handler: Handler<TheTypesOfEvents[Events.Unmounted]>) => {
     return this.on(Events.Unmounted, handler);
-  }
-  onVisibleChange(handler: Handler<TheTypesOfEvents[Events.VisibleChange]>) {
+  };
+  onVisibleChange = (handler: Handler<TheTypesOfEvents[Events.VisibleChange]>) => {
     return this.on(Events.VisibleChange, handler);
-  }
-  onOk(handler: Handler<TheTypesOfEvents[Events.OK]>) {
+  };
+  onOk = (handler: Handler<TheTypesOfEvents[Events.OK]>) => {
     return this.on(Events.OK, handler);
-  }
-  onCancel(handler: Handler<TheTypesOfEvents[Events.Cancel]>) {
+  };
+  onCancel = (handler: Handler<TheTypesOfEvents[Events.Cancel]>) => {
     return this.on(Events.Cancel, handler);
-  }
+  };
   onStateChange = (handler: Handler<TheTypesOfEvents[Events.StateChange]>) => {
     return this.on(Events.StateChange, handler);
   };

@@ -1,10 +1,10 @@
-import { UserCore } from "@/domains/user/index";
-import { BaseDomain, Handler } from "@/domains/base";
-import { RouteViewCore } from "@/domains/route_view/index";
-import { NavigatorCore } from "@/domains/navigator/index";
-import { JSONObject, Result } from "@/types/index";
+/**
+ * @file 应用，包含一些全局相关的事件、状态
+ */
 
-import { LocalCache } from "./storage";
+import { BaseDomain, Handler } from "@/domains/base";
+import { UserCore } from "@/domains/user/index";
+import { JSONObject, Result } from "@/types/index";
 
 export enum OrientationTypes {
   Horizontal = "horizontal",
@@ -12,10 +12,14 @@ export enum OrientationTypes {
 }
 const mediaSizes = {
   sm: 0,
-  md: 768, // 中等设备宽度阈值
-  lg: 992, // 大设备宽度阈值
-  xl: 1200, // 特大设备宽度阈值
-  "2xl": 1536, // 特大设备宽度阈值
+  /** 中等设备宽度阈值 */
+  md: 768,
+  /** 大设备宽度阈值 */
+  lg: 992,
+  /** 特大设备宽度阈值 */
+  xl: 1200,
+  /** 特大设备宽度阈值 */
+  "2xl": 1536,
 };
 function getCurrentDeviceSize(width: number) {
   if (width >= mediaSizes["2xl"]) {
@@ -33,26 +37,27 @@ function getCurrentDeviceSize(width: number) {
   return "sm";
 }
 export const MEDIA = "(prefers-color-scheme: dark)";
+type DeviceSizeTypes = keyof typeof mediaSizes;
+type ThemeTypes = "dark" | "light" | "system";
 
 enum Events {
-  Ready,
   Tip,
   Error,
   Login,
   Logout,
-  // 一些平台相关的事件
-  PopState,
-  Resize,
+  ForceUpdate,
   DeviceSizeChange,
-  Blur,
-  Keydown,
-  EscapeKeyDown,
-  ClickLink,
+  /** 生命周期 */
+  Ready,
   Show,
   Hidden,
+  /** 平台相关 */
+  Resize,
+  Blur,
+  Keydown,
   OrientationChange,
-  // 该怎么处理？
-  // DrivesChange,
+  EscapeKeyDown,
+  StateChange,
 }
 type TheTypesOfEvents = {
   [Events.Ready]: void;
@@ -60,10 +65,7 @@ type TheTypesOfEvents = {
   [Events.Error]: Error;
   [Events.Login]: {};
   [Events.Logout]: void;
-  [Events.PopState]: {
-    type: string;
-    pathname: string;
-  };
+  [Events.ForceUpdate]: void;
   [Events.Resize]: {
     width: number;
     height: number;
@@ -73,14 +75,11 @@ type TheTypesOfEvents = {
     key: string;
   };
   [Events.EscapeKeyDown]: void;
-  [Events.ClickLink]: {
-    href: string;
-  };
   [Events.Blur]: void;
   [Events.Show]: void;
   [Events.Hidden]: void;
   [Events.OrientationChange]: "vertical" | "horizontal";
-  // [Events.DrivesChange]: Drive[];
+  [Events.StateChange]: ApplicationState;
 };
 type ApplicationState = {
   ready: boolean;
@@ -88,17 +87,22 @@ type ApplicationState = {
   theme: ThemeTypes;
   deviceSize: DeviceSizeTypes;
 };
-type DeviceSizeTypes = keyof typeof mediaSizes;
-type ThemeTypes = "dark" | "light" | "system";
+type ApplicationProps = {
+  user: UserCore;
+  // history: HistoryCore;
+  /**
+   * 应用加载前的声明周期，只有返回 Result.Ok() 页面才会展示内容
+   */
+  beforeReady?: () => Promise<Result<null>>;
+  onReady?: () => void;
+};
 
 export class Application extends BaseDomain<TheTypesOfEvents> {
-  user?: UserCore;
-  router?: NavigatorCore;
-  cache: LocalCache;
-  lifetimes: Partial<{
-    beforeReady: () => Promise<Result<null>>;
-    onReady: () => void;
-  }> = {};
+  /** 用户 */
+  $user: UserCore;
+  // $history: HistoryCore;
+
+  lifetimes: Pick<ApplicationProps, "beforeReady" | "onReady">;
 
   ready = false;
   screen: {
@@ -118,13 +122,16 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
     wechat: boolean;
     ios: boolean;
     android: boolean;
+    weapp: boolean;
     prod: "develop" | "trial" | "release";
   } = {
     wechat: false,
     ios: false,
     android: false,
+    weapp: false,
     prod: "develop",
   };
+  orientation = OrientationTypes.Vertical;
   curDeviceSize: DeviceSizeTypes = "md";
   theme: ThemeTypes = "system";
 
@@ -142,32 +149,25 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  static Events = Events;
-
-  constructor(
-    options: {
-      user?: UserCore;
-      router?: NavigatorCore;
-      cache: LocalCache;
-    } & Application["lifetimes"]
-  ) {
+  constructor(props: ApplicationProps) {
     super();
 
-    const { user, router, cache, beforeReady, onReady } = options;
+    const { user: user, beforeReady, onReady } = props;
+
+    this.$user = user;
+
     this.lifetimes = {
       beforeReady,
       onReady,
     };
-    this.user = user;
-    this.router = router;
-    this.cache = cache;
   }
   /** 启动应用 */
-  async start(options: { width: number; height: number }) {
-    const { width, height } = options;
+  async start(size: { width: number; height: number }) {
+    const { width, height } = size;
     if (this.screen.width === 0) {
       this.screen = { ...this.screen, width, height };
     }
+    this.screen = { width, height };
     this.curDeviceSize = getCurrentDeviceSize(width);
     const { beforeReady } = this.lifetimes;
     if (beforeReady) {
@@ -179,6 +179,7 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
     }
     this.ready = true;
     this.emit(Events.Ready);
+    this.emit(Events.StateChange, { ...this.state });
     // console.log("[]Application - before start");
     return Result.Ok(null);
   }
@@ -195,62 +196,25 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
   applyTheme() {
     throw new Error("请在 connect.web 中实现 applyTheme 方法");
   }
-  prevViews: RouteViewCore[] = [];
-  views: RouteViewCore[] = [];
-  curView: RouteViewCore | null = null;
-  showView(view: RouteViewCore, options: Partial<{ back: boolean }> = {}) {
-    console.log("[DOMAIN]Application - showView", view._name, view.parent, options.back, this.curView);
-    this.setTitle(`${view.title}`);
-    if (options.back) {
-      if (!this.curView) {
-        // 异常行为
-        return;
-      }
-      if (!this.curView.parent) {
-        return;
-      }
-      this.curView.parent.uncoverPrevView();
-      return;
-    }
-    this.curView = view;
-    this.prevViews = this.views;
-    this.views = [];
-    const _show = (view: RouteViewCore) => {
-      if (view.parent) {
-        _show(view.parent);
-        (() => {
-          if (view.parent.canLayer) {
-            view.parent.layerSubView(view);
-            return;
-          }
-          view.parent.showSubView(view);
-        })();
-      }
-      view.show();
-      this.views.push(view);
-    };
-    _show(view);
-    // console.log("[DOMAIN]Application - after show", this.views);
-  }
-  back() {
-    if (this.env.ios) {
-      if (!this.curView) {
-        return;
-      }
-      if (!this.curView.parent) {
-        return;
-      }
-      this.curView.parent.uncoverPrevView();
-      return;
-    }
-    // history.back();
+  // push(...args: Parameters<HistoryCore["push"]>) {
+  //   return this.$history.push(...args);
+  // }
+  // replace(...args: Parameters<HistoryCore["replace"]>) {
+  //   return this.$history.replace(...args);
+  // }
+  // back(...args: Parameters<HistoryCore["back"]>) {
+  //   return this.$history.back(...args);
+  // }
+
+  tipUpdate() {
+    this.emit(Events.ForceUpdate);
   }
   /** 手机震动 */
   vibrate() {}
   setSize(size: { width: number; height: number }) {
-    console.log("[DOMAIN]application/index - setSize", size);
     this.screen = size;
   }
+  /** 设置页面 title */
   setTitle(title: string): void {
     throw new Error("请实现 setTitle 方法");
   }
@@ -270,6 +234,10 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
   getSystemTheme(e?: any): string {
     return "";
   }
+  /** 发送推送 */
+  notify(msg: { title: string; body: string }) {
+    console.log("请实现 notify 方法");
+  }
   disablePointer() {
     throw new Error("请实现 disablePointer 方法");
   }
@@ -286,11 +254,14 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
   escape() {
     this.emit(Events.EscapeKeyDown);
   }
-  popstate({ type, pathname }: { type: string; pathname: string }) {
-    this.emit(Events.PopState, { type, pathname });
+  resize(size: { width: number; height: number }) {
+    this.screen = size;
+    this.emit(Events.Resize, size);
   }
-  orientation = OrientationTypes.Vertical;
-  /** 屏幕方向改变 */
+  blur() {
+    this.emit(Events.Blur);
+  }
+
   handleScreenOrientationChange(orientation: number) {
     if (orientation === 0) {
       this.orientation = OrientationTypes.Vertical;
@@ -309,28 +280,23 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
     }
     this.emit(Events.Resize, size);
   }
-  blur() {
-    this.emit(Events.Blur);
-  }
+
   /* ----------------
    * Lifetime
    * ----------------
    */
   onReady(handler: Handler<TheTypesOfEvents[Events.Ready]>) {
-    if (this.ready) {
-      handler();
-    }
     return this.on(Events.Ready, handler);
   }
   onDeviceSizeChange(handler: Handler<TheTypesOfEvents[Events.DeviceSizeChange]>) {
     return this.on(Events.DeviceSizeChange, handler);
   }
+  onUpdate(handler: Handler<TheTypesOfEvents[Events.ForceUpdate]>) {
+    return this.on(Events.ForceUpdate, handler);
+  }
   /** 平台相关全局事件 */
   onOrientationChange(handler: Handler<TheTypesOfEvents[Events.OrientationChange]>) {
     return this.on(Events.OrientationChange, handler);
-  }
-  onPopState(handler: Handler<TheTypesOfEvents[Events.PopState]>) {
-    return this.on(Events.PopState, handler);
   }
   onResize(handler: Handler<TheTypesOfEvents[Events.Resize]>) {
     return this.on(Events.Resize, handler);
@@ -344,14 +310,14 @@ export class Application extends BaseDomain<TheTypesOfEvents> {
   onHidden(handler: Handler<TheTypesOfEvents[Events.Hidden]>) {
     return this.on(Events.Hidden, handler);
   }
-  onClickLink(handler: Handler<TheTypesOfEvents[Events.ClickLink]>) {
-    return this.on(Events.ClickLink, handler);
-  }
   onKeydown(handler: Handler<TheTypesOfEvents[Events.Keydown]>) {
     return this.on(Events.Keydown, handler);
   }
   onEscapeKeyDown(handler: Handler<TheTypesOfEvents[Events.EscapeKeyDown]>) {
     return this.on(Events.EscapeKeyDown, handler);
+  }
+  onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
+    return this.on(Events.StateChange, handler);
   }
   /**
    * ----------------

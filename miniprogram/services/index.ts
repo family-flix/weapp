@@ -1,69 +1,59 @@
 import dayjs from "dayjs";
 
-import { ReportTypes } from "@/constants/index";
 import { FetchParams } from "@/domains/list/typing";
-import { ListResponse, RequestedResource, Result } from "@/types/index";
-import { request } from "@/utils/request";
-import { MediaTypes } from "@/domains/tv/services";
+import { TmpRequestResp, request } from "@/domains/request/utils";
+import { ListResponse, ListResponseWithCursor, Result, UnpackedResult } from "@/types/index";
+import { MediaTypes, CollectionTypes, ReportTypes } from "@/constants/index";
 import { season_to_chinese_num } from "@/utils/index";
-import { CollectionTypes } from "@/domains/ui/collection/index";
 
-export function reportSomething(body: { type: ReportTypes; data: string }) {
-  return request.post("/api/report/add", body);
-}
-
-export function fetch_subtitle_url(params: { id: string }) {
-  const { id } = params;
-  return request.get<{ name: string; url: string }>(`/api/subtitle/${id}/url`);
+export function reportSomething(body: {
+  type: ReportTypes;
+  data: string;
+  media_id?: string;
+  media_source_id?: string;
+}) {
+  return request.post("/api/v2/wechat/report/create", body);
 }
 
 type AnswerPayload = Partial<{
-  content: string;
-  season: {
+  msg: string;
+  media: {
     id: string;
-    tv_id: string;
+    type: MediaTypes;
     name: string;
-    first_air_date: string;
-    poster_path: string;
-  };
-  movie: {
-    id: string;
-    name: string;
-    first_air_date: string;
+    air_date: string;
     poster_path: string;
   };
 }>;
 /**
  * 获取消息通知
  */
-export async function fetchNotifications(params: FetchParams) {
-  const r = await request.get<
-    ListResponse<{
+export function fetchNotifications(params: FetchParams) {
+  return request.post<
+    ListResponseWithCursor<{
       id: string;
       content: string;
       status: number;
       created: string;
     }>
-  >("/api/notification/list", params);
+  >("/api/v2/wechat/notification/list", params);
+}
+export function fetchNotificationsProcess(r: TmpRequestResp<typeof fetchNotifications>) {
   if (r.error) {
     return Result.Err(r.error);
   }
-  const { page, page_size, total, no_more, list } = r.data;
+  const { next_marker, page_size, total, list } = r.data;
   return Result.Ok({
-    page,
     page_size,
     total,
-    no_more,
+    next_marker,
     list: list.map((notify) => {
       const { id, content, status, created } = notify;
-      const { msg, movie, season } = JSON.parse(content) as {
-        msg: string;
-      } & AnswerPayload;
+      const { msg, media } = JSON.parse(content) as AnswerPayload;
       return {
         id,
         status,
-        movie,
-        season,
+        media,
         msg,
         created: dayjs(created).format("YYYY-MM-DD HH:mm"),
       };
@@ -73,11 +63,13 @@ export async function fetchNotifications(params: FetchParams) {
 
 export function readNotification(params: { id: string }) {
   const { id } = params;
-  return request.get(`/api/notification/${id}/read`);
+  return request.post("/api/v2/wechat/notification/read", {
+    id,
+  });
 }
 
 export function readAllNotification() {
-  return request.get(`/api/notification/read`);
+  return request.post("/api/v2/wechat/notification/read_all", {});
 }
 
 export function fetchInfo() {
@@ -127,18 +119,18 @@ export function fetchInviteeList(params: FetchParams) {
     }>
   >("/api/invitee/list", params);
 }
-export type InviteeItem = RequestedResource<typeof fetchInviteeList>["list"][number];
+export type InviteeItem = UnpackedResult<TmpRequestResp<typeof fetchInviteeList>>["list"][number];
 
-export async function fetchCollectionList(body: FetchParams) {
-  const r = await request.post<
-    ListResponse<{
+export function fetchCollectionList(body: FetchParams) {
+  return request.post<
+    ListResponseWithCursor<{
       id: string;
       title: string;
       desc?: string;
       medias: {
         id: string;
         type: number;
-        tv_id?: string;
+        order: number;
         season_text?: string;
         episode_count?: number;
         cur_episode_count?: number;
@@ -148,7 +140,9 @@ export async function fetchCollectionList(body: FetchParams) {
         text: string;
       }[];
     }>
-  >("/api/collection/list", body);
+  >("/api/v2/wechat/collection/list", body);
+}
+export function fetchCollectionListProcess(r: TmpRequestResp<typeof fetchCollectionList>) {
   if (r.error) {
     return Result.Err(r.error.message);
   }
@@ -160,18 +154,25 @@ export async function fetchCollectionList(body: FetchParams) {
         id,
         title,
         desc,
-        medias: medias.map((media) => {
-          const { id, type, name, text, poster_path, air_date, cur_episode_count, episode_count } = media;
-          if (type === MediaTypes.TV) {
-            const { tv_id } = media;
+        medias: medias
+          .sort((a, b) => a.order - b.order)
+          .map((media) => {
+            const { id, type, name, text, poster_path, air_date, cur_episode_count, episode_count } = media;
             return {
               id,
               type,
               name,
               poster_path,
-              tv_id,
-              air_date,
+              air_date: (() => {
+                if (type === MediaTypes.Movie) {
+                  return air_date;
+                }
+                return dayjs(air_date).format("YYYY");
+              })(),
               text: (() => {
+                if (type === MediaTypes.Movie) {
+                  return null;
+                }
                 if (text) {
                   return text;
                 }
@@ -181,24 +182,16 @@ export async function fetchCollectionList(body: FetchParams) {
                 return `更新至${cur_episode_count}集`;
               })(),
             } as MediaPayload;
-          }
-          return {
-            id,
-            type,
-            name,
-            poster_path,
-            air_date,
-            text,
-          } as MediaPayload;
-        }),
+          })
+          .filter(Boolean),
       };
     }),
   });
 }
 
 /** 获取今日新增影视剧 */
-export async function fetchUpdatedMediaToday() {
-  const r = await request.get<
+export function fetchUpdatedMediaToday() {
+  return request.get<
     ListResponse<{
       id: string;
       title: string;
@@ -215,6 +208,8 @@ export async function fetchUpdatedMediaToday() {
       }[];
     }>
   >("/api/collection/list", { type: CollectionTypes.DailyUpdate });
+}
+export function fetchUpdatedMediaTodayProcess(r: TmpRequestResp<typeof fetchUpdatedMediaToday>) {
   if (r.error) {
     return Result.Err(r.error.message);
   }
@@ -266,4 +261,44 @@ export function shareMediaToInvitee(values: { season_id?: string; movie_id?: str
     movie_id,
     target_member_id,
   });
+}
+
+/** 获取电视频道列表 */
+export function fetchTVChannelList(params: FetchParams) {
+  return request.post<
+    ListResponse<{
+      id: string;
+      name: string;
+      group_name: string;
+      logo: string;
+      url: string;
+    }>
+  >("/api/tv_live/list", params);
+}
+
+export function fetchDiaryList(params: FetchParams) {
+  return request.post<
+    ListResponseWithCursor<{
+      id: string;
+      content: string;
+      profile: {
+        type: MediaTypes;
+        name: string;
+        original_name: string;
+        poster_path: string;
+        season_text: string;
+        season_number: number;
+        air_date: string;
+        movie_id: string;
+        tv_id: string;
+        season_id: string;
+      };
+      created: string;
+    }>
+  >("/api/diary/list", params);
+}
+
+/** 语音识别 */
+export function recognize(body: { data: string }) {
+  return request.post<string>("/api/recognize", body);
 }

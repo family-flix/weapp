@@ -1,12 +1,17 @@
+    <!-- src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4"  -->
+    <!-- src="{{ url }}" -->
   <video 
     id="video" 
-    class="class"
+    class="class-name"
     style="width: 100%; {{style}}"
-    src="{{url}}" 
+    src="{{ url }}"
     show-center-play-btn='{{false}}' 
     show-play-btn="{{true}}" 
     show-bottom-progress="{{false}}"
-    controls
+    show-casting-button="{{false}}"
+    controls="{{false}}"
     referrer-policy="no-referrer"
     binderror="handleError"
+    bindtimeupdate="handleTimeupdate"
+    bindloadedmetadata="handleLoadedmetadata"
   ></video>

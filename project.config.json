@@ -18,7 +18,7 @@
     "enhance": true,
     "showShadowRootInWxmlPanel": false,
     "packNpmRelationList": [],
-    "ignoreUploadUnusedFiles": true,
+    "ignoreUploadUnusedFiles": false,
     "es6": true
   },
   "simulatorType": "wechat",

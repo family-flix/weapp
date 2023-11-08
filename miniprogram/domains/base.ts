@@ -1,10 +1,10 @@
 /**
  * 注册的监听器
  */
-import mitt, { EventType, Handler } from "mitt/index";
+import mitt, { EventType, Handler } from "mitt";
 
 let _uid = 0;
-function uid() {
+export function uid() {
   _uid += 1;
   return _uid;
 }
@@ -13,10 +13,9 @@ enum BaseEvents {
   Tip = "__tip",
   Destroy = "__destroy",
 }
-type TipIcons = "success" | "warning" | "error" | "loading";
 type TheTypesOfBaseEvents = {
   [BaseEvents.Tip]: {
-    icon?: TipIcons;
+    icon?: unknown;
     text: string[];
   };
   [BaseEvents.Destroy]: void;
@@ -37,8 +36,6 @@ export class BaseDomain<Events extends Record<EventType, unknown>> {
     }> = {}
   ) {
     const { _name: name, debug } = params;
-    this._emitter = mitt<BaseDomainEvents<Events>>();
-    this.listeners = [];
     if (name) {
       this._name = name;
     }
@@ -61,7 +58,7 @@ export class BaseDomain<Events extends Record<EventType, unknown>> {
       ...args,
     ];
   }
-  error(...args: unknown[]) {
+  errorTip(...args: unknown[]) {
     if (!this.debug) {
       return;
     }
@@ -89,7 +86,7 @@ export class BaseDomain<Events extends Record<EventType, unknown>> {
     // @ts-ignore
     this._emitter.emit(event, value);
   }
-  tip(content: { icon?: TipIcons; text: string[] }) {
+  tip(content: { icon?: unknown; text: string[] }) {
     // @ts-ignore
     this._emitter.emit(BaseEvents.Tip, content);
     return content.text.join("\n");

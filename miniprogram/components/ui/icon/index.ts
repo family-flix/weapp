@@ -1,7 +1,7 @@
 Component({
   externalClasses: ["class"],
   options: {
-    pureDataPattern: /^_/,
+    // pureDataPattern: /^_/,
     virtualHost: true,
     styleIsolation: "apply-shared",
   },
@@ -14,6 +14,14 @@ Component({
     },
     style: {
       type: String,
+    },
+    size: {
+      type: Number,
+      value: 32,
+    },
+    cover: {
+      type: Boolean,
+      value: false,
     },
   },
 });

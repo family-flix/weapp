@@ -26,7 +26,7 @@ Component({
   lifetimes: {
     attached() {
       const store = this.data._store as DialogCore;
-      console.log("[PACKAGE]dialog/portal - attached", store, this.data.name);
+      // console.log("[PACKAGE]dialog/portal - attached", store, this.data.name);
       if (!store) {
         return;
       }

@@ -1,1 +1,1 @@
-<text class="icon icon-{{name}} {{className}}"></text>
+<text class="icon icon-{{name}} {{className}}" style="display: block; font-size: {{size}}px; width: {{size}}px; height: {{size}}px; {{style}}"></text>

@@ -9,7 +9,24 @@ Component({
   },
   properties: {
     _store: {
-      type: Object,
+      type: null,
+      observer(store: DialogCore) {
+        if (this.mounted) {
+          return;
+        }
+        this.mounted = true;
+        const { open } = store;
+        this.setData({
+          open,
+        });
+        // console.log("[COMPONENT]dialog/overlay - observer", store);
+        store.onStateChange((nextState) => {
+          const { open } = nextState;
+          this.setData({
+            open,
+          });
+        });
+      },
     },
     className: {
       type: String,
@@ -18,35 +35,20 @@ Component({
       type: String,
     },
   },
+  mounted: false,
   data: {
     open: false,
   },
   lifetimes: {
-    attached() {
-      const store = this.data._store as DialogCore;
-      console.log("[COMPONENT]package/dialog/overlay - attached", store);
-      if (!store) {
-        return;
-      }
-      const { open } = store;
-      this.setData({
-        open,
-      });
-      store.onStateChange((nextState) => {
-        const { open } = nextState;
-        this.setData({
-          open,
-        });
-      });
-    },
+    attached() {},
   },
   methods: {
     handleClick() {
-      console.log("[COMPONENT]package/dialog/overlay - handleClick");
+      // console.log("[COMPONENT]package/dialog/overlay - handleClick");
       this.data._store.hide();
     },
     handleAnimationEnd() {
-      console.log("[COMPONENT]package/dialog/overlay - handleAnimationEnd", this.data._store);
+      // console.log("[COMPONENT]package/dialog/overlay - handleAnimationEnd", this.data._store);
       this.data._store.present.unmount();
     },
     handleTouchMove() {

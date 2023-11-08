@@ -1,21 +1,28 @@
-// import type {} from 'miniprogram-api-typings/types/index';
-
-import { TVGenresOptions, TVSourceOptions } from "@/constants/index";
-import { ListCore } from "@/domains/list/index";
-import { RequestCore } from "@/domains/request/index";
-import { SeasonItem, fetchSeasonList } from "@/domains/tv/services";
+import { app } from "@/store/index";
+import { client } from "@/store/request";
+import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/domains/media/services";
 import { ButtonCore, CheckboxGroupCore, DialogCore, InputCore } from "@/domains/ui/index";
-import { app } from "@/store/app";
+import { RequestCoreV2 } from "@/domains/request/v2";
+import { ListCoreV2 } from "@/domains/list/v2";
+import { TVGenresOptions, TVSourceOptions } from "@/constants/index";
+import { storage } from "@/store/storage";
 
-const seasonList = new ListCore(new RequestCore(fetchSeasonList), {
-  pageSize: 20,
-  beforeSearch() {
-    searchInput.setLoading(true);
-  },
-  afterSearch() {
-    searchInput.setLoading(false);
-  },
-});
+const seasonList = new ListCoreV2(
+  new RequestCoreV2({
+    fetch: fetchSeasonList,
+    process: fetchSeasonListProcess,
+    client,
+  }),
+  {
+    pageSize: 20,
+    beforeSearch() {
+      searchInput.setLoading(true);
+    },
+    afterSearch() {
+      searchInput.setLoading(false);
+    },
+  }
+);
 seasonList.onError((tip) => {
   wx.showToast({
     title: tip.message,
@@ -61,9 +68,7 @@ const searchInput = new InputCore({
     });
   },
 });
-const { language = [] } = app.cache.get("tv_search", {
-  language: [] as string[],
-});
+const { language = [] } = storage.get("tv_search");
 const sourceCheckboxGroup = new CheckboxGroupCore({
   values: TVSourceOptions.filter((opt) => {
     return language.includes(opt.value);
@@ -75,7 +80,7 @@ const sourceCheckboxGroup = new CheckboxGroupCore({
     };
   }),
   onChange(options) {
-    app.cache.merge("tv_search", {
+    storage.merge("tv_search", {
       language: options,
     });
     //     setHasSearch(!!options.length);
@@ -145,9 +150,7 @@ Page({
   data: {
     response: seasonList.response,
     hasSearch: (() => {
-      const { language = [] } = app.cache.get("tv_search", {
-        language: [] as string[],
-      });
+      const { language = [] } = storage.get("tv_search");
       return language.length !== 0;
     })(),
     searchInput,
@@ -184,9 +187,7 @@ Page({
     //       app.tip(msg);
     //     });
     const search = (() => {
-      const { language = [] } = app.cache.get("tv_search", {
-        language: [] as string[],
-      });
+      const { language = [] } = storage.get("tv_search");
       if (!language.length) {
         return {};
       }
@@ -203,9 +204,9 @@ Page({
   handleClickSeason(event: { currentTarget: { dataset: { data: SeasonItem } } }) {
     const { data } = event.currentTarget.dataset;
     console.log(data);
-    const { tv_id, id } = data;
+    const { id } = data;
     wx.navigateTo({
-      url: `/pages/tv_play/index?tv_id=${tv_id}&season_id=${id}`,
+      url: `/pages/tv_play/index?id=${id}`,
     });
   },
 });

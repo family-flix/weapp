@@ -1,12 +1,13 @@
+import { app } from "./store/index";
+import { storage } from "./store/storage";
+import { client } from "./store/request";
 import { connect } from "./domains/app/connect.weapp";
 import { UserCore } from "./domains/user/index";
-import { app } from "./store/app";
 import { wxResultify } from "./utils/index";
-import { request } from "./utils/request";
 
 App<IAppOption>({
   globalData: {},
-  onLaunch() {
+  async onLaunch() {
     const { statusBarHeight, windowWidth, windowHeight } = wx.getSystemInfoSync();
     const { width, height, top, right, bottom, left } = wx.getMenuButtonBoundingClientRect();
     app.screen.width = windowWidth;
@@ -21,6 +22,7 @@ App<IAppOption>({
       miniProgram: { appId, envVersion, version },
     } = wx.getAccountInfoSync();
     app.env.prod = envVersion;
+    app.env.weapp = true;
     console.log("[application]onLaunch", {
       env: app.env,
       screen: {
@@ -36,35 +38,26 @@ App<IAppOption>({
         });
         return;
       }
-      const r2 = await request.get<{ id: string; token: string }>("/api/validate/wechat", { code: r1.data.code });
-      if (r2.error) {
-        app.tip({
-          icon: "error",
-          text: ["登录失败", r2.error.message],
-        });
-        return;
-      }
-      const user = new UserCore(r2.data);
-      app.user = user;
-      app.cache.set("user", r2.data);
     }
-    const existing_user = app.cache.get("user");
-    console.log("[]check has existing user", existing_user);
-    (async () => {
-      const r = await wxResultify(wx.checkSession)();
-      if (r.error) {
-        login();
-        app.start({ width, height });
-        return;
-      }
-      if (existing_user) {
-        const user = new UserCore(existing_user);
-        app.user = user;
-        app.start({ width, height });
-        return;
-      }
-      login();
-      app.start({ width, height });
-    })();
+    const existing_user = storage.get("user");
+    const token =
+      "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..hygHZsl86_hlWWsa.BRdG-tcb2YWwx3O9GSpD9AoEnyWi-NVMBVVlrU7rAsOA-pgc3MsbJeiym-h51yZiHCJznyewuW0dDnKyxypgPFDEnX2M20sotUbLEyapUBISA2YRQt0.ZFIfKHxLJpNBALOuXFU6PQ";
+    client.appendHeaders({
+      Authorization: token,
+    });
+    // console.log("[]check has existing user", existing_user);
+    const r = await wxResultify(wx.checkSession)();
+    console.log("[]after wx.checkSession", r);
+    // if (r.error) {
+    //   await login();
+    //   app.start({ width, height });
+    //   return;
+    // }
+    // if (existing_user) {
+    //   app.start({ width, height });
+    //   return;
+    // }
+    // await login();
+    app.start({ width, height });
   },
 });

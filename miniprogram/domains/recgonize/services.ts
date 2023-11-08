@@ -1,6 +1,6 @@
 // import { request } from "@/utils/request";
 
-import { JSONObject, Result } from "@/types/index/index";
+import { JSONObject, Result } from "@/types/index";
 import { query_stringify } from "@/utils/index";
 
 const base = "https://asr.tencentcloudapi.com/";
@@ -11,23 +11,15 @@ const token = process.env.RECGONIZE_TOKEN;
   -H 'X-TC-Language: zh-CN' \
   -H 'X-TC-Region: ap-shanghai' \
   -H 'content-type: application/json' \
-  -H  process.env.RECGONIZE_TOKEN\
+  -H "Authorization: process.env.RECGONIZE_TOKEN \
   -H 'X-TC-Action: CreateRecTask' \
   -H 'X-TC-Timestamp: 1689426526' \
   -d '{}' 'https://asr.tencentcloudapi.com/'
 */
 
 type RequestClient = {
-  get: <T>(
-    url: string,
-    query?: JSONObject,
-    headers?: JSONObject
-  ) => Promise<Result<T>>;
-  post: <T>(
-    url: string,
-    body?: Record<string, unknown>,
-    headers?: Record<string, unknown>
-  ) => Promise<Result<T>>;
+  get: <T>(url: string, query?: JSONObject, headers?: JSONObject) => Promise<Result<T>>;
+  post: <T>(url: string, body?: Record<string, unknown>, headers?: Record<string, unknown>) => Promise<Result<T>>;
 };
 export const request = {
   get: (url, query, headers = {}) => {
@@ -125,12 +117,12 @@ const common_body = {
   Region: "ap-guangzhou",
 };
 function timestamp() {
-	const now = new Date();
-	const t = parseInt((now.valueOf() / 1000).toString());
-return {
-	t,
-	date: `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`
-};
+  const now = new Date();
+  const t = parseInt((now.valueOf() / 1000).toString());
+  return {
+    t,
+    date: `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`,
+  };
 }
 // function signature() {
 //   const HTTPRequestMethod = "post";
@@ -190,4 +182,3 @@ export async function request_recognize(base64: string) {
   }
   console.log(r.data);
 }
-

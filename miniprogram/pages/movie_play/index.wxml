@@ -1,0 +1,191 @@
+<!-- <view style="z-index: 1; position: relative;">
+    <f-video _store="{{ player }}" bind:load="bindVideoContext"></f-video>
+</view> -->
+<page-meta page-style="flex flex-col overflow-hidden;" background-color="{{backgroundBottomColor}}">
+    <navigation-bar class-name="" style="height: 44px;"></navigation-bar>
+    <view class="fixed w-screen h-screen bg-w-bg-0" bind:tap="handleClickScreen">
+        <view class="absolute z-10 w-full" style="top: 36%;left: 50%; min-height: 120rpx; transform: translate(-50%, -50%)">
+            <f-video class-name="relative z-10" style="width: 100%;" _store="{{$logic.$player}}"></f-video>
+            <presence open-class="animate-in fade-in" closed-class="animate-out fade-out" _store="{{$page.$mask}}">
+                <view class="absolute z-20 inset-0 bg-w-fg-1 dark:bg-black opacity-20"></view>
+            </presence>
+            <view class="absolute z-30 text-w-bg-0 dark:text-w-fg-0" style="left: 50%; top: 50%; min-height: 64px; transform: translate(-50%, -50%);">
+                <presence open-class="animate-in fade-in" closed-class="animate-out fade-out" _store="{{$page.$control}}">
+                    <block wx:if="{{!playerState.error}}">
+                        <block wx:if="{{!!playerState.ready}}">
+                            <view class="flex items-center space-x-8">
+                                <view catch:tap="handleClickRewind">
+                                    <icon name="rewind" size="{{36}}" />
+                                </view>
+                                <view class="p-2">
+                                    <block wx:if="{{playerState.playing}}">
+                                        <view catch:tap="handleClickPause">
+                                            <icon name="pause" size="{{64}}" />
+                                        </view>
+                                    </block>
+                                    <block wx:else>
+                                        <view catch:tap="handleClickPlay">
+                                            <icon name="play" size="{{64}}" />
+                                        </view>
+                                    </block>
+                                </view>
+                                <view catch:tap="handleClickFastForward">
+                                    <icon name="fast-forward" size="{{36}}" />
+                                </view>
+                            </view>
+                        </block>
+                        <block wx:else>
+                            <view class="animate animate-spin">
+                                <icon name="loader" size="{{64}}" style="color: #fff;" />
+                            </view>
+                        </block>
+                    </block>
+                    <block wx:else>
+                        <view class="flex flex-col justify-center items-center">
+                            <icon name="alert-triangle" size="{{64}}" />
+                            <view class="mt-4 text-center">{{playerState.error}}</view>
+                        </view>
+                    </block>
+                </presence>
+            </view>
+        </view>
+        <cover-view class="fixed top-0 left-0 w-full">
+            <cover-view class="flex items-center p-8 space-x-4">
+                <cover-view bindtap="handleClickExitFullscreen">Close</cover-view>
+            </cover-view>
+        </cover-view>
+        <view class="absolute z-0 inset-0 text-w-fg-0">
+            <view class="absolute top-0 z-40 w-full">
+                <presence _store="{{$page.$top}}" class="flex items-center justify-between" open-class="animate-in fade-in slide-in-from-top" closed-class="animate-out slide-out-to-top fade-out">
+                    <view class="flex items-center">
+                        <view class="inline-block p-4">
+                            <icon name="arrow-left" size="{{24}}" />
+                        </view>
+                        <block wx:if="{{!!state.curSource}}">
+                            <view class="truncate break-all" style="max-width: 248rpx;">
+                                {{state.curSource.order}}、{{state.curSource.name}}
+                            </view>
+                        </block>
+                    </view>
+                    <block>
+                        <view class="flex items-center">
+                            <view class="inline-block p-4" catch:tap="handleClickAirplay">
+                                <icon name="airplay" size="{{24}}" />
+                            </view>
+                        </view>
+                    </block>
+                </presence>
+            </view>
+            <view class="absolute bottom-12 z-40 w-full safe-bottom">
+                <presence _store="{{$page.$time}}">
+                    <view class="text-center text-xl">{{state.targetTime}}</view>
+                </presence>
+                <presence class="" _store="{{$page.$bottom}}" open-class="animate-in fade-in slide-in-from-bottom" closed-class="animate-out slide-out-to-bottom fade-out">
+                    <view class="px-4"></view>
+                    <view class="flex items-center flex-reverse space-x-4 mt-6 w-full px-2">
+                        <view class="relative p-2 rounded-md" catch:tap="handleClickSettings">
+                            <icon name="settings" size="{{24}}" />
+                        </view>
+                        <view class="relative p-2 rounded-md" catch:tap="handleClickFullscreen">
+                            <icon name="maximize" size="{{24}}" />
+                        </view>
+                    </view>
+                </presence>
+            </view>
+        </view>
+    </view>
+    <!-- <view class="flex-1">
+        <view class="operations text-w-fg-1">
+            <view class="z-10 absolute inset-0" bind:tap="handleClickScreen">
+                <view class="absolute bottom-12 w-full safe-bottom">
+                    <presence _store="{{$page.$bottom}}" open-class-name="animate-in fade-in slide-in-from-bottom" closed-class-name="animate-out slide-out-to-bottom fade-out">
+                        <view>
+                            <view class="flex justify-between px-8 mt-18">
+                                <view class="relative">
+                                    <view class="flex flex-col items-center">
+                                        <icon name="arrow-big-left" size="{{64}}" class-name="text-2xl" style="font-size: 88rpx;" />
+                                        <p class="mt-2 text-sm">上一集</p>
+                                    </view>
+                                </view>
+                                <view class="relative">
+                                    <view class="flex flex-col items-center">
+                                        <icon name="arrow-big-right" size="{{64}}" class="text-2xl" style="font-size: 88rpx;" />
+                                        <p class="mt-2 text-sm ">下一集</p>
+                                    </view>
+                                </view>
+                            </view>
+                            <view class="grid grid-cols-5 gap-2 mt-12 w-full px-2">
+                                <view class="flex flex-col items-center" catch:tap="handleClickEpisodesMenu">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="list" class-name="text-2xl " />
+                                    </view>
+                                    <p class="mt-2 text-sm ">选集</p>
+                                </view>
+                                <view class="flex flex-col items-center" catch:tap="handleClickSourcesMenu">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="wand-2" class-name="text-2xl" />
+                                    </view>
+                                    <p class="mt-2 text-sm">切换源</p>
+                                </view>
+                                <view class="flex flex-col items-center" catch:tap="handleClickRatesMenu">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="gauge" class-name="text-2xl " />
+                                    </view>
+                                    <p class="mt-2 text-sm ">{{rate}}x</p>
+                                </view>
+                                <view class="flex flex-col items-center" catch:tap="handleClickResolutionsMenu">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="glasses" class-name="text-2xl " />
+                                    </view>
+                                    <p class="mt-2 text-sm ">{{curSource.typeText || "分辨率"}}</p>
+                                </view>
+                                <view class="flex flex-col items-center" catch:tap="handleClickMoreMenu">
+                                    <view class="p-4 rounded-md bg-w-bg-2">
+                                        <icon name="more-horizontal" class-name="text-2xl " />
+                                    </view>
+                                    <p class="mt-2 text-sm ">更多</p>
+                                </view>
+                            </view>
+                        </view>
+                    </presence>
+                </view>
+            </view>
+        </view>
+        <view class="video z-20 absolute w-full" style="top: 24%;">
+            <f-video class-name="relative z-10" style="width: 100%;" _store="{{$logic.$player}}" bind:load="bindVideoContext"></f-video>
+            <cover-view wx:if="{{subtitleState.visible}}" class="absolute {{orientation === 'vertical' ? 'bottom-8' : 'bottom-2'}} flex justify-center z-10 w-full px-4" style="box-sizing: border-box;">
+                <cover-view class="relative p-2 rounded-md overflow-hidden">
+                    <cover-view wx:if="{{subtitleState.texts.length}}" class="absolute z-10 inset-0 bg-w-bg-2 opacity-80;" />
+                    <cover-view class="relative z-20 text-min text-center {{orientation === 'vertical' ? 'text-min' : 'text-sm'}}">
+                        <block wx:for="{{subtitleState.texts}}" wx:for-item="text" wx:key="self">
+                            <cover-view>{{text}}</cover-view>
+                        </block>
+                    </cover-view>
+                </cover-view>
+            </cover-view>
+        </view>
+    </view>
+    <view class="mt-2 space-y-1">
+        <block wx:for="{{subtileState.texts}}" wx:for-item="text" wx:key="self">
+            <view class="text-center text-lg">{{text}}</view>
+        </block>
+    </view> -->
+</page-meta>
+<sheet _store="{{$page.$episode}}">
+    <view class="relative box-border h-full px-4 safe-bottom">
+        <view class="flex space-x-2 max-w-full overflow-x-auto scroll--hidden">
+            <block wx:for="{{state.groups}}" wx:key="id">
+                <view class="p-2">{{item.text}}</view>
+            </block>
+        </view>
+        <view class="grid gap-2 grid-cols-6">
+            <block wx:for="{{state.curGroup.list}}" wx:key="id">
+                <view class="relative flex justify-center items-center w-12 h-12 p-2 rounded-md bg-w-fg-3">
+                    <view class="absolute right-1 top-1 text-w-fg-1" style="font-size: 10px;">
+                        {{item.order}}
+                    </view>
+                </view>
+            </block>
+        </view>
+    </view>
+</sheet>

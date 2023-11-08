@@ -1,5 +1,5 @@
 import { InputCore } from "@/domains/ui/index";
-import { app } from "@/store/app";
+import { app } from "@/store/index";
 
 Component({
   externalClasses: ["class-name"],
@@ -7,6 +7,7 @@ Component({
     pureDataPattern: /^_/,
     virtualHost: true,
     styleIsolation: "apply-shared",
+    multipleSlots: true,
   },
   properties: {
     _store: {

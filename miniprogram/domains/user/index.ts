@@ -1,9 +1,12 @@
 import { Handler } from "mitt";
 
-import { Result } from "@/types/index";
 import { BaseDomain } from "@/domains/base";
+import { RequestCoreV2 } from "@/domains/request/v2";
+import { HttpClientCore } from "@/domains/http_client/index";
+import { Result } from "@/types/index";
+import { sleep } from "@/utils/index";
 
-import { fetch_user_profile, login, validate_member_token } from "./services";
+import { fetch_user_profile, login, validateMemberToken } from "./services";
 
 export enum Events {
   Tip,
@@ -12,6 +15,7 @@ export enum Events {
   Logout,
   /** 身份凭证失效 */
   Expired,
+  NeedUpdate,
   StateChange,
 }
 type TheTypesOfEvents = {
@@ -20,31 +24,35 @@ type TheTypesOfEvents = {
   [Events.Login]: UserState & { token: string };
   [Events.Logout]: void;
   [Events.Expired]: void;
+  [Events.NeedUpdate]: void;
   [Events.StateChange]: UserState;
 };
 type UserProps = {
   id: string;
-  username?: string;
-  avatar?: string;
+  username: string;
+  avatar: string;
   token: string;
+  client: HttpClientCore;
 };
-type UserState = UserProps & {
-  // id: string;
-  // username: string;
-  // avatar: string;
-  // token: string;
+type UserState = {
+  id: string;
+  username: string;
+  avatar: string;
+  token: string;
 };
 export class UserCore extends BaseDomain<TheTypesOfEvents> {
-  // static Events = Events;
+  static Events = Events;
 
-  // _name = "UserCore";
-  // debug = false;
+  _name = "UserCore";
+  debug = false;
 
-  id: string;
-  token: string;
-  username?: string;
-  avatar?: string;
-  isLogin: boolean;
+  $client: HttpClientCore;
+
+  id: string = "";
+  username: string = "Anonymous";
+  avatar: string = "";
+  token: string = "";
+  isLogin: boolean = false;
 
   get state(): UserState {
     return {
@@ -54,49 +62,68 @@ export class UserCore extends BaseDomain<TheTypesOfEvents> {
       token: this.token,
     };
   }
-  constructor(options: Partial<{ _name: string }> & UserProps) {
-    super(options);
+  constructor(props: Partial<{ _name: string }> & UserProps) {
+    super(props);
 
-    const { id, username, avatar, token } = options;
+    const { id, username, avatar, token, client } = props;
     // this.log("constructor", initialUser);
     this.id = id;
     this.username = username;
     this.avatar = avatar;
-    this.token = token;
     this.isLogin = !!token;
+    this.token = token;
+    this.$client = client;
   }
   logout() {
-    // this.validate()
+    this.emit(Events.Logout);
   }
   /**
    * 以成员身份登录
    */
-  async validate(token: string, force?: string) {
-    if (force !== "1" && this.isLogin) {
-      return Result.Ok(this.state);
-    }
+  async validate(values: Record<string, string>) {
+    const { token, force, tmp } = values;
+    // if (this.isLogin && !force) {
+    //   return Result.Ok(this.state);
+    // }
     if (!token) {
       const msg = this.tip({ text: ["缺少 token"] });
       return Result.Err(msg);
     }
-    const r = await validate_member_token(token);
+    const request = new RequestCoreV2({
+      fetch: validateMemberToken,
+      client: this.$client,
+    });
+    const r = await request.run({ token });
     if (r.error) {
+      console.log("after request.run", r);
+      if (r.error.code === 800) {
+        this.emit(Events.NeedUpdate);
+        return Result.Err(r.error);
+      }
       this.tip({ text: ["校验 token 失败", r.error.message] });
       return Result.Err(r.error);
     }
     this.id = r.data.id;
     this.token = r.data.token;
     this.isLogin = true;
-    this.emit(Events.Login, {
-      ...this.state,
-    });
+    if (!tmp) {
+      this.emit(Events.Login, {
+        ...this.state,
+      });
+    }
+    await sleep(800);
     return Result.Ok({ ...this.state });
   }
   async fetchProfile() {
     if (!this.isLogin) {
       return Result.Err("请先登录");
     }
-    const r = await fetch_user_profile();
+
+    const request = new RequestCoreV2({
+      fetch: fetch_user_profile,
+      client: this.$client,
+    });
+    const r = await request.run();
     if (r.error) {
       return r;
     }
@@ -108,6 +135,9 @@ export class UserCore extends BaseDomain<TheTypesOfEvents> {
   }
   onLogout(handler: Handler<TheTypesOfEvents[Events.Logout]>) {
     return this.on(Events.Logout, handler);
+  }
+  onNeedUpdate(handler: Handler<TheTypesOfEvents[Events.NeedUpdate]>) {
+    return this.on(Events.NeedUpdate, handler);
   }
   onExpired(handler: Handler<TheTypesOfEvents[Events.Expired]>) {
     return this.on(Events.Expired, handler);

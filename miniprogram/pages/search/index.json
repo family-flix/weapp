@@ -1,0 +1,13 @@
+{
+  "usingComponents": {
+    "lazy-image": "/components/ui/image",
+    "show": "/components/ui/show",
+    "input": "/components/ui/input",
+    "tabs": "/components/ui/tabs",
+    "button": "/components/ui/button",
+    "dialog": "/components/ui/dialog",
+    "icon": "/components/ui/icon",
+    "navigation-bar": "/components/ui/navigation-bar",
+    "portal": "/packages/dialog/portal"
+  }
+}

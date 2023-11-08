@@ -11,6 +11,9 @@ export function connect(app: Application) {
       title,
     });
   };
+  app.back = () => {
+    wx.navigateBack();
+  };
   // window.addEventListener("DOMContentLoaded", () => {
   //   const { innerWidth, innerHeight } = window;
   //   app.setSize({ width: innerWidth, height: innerHeight });
@@ -24,13 +27,23 @@ export function connect(app: Application) {
   // });
   // window.addEventListener("beforeunload", (event) => {
   // });
-  // window.addEventListener("resize", () => {
-  //   const { innerWidth, innerHeight } = window;
-  //   const size = {
-  //     width: innerWidth,
-  //     height: innerHeight,
-  //   };
-  //   app.resize(size);
+  wx.onWindowResize((screen) => {
+    const {
+      size: { windowWidth, windowHeight },
+    } = screen;
+    const size = {
+      width: windowWidth,
+      height: windowHeight,
+    };
+    if (size.width === app.screen.height && size.height === app.screen.width) {
+      app.screen.width = size.height;
+      app.screen.height = size.width;
+      app.handleScreenOrientationChange(size.width > size.height ? 1 : 0);
+    }
+    app.handleResize(size);
+  });
+  // wx.onDeviceMotionChange((r) => {
+  //   console.log(r.)
   // });
   // window.addEventListener("blur", () => {
   //   app.emit(app.Events.Blur);

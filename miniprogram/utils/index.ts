@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 // import relative_time from "dayjs/plugin/relativeTime";
 import { cn as nzhcn } from "nzh/index";
 
-import { Result } from "@/types/index";
+import { JSONObject, Result } from "@/types/index";
 
 export const formatTime = (date: Date) => {
   const year = date.getFullYear();
@@ -24,9 +24,16 @@ const formatNumber = (n: number) => {
 // dayjs.extend(relative_time);
 // dayjs.locale("zh-cn");
 
-export function padding_zero(str: number | string) {
-  if (String(str).length === 1) {
-    return `0${str}`;
+export function padding_zero(str: number | string, options: { count: number; pos: number } = { count: 2, pos: 1 }) {
+  const { count, pos } = options;
+  if (String(str).length < count) {
+    const num = count - String(str).length;
+    if (pos === 1) {
+      return `${"0".repeat(num)}${str}`;
+    }
+    if (pos === 2) {
+      return `${str}${"0".repeat(num)}`;
+    }
   }
   return String(str);
 }
@@ -34,7 +41,13 @@ export function remove_str(filename: string, index: number = 0, length: number) 
   return filename.slice(0, index) + filename.slice(index + length);
 }
 
-export function episode_to_chinese_num(str: string) {
+export function episode_to_chinese_num(str: string | number) {
+  if (typeof str === "number") {
+    return `第${str}集`;
+  }
+  if (str.match(/^[0-9]/)) {
+    return str;
+  }
   const regex = /(\d+)/g;
   let s = str.replace(/[eE]/g, "");
   const matches = s.match(regex);
@@ -80,12 +93,13 @@ export function update<T>(arr: T[], index: number, nextItem: T) {
   return [...arr.slice(0, index), nextItem, ...arr.slice(index + 1)];
 }
 
-export function query_stringify(query: Record<string, string | number | undefined>) {
+export function query_stringify(query: JSONObject) {
   return Object.keys(query)
     .filter((key) => {
       return query[key] !== undefined;
     })
     .map((key) => {
+      // @ts-ignore
       return `${key}=${encodeURIComponent(query[key]!)}`;
     })
     .join("&");
@@ -156,6 +170,14 @@ export function minute_to_hour(value: number) {
   }
   return [null, minutes];
 }
+
+export function minute_to_hour2(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  const formattedHours = String(hours).padStart(2, "0");
+  const formattedMinutes = String(remainingMinutes).padStart(2, "0");
+  return `${formattedHours}:${formattedMinutes}`;
+}
 export function relative_time_from_now(time: string) {
   const date = dayjs(time);
   const now = dayjs();
@@ -201,7 +223,7 @@ export function wxResultify<
 >(
   fn: T
 ): (
-  args?: Omit<Parameters<T>[0], "success" | "fail">
+  args?: Omit<NonNullable<Parameters<T>[0]>, "success" | "fail">
 ) => Promise<Result<Parameters<NonNullable<NonNullable<Parameters<T>[0]>["success"]>>[0]>> {
   return (args?: Omit<NonNullable<Parameters<T>[0]>, "success" | "fail">) => {
     const p = new Promise((resolve) => {
@@ -211,7 +233,9 @@ export function wxResultify<
           resolve(Result.Ok(d));
         },
         fail(err) {
-          resolve(Result.Err(err.errmsg));
+          // @ts-ignore
+          const msg = err.errmsg || err.errMsg;
+          resolve(Result.Err(msg));
         },
       });
     });

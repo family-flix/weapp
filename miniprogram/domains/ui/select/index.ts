@@ -2,13 +2,13 @@
 
 import { Handler } from "mitt";
 
+import { app } from "@/store/index";
 import { BaseDomain } from "@/domains/base";
 import { PopperCore } from "@/domains/ui/popper/index";
 import { CollectionCore } from "@/domains/ui/collection/index";
 import { DismissableLayerCore } from "@/domains/ui/dismissable-layer/index";
 import { Direction } from "@/domains/ui/direction/index";
 import { Rect } from "@/types/index";
-import { app } from "@/store/app";
 
 import { SelectContentCore } from "./content";
 import { SelectViewportCore } from "./viewport";
