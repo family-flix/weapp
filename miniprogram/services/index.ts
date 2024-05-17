@@ -3,8 +3,8 @@ import dayjs from "dayjs";
 import { FetchParams } from "@/domains/list/typing";
 import { TmpRequestResp, request } from "@/domains/request/utils";
 import { ListResponse, ListResponseWithCursor, Result, UnpackedResult } from "@/types/index";
-import { MediaTypes, CollectionTypes, ReportTypes } from "@/constants/index";
-import { season_to_chinese_num } from "@/utils/index";
+import { MediaTypes, CollectionTypes, ReportTypes, AuthCodeStep } from "@/constants/index";
+import { relative_time_from_now, season_to_chinese_num } from "@/utils/index";
 
 export function reportSomething(body: {
   type: ReportTypes;
@@ -12,7 +12,7 @@ export function reportSomething(body: {
   media_id?: string;
   media_source_id?: string;
 }) {
-  return request.post("/api/v2/wechat/report/create", body);
+  return request.post<{ id: string }>("/api/v2/wechat/report/create", body);
 }
 
 type AnswerPayload = Partial<{
@@ -61,6 +61,7 @@ export function fetchNotificationsProcess(r: TmpRequestResp<typeof fetchNotifica
   });
 }
 
+/** 标记消息已读 */
 export function readNotification(params: { id: string }) {
   const { id } = params;
   return request.post("/api/v2/wechat/notification/read", {
@@ -68,6 +69,7 @@ export function readNotification(params: { id: string }) {
   });
 }
 
+/** 标记所有消息已读 */
 export function readAllNotification() {
   return request.post("/api/v2/wechat/notification/read_all", {});
 }
@@ -75,6 +77,9 @@ export function readAllNotification() {
 export function fetchInfo() {
   return request.get<{
     id: string;
+    nickname: string;
+    email: string | null;
+    avatar: string | null;
     permissions: string[];
   }>("/api/info");
 }
@@ -295,10 +300,105 @@ export function fetchDiaryList(params: FetchParams) {
       };
       created: string;
     }>
-  >("/api/diary/list", params);
+  >("/api/v2/wechat/diary/list", params);
 }
 
 /** 语音识别 */
 export function recognize(body: { data: string }) {
-  return request.post<string>("/api/recognize", body);
+  return request.post<string>("/api/2/wechat/recognize", body);
+}
+
+/** 获取有更新的观看历史 */
+export function fetchUpdatedMediaHasHistory(params: FetchParams) {
+  return request.post<
+    ListResponse<{
+      id: string;
+      latest_episode_created: string;
+      cur_episode_name: string;
+      cur_episode_order: number;
+      name: string;
+      poster_path: string;
+      updated: string;
+      thumbnail_path: string;
+      member_name: string;
+      latest_episode_order: number;
+      latest_episode_name: string;
+    }>
+  >("/api/v2/wechat/history/updated", {
+    page: params.page,
+    page_size: params.pageSize,
+  });
+}
+export function fetchUpdatedMediaHasHistoryProcess(r: TmpRequestResp<typeof fetchUpdatedMediaHasHistory>) {
+  if (r.error) {
+    return Result.Err(r.error.message);
+  }
+  const { page, page_size, no_more, list } = r.data;
+  return Result.Ok({
+    page,
+    page_size,
+    no_more,
+    list: list.map((media) => {
+      const {
+        id,
+        name,
+        poster_path,
+        thumbnail_path,
+        updated,
+        latest_episode_order,
+        latest_episode_name,
+        latest_episode_created,
+        cur_episode_name,
+        cur_episode_order,
+      } = media;
+      return {
+        id,
+        name,
+        poster_path,
+        episode_added: latest_episode_order - cur_episode_order,
+        thumbnail_path,
+        cur_episode: {
+          order: cur_episode_order,
+          name: cur_episode_name,
+          updated_at: relative_time_from_now(updated),
+        },
+        latest_episode: {
+          order: latest_episode_order,
+          name: latest_episode_name,
+          created_at: relative_time_from_now(latest_episode_created),
+        },
+      };
+    }),
+  });
+}
+
+export function confirmQRCode(values: { code: string; status: AuthCodeStep }) {
+  return request.post("/api/v2/wechat/auth/code/confirm", values);
+}
+
+export function fetchInvitationCodeList(params: FetchParams) {
+  return request.post<
+    ListResponseWithCursor<{
+      id: string;
+      code: string;
+      used_at: string;
+      created: string;
+      invitee: {
+        id: string;
+        nickname: string;
+        email: string;
+        avatar: string;
+      };
+    }>
+  >("/api/v2/wechat/invitation_code/list", params);
+}
+export type InvitationCodeItem = UnpackedResult<TmpRequestResp<typeof fetchInvitationCodeList>>["list"][number];
+
+export function createInvitationCode(values: { count: number }) {
+  return request.post<{
+    list: {
+      code: string;
+      created_at: string;
+    }[];
+  }>("/api/v2/wechat/invitation_code/create", values);
 }

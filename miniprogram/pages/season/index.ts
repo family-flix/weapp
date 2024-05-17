@@ -1,17 +1,16 @@
 // import type {} from 'miniprogram-api-typings/types/index';
 
 import { app } from "@/store/index";
+import { storage } from "@/store/storage";
 import { client } from "@/store/request";
 import { TVGenresOptions, TVSourceOptions } from "@/constants/index";
 import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/domains/media/services";
 import { ButtonCore, CheckboxGroupCore, DialogCore, InputCore } from "@/domains/ui/index";
-import { RequestCoreV2 } from "@/domains/request/v2";
-import { ListCoreV2 } from "@/domains/list/v2";
-import { storage } from "@/store/storage";
+import { RequestCore } from "@/domains/request/index";
+import { ListCore } from "@/domains/list/index";
 
-const seasonList = new ListCoreV2(
-  new RequestCoreV2({
-    fetch: fetchSeasonList,
+const seasonList = new ListCore(
+  new RequestCore(fetchSeasonList, {
     process: fetchSeasonListProcess,
     client,
   }),

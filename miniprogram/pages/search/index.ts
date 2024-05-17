@@ -4,10 +4,9 @@ import { storage } from "@/store/storage";
 import { ListCore } from "@/domains/list/index";
 import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/domains/media/services";
 import { ButtonCore, CheckboxGroupCore, DialogCore, InputCore } from "@/domains/ui/index";
-import { RequestCoreV2 } from "@/domains/request/v2";
-import { ListCoreV2 } from "@/domains/list/v2";
-import { HttpClientCore } from "@/domains/http_client";
+import { RequestCore } from "@/domains/request/index";
 import { MediaTypes, TVGenresOptions, TVSourceOptions } from "@/constants/index";
+import { UnpackedResult } from "@/types/index";
 
 Page({
   data: {
@@ -27,8 +26,8 @@ Page({
       btn: null | ButtonCore;
     },
     $dialog: null as null | DialogCore,
-    $list: null as null | ListCoreV2<
-      RequestCoreV2<{ fetch: typeof fetchSeasonList; process: typeof fetchSeasonListProcess; client: HttpClientCore }>,
+    $list: null as null | ListCore<
+      RequestCore<typeof fetchSeasonList, UnpackedResult<ReturnType<typeof fetchSeasonListProcess>>>,
       SeasonItem
     >,
   },
@@ -39,9 +38,8 @@ Page({
     //   return;
     // }
     // this.input.focus();
-    const $list = new ListCoreV2(
-      new RequestCoreV2({
-        fetch: fetchSeasonList,
+    const $list = new ListCore(
+      new RequestCore(fetchSeasonList, {
         process: fetchSeasonListProcess,
         client,
       }),

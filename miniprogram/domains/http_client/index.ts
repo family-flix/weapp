@@ -12,113 +12,88 @@ type TheTypesOfEvents = {
 };
 
 type HttpClientCoreProps = {
-  hostname: string;
+  hostname?: string;
   headers?: Record<string, string>;
 };
 type HttpClientCoreState = {};
 
 export class HttpClientCore extends BaseDomain<TheTypesOfEvents> {
-  //   axios: AxiosInstance;
-
-  hostname: string;
+  hostname: string = "";
   headers: Record<string, string> = {};
 
   constructor(props: Partial<{ _name: string }> & HttpClientCoreProps) {
     super(props);
 
-    const { hostname, headers = {} } = props;
+    const { hostname = "", headers = {} } = props;
 
     this.hostname = hostname;
     this.headers = headers;
-    // this.user = user;
-    //     const client = axios.create({
-    //       timeout: 12000,
-    //     });
-    //     this.axios = client;
   }
 
   async get<T>(
     endpoint: string,
     query?: JSONObject,
-    extra: Partial<{ headers: Record<string, string>; token: unknown }> = {}
+    extra: Partial<{ headers: Record<string, string>; id: string }> = {}
   ): Promise<Result<T>> {
-    //     const client = this.axios;
-    // const user = this.user;
     try {
       const h = this.hostname;
-      const url = `${h}${endpoint}${query ? "?" + query_stringify(query) : ""}`;
-      const resp = await this.fetch<{ code: number | string; msg: string; data: unknown | null }>({
+      const url = [h, endpoint, query ? "?" + query_stringify(query) : ""].join("");
+      const resp = await this.fetch<T>({
         url,
         method: "GET",
-        // cancelToken: extra.token,
+        id: extra.id,
         headers: {
           ...this.headers,
           ...(extra.headers || {}),
-          // Authorization: user.token,
         },
       });
-      console.log('before GET resp.data', resp.data);
-      const { code, msg, data } = resp.data;
-      if (code !== 0) {
-        return Result.Err(msg, code, data);
-      }
-      return Result.Ok(data as T);
+      return Result.Ok(resp.data);
     } catch (err) {
       const error = err as Error;
-      //       if (axios.isCancel(error)) {
-      //         return Result.Err("cancel", "CANCEL");
-      //       }
       const { message } = error;
-      // console.log("error", message);
       return Result.Err(message);
     }
   }
   async post<T>(
     endpoint: string,
     body?: JSONObject | FormData,
-    extra: Partial<{ headers: Record<string, string>; token: unknown }> = {}
+    extra: Partial<{ headers: Record<string, string>; id: string }> = {}
   ): Promise<Result<T>> {
-    //     const client = this.axios;
-    // const user = this.user;
     const h = this.hostname;
-    const url = `${h}${endpoint}`;
-    // console.log(url, h, endpoint, this.headers);
+    const url = [h, endpoint].join("");
     try {
-      const resp = await this.fetch<{ code: number | string; msg: string; data: unknown | null }>({
+      const resp = await this.fetch<T>({
         url,
         method: "POST",
         data: body,
-        // cancelToken: extra.token,
+        id: extra.id,
         headers: {
           ...this.headers,
           ...(extra.headers || {}),
-          // Authorization: user.token,
         },
       });
-      // console.log('before resp.data', resp.data);
-      const { code, msg, data } = resp.data;
-      if (code !== 0) {
-        return Result.Err(msg, code, data);
-      }
-      return Result.Ok(data as T);
+      return Result.Ok(resp.data);
     } catch (err) {
       const error = err as Error;
-      //       if (axios.isCancel(error)) {
-      //         return Result.Err("cancel", "CANCEL");
-      //       }
       const { message } = error;
       return Result.Err(message);
     }
   }
   async fetch<T>(options: {
     url: string;
-    method: "GET" | "POST" | "PUT" | "DELETE";
+    method: "GET" | "POST";
+    id?: string;
     data?: JSONObject | FormData;
     headers?: Record<string, string>;
   }) {
-    return {} as { data: T };
+    console.log("请在 connect 中实现 fetch 方法");
+    return { data: {} } as { data: T };
   }
-  cancel() {}
+  cancel(id: string) {
+    const tip = "请在 connect 中实现 cancel 方法";
+    console.log(tip);
+    return Result.Err(tip);
+  }
   setHeaders(headers: Record<string, string>) {
     this.headers = headers;
   }

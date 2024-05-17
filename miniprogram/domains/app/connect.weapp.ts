@@ -1,6 +1,7 @@
 import { Application } from "@/domains/app/index";
+import { StorageCore } from "@/domains/storage/index";
 
-export function connect(app: Application) {
+export function connect<T extends { storage: StorageCore<any> }>(app: Application<T>) {
   // const { router } = app;
   // const ownerDocument = globalThis.document;
   // app.getComputedStyle = (el: HTMLElement) => {
@@ -10,9 +11,6 @@ export function connect(app: Application) {
     wx.setNavigationBarTitle({
       title,
     });
-  };
-  app.back = () => {
-    wx.navigateBack();
   };
   // window.addEventListener("DOMContentLoaded", () => {
   //   const { innerWidth, innerHeight } = window;

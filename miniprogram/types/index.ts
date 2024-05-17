@@ -1,4 +1,4 @@
-import { BizError } from "@/domains/error/index";
+import { BizError } from "@/domains/error";
 
 export type Resp<T> = {
   data: T extends null ? null : T;
@@ -22,9 +22,6 @@ export const Result = {
       data,
       code,
       error: (() => {
-        if (!message) {
-          return new BizError("未知错误");
-        }
         if (typeof message === "string") {
           const e = new BizError(message, code, data);
           return e;

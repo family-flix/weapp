@@ -5,7 +5,7 @@
 import { BaseDomain, Handler } from "@/domains/base";
 import { SubtitleCore } from "@/domains/subtitle/index";
 import { SubtitleFileResp } from "@/domains/subtitle/types";
-import { RequestCoreV2 } from "@/domains/request/v2";
+import { RequestCore } from "@/domains/request/index";
 import { HttpClientCore } from "@/domains/http_client/index";
 import { MediaOriginCountry } from "@/constants/index";
 import { Result } from "@/types/index";
@@ -81,8 +81,7 @@ export class MediaSourceFileCore extends BaseDomain<TheTypesOfEvents> {
 
   /** 播放该电视剧下指定影片 */
   async load(file: { id: string }) {
-    const fetch = new RequestCoreV2({
-      fetch: fetchSourcePlayingInfo,
+    const fetch = new RequestCore(fetchSourcePlayingInfo, {
       process: fetchSourcePlayingInfoProcess,
       client: this.$client,
     });
@@ -94,6 +93,19 @@ export class MediaSourceFileCore extends BaseDomain<TheTypesOfEvents> {
       this.tip({
         text: ["获取影片详情失败", res.error.message],
       });
+      this.profile = {
+        id: file.id,
+        invalid: 1,
+        url: "",
+        type: this.curResolution,
+        typeText: "",
+        width: 0,
+        height: 0,
+        thumbnailPath: "",
+        resolutions: [],
+        subtitles: [],
+      };
+      this.emit(Events.StateChange, { ...this.state });
       return Result.Err(res.error);
     }
     const { url, thumbnailPath, typeText, type, width, height, resolutions, subtitles } = res.data;
@@ -103,6 +115,7 @@ export class MediaSourceFileCore extends BaseDomain<TheTypesOfEvents> {
       url,
       type,
       typeText,
+      invalid: 0,
       width,
       height,
       thumbnailPath,
@@ -137,6 +150,7 @@ export class MediaSourceFileCore extends BaseDomain<TheTypesOfEvents> {
       url,
       type: targetType,
       typeText,
+      invalid: 0,
       width,
       height,
       resolutions,

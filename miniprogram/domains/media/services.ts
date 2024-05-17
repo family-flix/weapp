@@ -4,16 +4,9 @@ import { request, TmpRequestResp } from "@/domains/request/utils";
 import { FetchParams } from "@/domains/list/typing";
 import { SubtitleFileResp } from "@/domains/subtitle/types";
 import { MediaResolutionTypes, MediaResolutionTypeTexts } from "@/domains/source/constants";
-import {
-  ListResponse,
-  ListResponseWithCursor,
-  RequestedResource,
-  Result,
-  Unpacked,
-  UnpackedResult,
-} from "@/types/index";
-import { MediaTypes, MediaOriginCountry, SeasonGenresTexts, SeasonMediaOriginCountryTexts } from "@/constants/index";
-import { episode_to_chinese_num, minute_to_hour2, relative_time_from_now } from "@/utils/index";
+import { ListResponse, ListResponseWithCursor, RequestedResource, Result, Unpacked, UnpackedResult } from "@/types";
+import { MediaTypes, MediaOriginCountry, SeasonGenresTexts, SeasonMediaOriginCountryTexts } from "@/constants";
+import { episode_to_chinese_num, minute_to_hour2, relative_time_from_now } from "@/utils";
 
 /**
  * 获取季列表
@@ -365,6 +358,7 @@ export function fetchSourcePlayingInfo(body: { id: string; type: MediaResolution
     width: number;
     /** 视频高度 */
     height: number;
+    invalid: number;
     /** 该视频其他分辨率 */
     other: {
       cur: boolean;
@@ -380,13 +374,14 @@ export function fetchSourcePlayingInfo(body: { id: string; type: MediaResolution
     subtitles: SubtitleFileResp[];
   }>("/api/v2/wechat/source", {
     id: body.id,
+    type: body.type,
   });
 }
 export function fetchSourcePlayingInfoProcess(r: TmpRequestResp<typeof fetchSourcePlayingInfo>) {
   if (r.error) {
     return Result.Err(r.error);
   }
-  const { id, url, width, height, thumbnail_path, type, other, subtitles } = r.data;
+  const { id, url, width, height, thumbnail_path, type, invalid, other, subtitles } = r.data;
   return Result.Ok({
     id,
     url,
@@ -394,6 +389,7 @@ export function fetchSourcePlayingInfoProcess(r: TmpRequestResp<typeof fetchSour
     typeText: MediaResolutionTypeTexts[type],
     width,
     height,
+    invalid,
     thumbnailPath: thumbnail_path,
     resolutions: other.map((t) => {
       const { cur, url, width, height, type } = t;

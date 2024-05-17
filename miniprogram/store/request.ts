@@ -1,11 +1,10 @@
+/**
+ * @file 网络请求
+ */
 import { HttpClientCore } from "@/domains/http_client/index";
-import { __VERSION__ } from "@/constants/index";
 import { connect } from "@/domains/http_client/connect.weapp";
+import { __VERSION__ } from "@/constants/index";
 
-// if (app.env.prod === "develop") {
-//   return "https://media-t.funzm.com";
-// }
-// return "https://media.funzm.com";
 export const client = new HttpClientCore({
   hostname: "https://media.funzm.com",
   headers: {
@@ -13,6 +12,3 @@ export const client = new HttpClientCore({
   },
 });
 connect(client);
-export const fetch = new HttpClientCore({
-  hostname: "",
-});

@@ -3,12 +3,11 @@ import { client } from "@/store/request";
 import { TVGenresOptions, TVSourceOptions } from "@/constants/index";
 import { ButtonCore, CheckboxGroupCore, DialogCore, InputCore } from "@/domains/ui/index";
 import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/domains/media/services";
-import { RequestCoreV2 } from "@/domains/request/v2";
-import { ListCoreV2 } from "@/domains/list/v2";
+import { RequestCore } from "@/domains/request/index";
+import { ListCore } from "@/domains/list/index";
 
-const movieList = new ListCoreV2(
-  new RequestCoreV2({
-    fetch: fetchSeasonList,
+const movieList = new ListCore(
+  new RequestCore(fetchSeasonList, {
     process: fetchSeasonListProcess,
     client,
   }),

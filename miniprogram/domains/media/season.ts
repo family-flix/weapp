@@ -2,8 +2,8 @@
  * @file 电视剧
  */
 import { BaseDomain, Handler } from "@/domains/base";
-import { MediaSourceFileCore } from "@/domains/source/index";
-import { RequestCoreV2 } from "@/domains/request/v2";
+import { MediaSourceFileCore } from "@/domains/source";
+import { RequestCore } from "@/domains/request";
 import { MediaResolutionTypes } from "@/domains/source/constants";
 import { HttpClientCore } from "@/domains/http_client/index";
 import { debounce } from "@/utils/lodash/debounce";
@@ -113,13 +113,12 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     });
   }
 
-  fetchProfile = async (season_id: string) => {
+  async fetchProfile(season_id: string) {
     if (season_id === undefined) {
       const msg = this.tip({ text: ["缺少季 id 参数"] });
       return Result.Err(msg);
     }
-    const fetch = new RequestCoreV2({
-      fetch: fetchMediaPlayingEpisode,
+    const fetch = new RequestCore(fetchMediaPlayingEpisode, {
       process: fetchMediaPlayingEpisodeProcess,
       client: this.$client,
     });
@@ -146,7 +145,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     this.emit(Events.ProfileLoaded, { profile: this.profile, curSource: curSource });
     this.emit(Events.StateChange, { ...this.state });
     return Result.Ok({ ...this.state });
-  };
+  }
 
   fetchSeries(media_id: string) {
     fetchMediaSeries({
@@ -155,10 +154,10 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
   }
 
   /** 播放该电视剧下指定影片 */
-  playEpisode = async (episode: MediaSource, extra: { currentTime: number }) => {
+  async playEpisode(source: MediaSource, extra: { currentTime: number }) {
     const { currentTime = 0 } = extra;
-    console.log("[DOMAIN]media/season - playEpisode", episode, this.curSource);
-    const { id, files } = episode;
+    console.log("[DOMAIN]media/season - playEpisode", source, this.curSource);
+    const { id, files } = source;
     if (this.curSource && id === this.curSource.id) {
       this.tip({
         text: ["已经是该剧集了"],
@@ -172,7 +171,8 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
       return Result.Err(tip);
     }
     const file = files[0];
-    console.log("[DOMAIN]media/season - playEpisode before this.$source.load", episode);
+    console.log("[DOMAIN]media/season - playEpisode before this.$source.load", source);
+    this.curSource = { ...source, currentTime, thumbnailPath: source.stillPath, curFileId: file.id };
     const res = await this.$source.load(file);
     if (res.error) {
       this.tip({
@@ -181,9 +181,9 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
       return Result.Err(res.error);
     }
     this.currentTime = currentTime;
-    this.curSource = { ...episode, currentTime, thumbnailPath: episode.stillPath, curFileId: file.id };
+    this.curSource = { ...source, currentTime, thumbnailPath: source.stillPath, curFileId: file.id };
     (async () => {
-      const r = await this.$source.loadSubtitle({ extraSubtitleFiles: episode.subtitles, currentTime });
+      const r = await this.$source.loadSubtitle({ extraSubtitleFiles: source.subtitles, currentTime });
       if (r.error) {
         console.log("[DOMAIN]media/season - loadSubtitle failed ", r.error.message);
         return;
@@ -195,11 +195,11 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     return Result.Ok(this.curSource);
   }
   /** 切换剧集 */
-  switchEpisode = (episode: MediaSource) => {
+  switchEpisode(episode: MediaSource) {
     return this.playEpisode(episode, { currentTime: 0 });
   }
   /** 获取下一剧集 */
-  getNextEpisode = async () => {
+  async getNextEpisode() {
     if (this.profile === null) {
       return Result.Err("请先调用 fetchProfile 方法");
     }
@@ -223,10 +223,15 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     }
     const isLastEpisode = curSourceIndex === curGroup.list.length - 1;
     if (!isLastEpisode) {
-      const nextEpisode = curGroup.list[curSourceIndex + 1];
+      let nextEpisode = curGroup.list[curSourceIndex + 1];
+      if (!nextEpisode.id) {
+        nextEpisode = curGroup.list[curSourceIndex + 2];
+      }
+      if (nextEpisode) {
+        return Result.Ok(nextEpisode);
+      }
       // curEpisode.cur = false;
       // nextEpisode.cur = true;
-      return Result.Ok(nextEpisode);
     }
     if (curGroupIndex === this.sourceGroups.length - 1) {
       return Result.Err("已经是最后一集了");
@@ -235,8 +240,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     if (!nextGroup) {
       return Result.Err("已经是最后一集了2");
     }
-    const fetch = new RequestCoreV2({
-      fetch: fetchSourceInGroup,
+    const fetch = new RequestCore(fetchSourceInGroup, {
       process: fetchSourceInGroupProcess,
       client: this.$client,
     });
@@ -258,7 +262,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
   /** 为播放下一集进行准备 */
   prepareNextEpisode() {}
   /** 播放下一集 */
-  playNextEpisode = async () => {
+  async playNextEpisode() {
     if (this._pending) {
       const msg = this.tip({ text: ["正在加载..."] });
       return Result.Err(msg);
@@ -277,8 +281,8 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     }
     await this.playEpisode(nextEpisode, { currentTime: 0 });
     return Result.Ok(null);
-  };
-  fetchEpisodeOfGroup = async (group: { start: number; end: number }) => {
+  }
+  async fetchEpisodeOfGroup(group: { start: number; end: number }) {
     if (this.profile === null) {
       const msg = this.tip({
         text: ["请先调用 fetchProfile"],
@@ -292,8 +296,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
       });
       return Result.Err(msg);
     }
-    const fetch = new RequestCoreV2({
-      fetch: fetchSourceInGroup,
+    const fetch = new RequestCore(fetchSourceInGroup, {
       process: fetchSourceInGroupProcess,
       client: this.$client,
     });
@@ -312,8 +315,8 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     this.curGroup = matchedGroup;
     this.emit(Events.StateChange, { ...this.state });
     return Result.Ok(null);
-  };
-  changeSourceFile = async (sourceFile: { id: string }) => {
+  }
+  async changeSourceFile(sourceFile: { id: string }) {
     if (this.profile === null) {
       const msg = this.tip({ text: ["视频还未加载完成"] });
       return Result.Err(msg);
@@ -330,12 +333,11 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
       });
       return Result.Err(res.error);
     }
-    // this.loadSubtitle({ currentTime: this.currentTime });
     this.emit(Events.SourceFileChange, { ...res.data, currentTime: this.currentTime });
     return Result.Ok(null);
-  };
+  }
   /** 切换分辨率 */
-  changeResolution = (targetType: MediaResolutionTypes) => {
+  changeResolution(targetType: MediaResolutionTypes) {
     // console.log("switchResolution 1");
     if (this.profile === null) {
       const msg = this.tip({ text: ["视频还未加载完成"] });
@@ -350,14 +352,14 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     // console.log("[DOMAIN]tv/index - changeResolution", this.currentTime);
     this.emit(Events.SourceFileChange, { ...target, currentTime: this.currentTime });
     return Result.Ok(target);
-  };
-  setCurrentTime = (currentTime: number) => {
+  }
+  setCurrentTime(currentTime: number) {
     this.currentTime = currentTime;
-  };
-  setCurResolution = (type: MediaResolutionTypes) => {
+  }
+  setCurResolution(type: MediaResolutionTypes) {
     this.curResolutionType = type;
-  };
-  markFileInvalid = (id: string) => {
+  }
+  markFileInvalid(id: string) {
     if (!this.curSource) {
       return;
     }
@@ -374,8 +376,8 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
       }
       return f;
     });
-  };
-  updatePlayProgressForce = (values: Partial<{ currentTime: number; duration: number }> = {}) => {
+  }
+  updatePlayProgressForce(values: Partial<{ currentTime: number; duration: number }> = {}) {
     const { currentTime = this.currentTime, duration = 0 } = values;
     console.log(
       "[DOMAIN]media/season - update_play_progress",
@@ -393,8 +395,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     if (this.$source.profile === null) {
       return;
     }
-    const request = new RequestCoreV2({
-      fetch: updatePlayHistory,
+    const request = new RequestCore(updatePlayHistory, {
       client: this.$client,
     });
     request.run({
@@ -404,13 +405,13 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
       duration: parseFloat(duration.toFixed(2)),
       source_id: this.$source.profile.id,
     });
-  };
+  }
   /** 更新观看进度 */
   updatePlayProgress = throttle_1(10 * 1000, (values: Partial<{ currentTime: number; duration: number }> = {}) => {
     this.updatePlayProgressForce(values);
   });
   /** 当前进度改变 */
-  handleCurTimeChange = (values: { currentTime: number; duration: number }) => {
+  handleCurTimeChange(values: { currentTime: number; duration: number }) {
     this.playing = true;
     this._pause();
     const { currentTime = 0 } = values;
@@ -420,7 +421,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
       this.$source.$subtitle?.handleTimeChange(currentTime);
     }
     this.updatePlayProgress(values);
-  };
+  }
   /** 当 800 毫秒内没有播放，就表示暂停了 */
   _pause = debounce(800, () => {
     this.playing = false;
@@ -439,27 +440,27 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     return [];
   }
 
-  onSourceFileChange = (handler: Handler<TheTypesOfEvents[Events.SourceFileChange]>) => {
+  onSourceFileChange(handler: Handler<TheTypesOfEvents[Events.SourceFileChange]>) {
     return this.on(Events.SourceFileChange, handler);
-  };
-  onProfileLoaded = (handler: Handler<TheTypesOfEvents[Events.ProfileLoaded]>) => {
+  }
+  onProfileLoaded(handler: Handler<TheTypesOfEvents[Events.ProfileLoaded]>) {
     return this.on(Events.ProfileLoaded, handler);
-  };
-  onEpisodeChange = (handler: Handler<TheTypesOfEvents[Events.EpisodeChange]>) => {
+  }
+  onEpisodeChange(handler: Handler<TheTypesOfEvents[Events.EpisodeChange]>) {
     return this.on(Events.EpisodeChange, handler);
-  };
-  onStateChange = (handler: Handler<TheTypesOfEvents[Events.StateChange]>) => {
+  }
+  onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
     return this.on(Events.StateChange, handler);
-  };
-  onBeforeNextEpisode = (handler: Handler<TheTypesOfEvents[Events.BeforeNextEpisode]>) => {
+  }
+  onBeforeNextEpisode(handler: Handler<TheTypesOfEvents[Events.BeforeNextEpisode]>) {
     return this.on(Events.BeforeNextEpisode, handler);
-  };
-  onBeforePrevEpisode = (handler: Handler<TheTypesOfEvents[Events.BeforePrevEpisode]>) => {
+  }
+  onBeforePrevEpisode(handler: Handler<TheTypesOfEvents[Events.BeforePrevEpisode]>) {
     return this.on(Events.BeforePrevEpisode, handler);
-  };
-  onBeforeChangeSource = (handler: Handler<TheTypesOfEvents[Events.BeforeChangeSource]>) => {
+  }
+  onBeforeChangeSource(handler: Handler<TheTypesOfEvents[Events.BeforeChangeSource]>) {
     return this.on(Events.BeforeChangeSource, handler);
-  };
+  }
 }
 
 function throttle_1(delay: number, fn: Function) {

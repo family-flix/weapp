@@ -1,13 +1,15 @@
 import { MediaResolutionTypes } from "@/domains/source/constants";
-import { StorageCore } from "@/domains/storage/index";
+import { StorageCore } from "@/domains/storage";
 
 const DEFAULT_CACHE_VALUES = {
   user: {
     id: "",
     username: "anonymous",
+    email: "",
     token: "",
     avatar: "",
   },
+  theme: "system",
   player_settings: {
     rate: 1,
     volume: 0.5,
@@ -20,7 +22,11 @@ const DEFAULT_CACHE_VALUES = {
   movie_search: {
     language: [] as string[],
   },
-  media_search_histories: [] as string[],
+  media_search_histories: [] as {
+    text: string;
+    sort: number;
+  }[],
+  dialog_flags: {} as Record<string, { show_at: number }>,
 };
 const key = "m_global";
 const client = {
@@ -35,6 +41,11 @@ const e = client.getItem(key);
 export const storage = new StorageCore<typeof DEFAULT_CACHE_VALUES>({
   key,
   defaultValues: DEFAULT_CACHE_VALUES,
-  values: JSON.parse(e || "{}"),
+  values: (() => {
+    const prev = JSON.parse(e || "{}");
+    return {
+      ...prev,
+    };
+  })(),
   client,
 });

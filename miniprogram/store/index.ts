@@ -1,26 +1,47 @@
-import { fetchInfo, fetchNotifications, fetchNotificationsProcess } from "@/services/index";
+import { fetchNotifications, fetchNotificationsProcess } from "@/services/index";
 import { Application } from "@/domains/app/index";
-import { ListCoreV2 } from "@/domains/list/v2";
+import { ListCore } from "@/domains/list";
 import { NavigatorCore } from "@/domains/navigator/index";
 import { RouteViewCore } from "@/domains/route_view/index";
 import { HistoryCore } from "@/domains/history/index";
-import { RequestCoreV2 } from "@/domains/request/v2";
-import { ListCore } from "@/domains/list/index";
-import { ImageCore } from "@/domains/ui/index";
+import { RequestCore, onCreate } from "@/domains/request";
+import { onCreateGetPayload, onCreatePostPayload } from "@/domains/request/utils";
+import { ImageCore } from "@/domains/ui/image";
 import { Result } from "@/types/index";
+import { wxResultify } from "@/utils/index";
 
 import { client } from "./request";
-import { storage } from "./storage";
 import { user } from "./user";
+import { storage } from "./storage";
 import { PageKeys, RouteConfig, routes } from "./routes";
 
-const window = {
-  location: {
-    origin: "https://media.funzm.com",
-  },
-};
-NavigatorCore.prefix = "";
-ImageCore.setPrefix(window.location.origin);
+NavigatorCore.prefix = "/";
+ImageCore.setPrefix("https://media.funzm.com");
+
+function media_response_format<T>(r: Result<{ code: number | string; msg: string; data: T }>) {
+  if (r.error) {
+    return Result.Err(r.error.message);
+  }
+  const { code, msg, data } = r.data;
+  if (code !== 0) {
+    return Result.Err(msg, code, data);
+  }
+  return Result.Ok(data);
+}
+onCreatePostPayload((payload) => {
+  payload.process = media_response_format;
+});
+onCreateGetPayload((payload) => {
+  payload.process = media_response_format;
+});
+onCreate((ins) => {
+  ins.onFailed((e) => {
+    app.tip({
+      text: [e.message],
+    });
+  });
+});
+
 const router = new NavigatorCore();
 const view = new RouteViewCore({
   name: "root" as PageKeys,
@@ -30,6 +51,7 @@ const view = new RouteViewCore({
   parent: null,
   views: [],
 });
+view.isRoot = true;
 export const history = new HistoryCore<PageKeys, RouteConfig>({
   view,
   router,
@@ -40,24 +62,45 @@ export const history = new HistoryCore<PageKeys, RouteConfig>({
 });
 export const app = new Application({
   user,
+  storage,
   async beforeReady() {
+    const r1 = await wxResultify(wx.login)();
+    if (r1.error) {
+      app.tip({
+        text: ["登录失败，请退出小程序重试"],
+      });
+      return Result.Err(r1.error.message);
+    }
+    const { code } = r1.data;
+    const r2 = await user.loginWithWeappCode({ code });
+    if (r2.error) {
+      app.tip({
+        text: ["登录失败，请退出小程序重试"],
+      });
+      return Result.Err(r2.error.message);
+    }
+    client.appendHeaders({
+      Authorization: r2.data.token,
+    });
     return Result.Ok(null);
   },
 });
-
 user.onLogin((profile) => {
+  client.appendHeaders({
+    Authorization: user.token,
+  });
   storage.set("user", profile);
 });
 user.onLogout(() => {
   storage.clear("user");
-  // router.push("/login");
+  history.push("root.login");
 });
 user.onExpired(() => {
   storage.clear("user");
   app.tip({
     text: ["token 已过期，请重新登录"],
   });
-  // router.replace("/login");
+  history.push("root.login");
 });
 user.onTip((msg) => {
   app.tip(msg);
@@ -66,9 +109,8 @@ user.onNeedUpdate(() => {
   app.tipUpdate();
 });
 
-export const messageList = new ListCoreV2(
-  new RequestCoreV2({
-    fetch: fetchNotifications,
+export const messageList = new ListCore(
+  new RequestCore(fetchNotifications, {
     process: fetchNotificationsProcess,
     client: client,
   }),
@@ -78,12 +120,8 @@ export const messageList = new ListCoreV2(
     },
   }
 );
-export const infoRequest = new RequestCoreV2({
-  fetch: fetchInfo,
-  client: client,
-});
 
-ListCore.commonProcessor = ListCoreV2.commonProcessor = <T>(
+ListCore.commonProcessor = <T>(
   originalResponse: any
 ): {
   dataSource: T[];
