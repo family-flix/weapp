@@ -1,4 +1,6 @@
 {
   "component": true,
-  "usingComponents": {}
+  "usingComponents": {
+    "presence": "/components/ui/presence/index"
+  }
 }

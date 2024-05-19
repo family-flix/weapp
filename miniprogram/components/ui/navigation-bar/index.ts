@@ -10,7 +10,7 @@ Component({
     multipleSlots: true,
   },
   properties: {
-    _store: {
+    store: {
       type: Object,
     },
     style: {
@@ -23,8 +23,8 @@ Component({
     },
   },
   data: {
-    paddingTop: app.screen.statusBarHeight || 0,
-    paddingRight: app.screen.menuButton?.width || 0,
+    paddingTop: app.screen.statusBarHeight || 34,
+    paddingRight: app.screen.menuButton?.width || 87,
     height: 34,
   },
   lifetimes: {
@@ -34,9 +34,9 @@ Component({
         paddingTop: app.screen.statusBarHeight || 0,
         paddingRight: (() => {
           if (!app.screen.menuButton) {
-            return 0;
+            return 87;
           }
-          return app.screen.width - app.screen.menuButton.left;
+          return app.screen.menuButton.width;
         })(),
       });
     },

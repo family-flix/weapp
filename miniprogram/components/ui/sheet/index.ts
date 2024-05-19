@@ -6,14 +6,18 @@ const defaultOverlayClassName = "fixed inset-0 z-50 bg-black--50 opacity-0 backd
 const defaultContentClassName =
   "fixed z-50 scale-100 opacity-100 grid w-full max-w-lg gap-4 shadow-lg duration-200 rounded-tl-xl rounded-tr-xl bg-w-bg-2 text-w-fg-0 border-w-bg-2";
 
-const sheetVariants = cva("fixed z-50 scale-100 gap-4 rounded-tl-xl rounded-tr-xl bg-w-bg-2 text-w-fg-0 opacity-100", {
+const sheetVariants = cva("fixed z-50 scale-100 gap-4 bg-w-bg-2 text-w-fg-0 opacity-100", {
   variants: {
     position: {
-      top: "animate-in slide-in-from-top w-full duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top",
-      bottom:
-        "animate-in slide-in-from-bottom w-full duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom",
-      left: "animate-in slide-in-from-left h-full duration-300",
-      right: "animate-in slide-in-from-right h-full duration-300",
+      top: "w-full duration-300",
+      bottom: "w-full duration-300",
+      left: "h-full duration-300",
+      right: "h-full duration-300",
+      // top: "animate-in slide-in-from-top w-full duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top",
+      // bottom:
+      //   "animate-in slide-in-from-bottom w-full duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom",
+      // left: "animate-in slide-in-from-left h-full duration-300",
+      // right: "animate-in slide-in-from-right h-full duration-300",
     },
     size: {
       content: "",
@@ -33,26 +37,22 @@ const sheetVariants = cva("fixed z-50 scale-100 gap-4 rounded-tl-xl rounded-tr-x
     {
       position: ["top", "bottom"],
       size: "default",
-      // class: "h-1/3",
-      class: "",
+      class: "h-1/3",
     },
     {
       position: ["top", "bottom"],
       size: "sm",
-      // class: "h-1/4",
-      class: "",
+      class: "h-1/4",
     },
     {
       position: ["top", "bottom"],
       size: "lg",
-      // class: "h-1/2",
-      class: "",
+      class: "h-1/2",
     },
     {
       position: ["top", "bottom"],
       size: "xl",
-      // class: "h-5/6",
-      class: "",
+      class: "h-5/6",
     },
     {
       position: ["top", "bottom"],
@@ -91,8 +91,8 @@ const sheetVariants = cva("fixed z-50 scale-100 gap-4 rounded-tl-xl rounded-tr-x
     },
   ],
   defaultVariants: {
-    position: "right",
-    size: "default",
+    position: "bottom",
+    size: "lg",
   },
 });
 const portalVariants = cva("fixed inset-0 z-50 flex", {
@@ -117,24 +117,53 @@ Component({
   properties: {
     _store: {
       type: null,
-      observer(store: DialogCore) {
+      observer(store: ReturnType<typeof DialogCore>) {
+        if (!store) {
+          return;
+        }
         if (this.mounted) {
           return;
         }
-        const { position, size, _store } = this.data;
+        const { position, size } = this.data;
         this.mounted = true;
-        const { title, footer, showCancel } = store;
-        const contentClassName = sheetVariants({ position, size });
+        const { title, footer, cancel } = store.state;
+        console.log("position, size", this.data);
+        // const contentClassName = sheetVariants({ position, size });
         this.setData({
           title,
           footer,
-          cancel: showCancel,
-          contentClassName,
+          cancel,
+          // contentClassName,
+        });
+        store.$present.onStateChange((v) => {
+          const { enter, exit } = v;
+          // const overlayAnimationClassName = (() => {
+          //   if (enter) {
+          //     return `animate-in fade-in`;
+          //   }
+          //   if (exit) {
+          //     return ` animate-out fade-out-0`;
+          //   }
+          //   return "";
+          // })();
+          // const contentClassName = "";
+          // const contentAnimationClassName = (() => {
+          //   if (enter) {
+          //     return `animate-in slide-in-from-bottom`;
+          //   }
+          //   if (exit) {
+          //     return `animate-out slide-out-to-bottom`;
+          //   }
+          //   return "";
+          // })();
+          // this.setData({
+          //   overlayClassName: overlayAnimationClassName,
+          //   contentClassName: contentAnimationClassName,
+          // });
         });
         store.onStateChange((nextState) => {
           const { title, footer, cancel, open } = nextState;
           const overlayAnimationClassName = open ? `animate-in fade-in` : ` animate-out fade-out-0`;
-          const contentClassName = "";
           const contentAnimationClassName = open
             ? `animate-in slide-in-from-bottom`
             : `animate-out slide-out-to-bottom`;
@@ -142,28 +171,34 @@ Component({
             title,
             footer,
             cancel,
-            overlayClassName: [defaultOverlayClassName, overlayAnimationClassName].join(" "),
-            contentClassName: [defaultContentClassName, contentClassName, contentAnimationClassName].join(" "),
+            overlayClassName: overlayAnimationClassName,
+            contentClassName: contentAnimationClassName,
           });
         });
       },
     },
     size: {
       type: String,
+      // value: 'lg',
     },
     position: {
       type: String,
+      // value: 'bottom',
+    },
+    hideTitle: {
+      type: Boolean,
+      value: false,
     },
   },
   data: {
     title: "",
-    overlayClassName: defaultOverlayClassName,
-    contentClassName: defaultContentClassName,
+    // overlayClassName: defaultOverlayClassName,
+    // contentClassName: defaultContentClassName,
   },
   lifetimes: {
     attached() {
       const { position, size, _store } = this.data;
-      const store = _store as DialogCore;
+      const store = _store as ReturnType<typeof DialogCore>;
       // console.log("[COMPONENT]ui/dialog - attached", store);
       if (!store) {
         return;

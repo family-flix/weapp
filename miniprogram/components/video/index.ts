@@ -4,7 +4,7 @@ import { connect } from "@/domains/player/connect.weapp";
 Component({
   externalClasses: ["class-name"],
   options: {
-    // pureDataPattern: /^_/,
+    pureDataPattern: /^_/,
     virtualHost: true,
     styleIsolation: "apply-shared",
   },
@@ -23,44 +23,49 @@ Component({
     ready() {
       // const query = this.createSelectorQuery();
       // const videoContext = query.select("#video");
-      const videoContext = wx.createVideoContext("video", this);
-      const store = this.data._store;
-      // console.log("[COMPONENT]Video - before store.onUrlChange", videoContext, store);
-      this.triggerEvent("load", {
-        context: videoContext,
-      });
-      // const store = this.data.store as PlayerCore;
-      connect(videoContext, store);
+      const context = wx.createVideoContext("video", this);
+      const store: ReturnType<typeof PlayerCore> = this.data._store;
+      console.log("[COMPONENT]video - ready", context, this.data);
       store.onUrlChange(({ url }) => {
-        // console.log("url change", url);
+        // mediaSource.url =
+        //   "http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400";
         this.setData({
           url,
         });
+      });
+      this.triggerEvent("load", {
+        context,
       });
     },
   },
   methods: {
     handleTimeupdate(event) {
       const { currentTime, duration } = event.detail;
-      const store = this.data._store as PlayerCore;
-      if (!store) {
-        return;
-      }
-      store.handleTimeUpdate({ currentTime, duration });
+      this.triggerEvent("progress", {
+        currentTime,
+        duration,
+      });
+      // const store: ReturnType<typeof PlayerCore> = this.data._store;
+      // if (!store) {
+      //   return;
+      // }
+      // store.handleTimeUpdate({ currentTime, duration });
     },
     handleLoadedmetadata() {
-      const store = this.data._store as PlayerCore;
-      // wx.showToast({
-      //   title: 'handleLoadedmetadata',
-      // });
-      store.handleCanPlay();
+      // const store: ReturnType<typeof PlayerCore> = this.data._store;
+      // if (!store) {
+      //   return;
+      // }
+      // store.handleCanPlay();
+      this.triggerEvent("canplay", {});
     },
-    handleError(event) {
-      console.log("video has error", event);
-      wx.showToast({
-        icon: "none",
-        title: event.detail.errMsg,
-      });
+    handleError(event: { detail: { errMsg: string } }) {
+      // const store: ReturnType<typeof PlayerCore> = this.data._store;
+      // if (!store) {
+      //   return;
+      // }
+      // store.handleError(event.detail.errMsg);
+      this.triggerEvent("error", { msg: event.detail.errMsg });
     },
   },
 });

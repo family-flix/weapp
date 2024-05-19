@@ -45,7 +45,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
   debug = true;
 
   popper: PopperCore;
-  presence: PresenceCore;
+  presence: ReturnType<typeof PresenceCore>;
   layer: DismissableLayerCore;
 
   openTimer: number | null = null;
@@ -73,7 +73,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       strategy,
       _name: name ? `${name}-popper` : "MenuCore",
     });
-    this.presence = new PresenceCore();
+    this.presence = PresenceCore();
     this.layer = new DismissableLayerCore();
 
     this.popper.onEnter(() => {

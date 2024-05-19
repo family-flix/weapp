@@ -9,51 +9,9 @@
     "miniprogram": {
       "list": [
         {
-          "name": "电视剧详情播放页面",
-          "pathName": "pages/tv_play/index",
-          "query": "id=5XsS4EbKJ8WXLfS",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "搜索页面",
-          "pathName": "pages/search/index",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "有字幕的电视剧详情",
-          "pathName": "pages/tv_play/index",
-          "query": "tv_id=YpOS390ksts1mKu&season_id=TyWN5I0W2dyMISV",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "电视剧详情",
-          "pathName": "pages/tv_play/index",
-          "query": "tv_id=ftqHIolN0IVNgpJ&season_id=U1LZdJ8yLu4AHj7",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
           "name": "播放电视剧",
           "pathName": "pages/tv_play/index",
-          "query": "tv_id=UcMCTViDjOWuJld&season_id=I0A7vLdqGEXET4g",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "电视剧详情",
-          "pathName": "pages/tv_play/index",
-          "query": "tv_id=RPes4sgvgfA7qPV&season_id=8NtvC0GMZ2qSbR1",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "季列表",
-          "pathName": "pages/season/index",
-          "query": "",
+          "query": "id=NsTN9ZZAdqWLsQp&type=1",
           "launchMode": "default",
           "scene": null
         }

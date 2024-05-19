@@ -3,7 +3,7 @@
  */
 
 import { BaseDomain, Handler } from "@/domains/base";
-import { UserCore } from "@/domains/user";
+import { UserCore } from "@/domains/user/index";
 import { StorageCore } from "@/domains/storage/index";
 import { JSONObject, Result } from "@/types/index";
 
@@ -91,7 +91,7 @@ type ApplicationState = {
 };
 type ApplicationProps<T extends { storage: StorageCore<any> }> = {
   user: UserCore;
-  storage: T['storage'];
+  storage: T["storage"];
   // history: HistoryCore;
   /**
    * 应用加载前的声明周期，只有返回 Result.Ok() 页面才会展示内容
@@ -103,7 +103,7 @@ type ApplicationProps<T extends { storage: StorageCore<any> }> = {
 export class Application<T extends { storage: StorageCore<any> }> extends BaseDomain<TheTypesOfEvents> {
   /** 用户 */
   $user: UserCore;
-  $storage: T['storage'];
+  $storage: T["storage"];
 
   lifetimes: Pick<ApplicationProps<T>, "beforeReady" | "onReady">;
 
@@ -139,6 +139,7 @@ export class Application<T extends { storage: StorageCore<any> }> extends BaseDo
   orientation = OrientationTypes.Vertical;
   curDeviceSize: DeviceSizeTypes = "md";
   theme: ThemeTypes = "system";
+  hostname: string = "";
 
   safeArea = false;
   Events = Events;
@@ -170,10 +171,8 @@ export class Application<T extends { storage: StorageCore<any> }> extends BaseDo
   /** 启动应用 */
   async start(size: { width: number; height: number }) {
     const { width, height } = size;
-    if (this.screen.width === 0) {
-      this.screen = { ...this.screen, width, height };
-    }
-    this.screen = { width, height };
+    this.screen = { ...this.screen, width, height };
+    // this.screen = { width, height };
     this.curDeviceSize = getCurrentDeviceSize(width);
     // console.log('[Application]start');
     const { beforeReady } = this.lifetimes;
@@ -307,6 +306,10 @@ export class Application<T extends { storage: StorageCore<any> }> extends BaseDo
    * ----------------
    */
   onReady(handler: Handler<TheTypesOfEvents[Events.Ready]>) {
+    if (this.ready) {
+      handler();
+      return;
+    }
     return this.on(Events.Ready, handler);
   }
   onDeviceSizeChange(handler: Handler<TheTypesOfEvents[Events.DeviceSizeChange]>) {

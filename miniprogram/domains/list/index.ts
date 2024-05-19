@@ -2,7 +2,7 @@
  * @file 分页领域
  */
 import { BaseDomain, Handler } from "@/domains/base";
-import { RequestCore } from "@/domains/request";
+import { RequestCore } from "@/domains/request/index";
 import { RequestPayload } from "@/domains/request/utils";
 import { debounce } from "@/utils/lodash/debounce";
 import { Result } from "@/types/index";

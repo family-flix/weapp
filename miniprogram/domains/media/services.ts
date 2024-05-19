@@ -1,12 +1,13 @@
 import dayjs from "dayjs";
 
+import { ListResponse, ListResponseWithCursor } from "@/store/types";
 import { request, TmpRequestResp } from "@/domains/request/utils";
 import { FetchParams } from "@/domains/list/typing";
 import { SubtitleFileResp } from "@/domains/subtitle/types";
 import { MediaResolutionTypes, MediaResolutionTypeTexts } from "@/domains/source/constants";
-import { ListResponse, ListResponseWithCursor, RequestedResource, Result, Unpacked, UnpackedResult } from "@/types";
-import { MediaTypes, MediaOriginCountry, SeasonGenresTexts, SeasonMediaOriginCountryTexts } from "@/constants";
-import { episode_to_chinese_num, minute_to_hour2, relative_time_from_now } from "@/utils";
+import { RequestedResource, Result, UnpackedResult } from "@/types/index";
+import { MediaTypes, MediaOriginCountry, SeasonGenresTexts, SeasonMediaOriginCountryTexts } from "@/constants/index";
+import { episode_to_chinese_num, minute_to_hour2, relative_time_from_now } from "@/utils/index";
 
 /**
  * 获取季列表
@@ -188,6 +189,7 @@ export function fetchMediaPlayingEpisodeProcess(r: TmpRequestResp<typeof fetchMe
     vote_average,
     source_groups,
   } = r.data;
+  console.log('media playing', cur_source);
   const episodes = sources.map(normalizeEpisode);
   const sourceGroups = (() => {
     return source_groups.map((group) => {
@@ -420,6 +422,7 @@ export function updatePlayHistory(body: {
   source_id: string;
 }) {
   const { media_id, media_source_id, current_time, duration, source_id } = body;
+  console.log('before update history', current_time);
   return request.post<null>("/api/v2/wechat/history/update", {
     media_id,
     media_source_id,

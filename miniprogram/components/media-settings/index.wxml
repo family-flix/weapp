@@ -1,0 +1,212 @@
+<view class="overflow-hidden h-full bg-w-bg-2">
+    <view class="flex h-full transition-transform duration-500 ease-in-out" store="{{$com.ui.wrap}}" style="{{ style }}">
+        <view class="panel__home w-full flex-shrink-0">
+            <view class="space-x-2 px-4">
+                <view class="flex items-center mt-2 h-12">
+                    <view class="text-xl">设置</view>
+                </view>
+            </view>
+            <view class="bg-w-bg-1" style="height: 1px;" />
+            <view class="mt-2">
+                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Resolution}}" bind:tap="handleClickMenu">
+                    <view>分辨率</view>
+                    <view class="flex items-center text-w-fg-1">
+                        <block wx:if="{{!!curSource.typeText}}">
+                            <view class="px-2">{{curSource.typeText}}</view>
+                        </block>
+                    </view>
+                </view>
+                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.SourceFile}}" bind:tap="handleClickMenu">
+                    <view>视频源</view>
+                    <view class=" text-w-fg-1"></view>
+                </view>
+                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Subtitle}}" bind:tap="handleClickMenu">
+                    <view>字幕列表</view>
+                    <view class="flex items-center">
+                        <view class="px-4" catch:tap="handleClickSubtitleBtn">
+                            <block wx:if="{{subtitle === null}}">
+                                <view class="text-w-fg-2">暂无字幕</view>
+                            </block>
+                            <block wx:if="{{subtitle.visible}}">禁用</block>
+                            <block wx:else>启用</block>
+                        </view>
+                        <view class="{{subtitle === null ? 'text-w-fg-2' : 'text-w-fg-1'}}"></view>
+                    </view>
+                </view>
+                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Rate}}" bind:tap="handleClickRateMenu">
+                    <view>播放倍率</view>
+                    <view class="flex items-center space-x-2 text-w-fg-1">
+                        <view class="px-2">{{playerState.rate}}x</view>
+                    </view>
+                </view>
+                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Share}}" bind:tap="handleClickMenu">
+                    <view>分享</view>
+                    <view class="flex items-center space-x-2 text-w-fg-1"></view>
+                </view>
+                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Report}}" bind:tap="handleClickMenu">
+                    <view>反馈问题</view>
+                    <view class="flex items-center space-x-2 text-w-fg-1"></view>
+                </view>
+            </view>
+        </view>
+        <view class="panel__second relative w-full h-full flex-shrink-0">
+            <view class="flex items-center justify-between mt-2 h-12 px-4 bg-w-bg-2">
+                <view class="flex items-center space-x-1" bind:tap="handleClickBack">
+                    <view class="mr-1">返回</view>
+                    <view class="flex items-center space-x-2 text-lg">
+                        <view class="text-w-fg-2">设置</view>
+                        <view>/</view>
+                        <view>
+                            <block wx:if="{{curMenu}}">{{curMenu.title}}</block>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            <view class="bg-w-bg-1" style="height: 1px;" />
+            <view class="absolute top-16 bottom-0 left-0 w-full h-auto">
+                <block wx:if="{{menuIndex === MediaSettingsMenuKey.Resolution}}">
+                    <view>
+                        <block wx:if="{{!curSource || !curSource.resolutions.length}}">
+                            <view class="flex items-center justify-center p-12">
+                                <view class="flex flex-col items-center">
+                                    <Bird class="w-24 h-24" />
+                                    <view class="mt-2 text-center">暂无可切换的分辨率</view>
+                                </view>
+                            </view>
+                        </block>
+                        <block wx:else>
+                            <view class="max-h-full text-w-fg-1 px-4 overflow-y-auto">
+                                <view class="pb-24">
+                                    <block wx:for="{{curSource.resolutions}}" wx:for-item="r" wx:key="typeText">
+                                        <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{curSource.typeText === r.typeText ? 'bg-w-bg-active' : ''}}" bind:tap="handleClickType">
+                                            <view>{{r.typeText}}</view>
+                                        </view>
+                                    </block>
+                                </view>
+                            </view>
+                        </block>
+                    </view>
+                </block>
+                <block wx:if="{{menuIndex === MediaSettingsMenuKey.SourceFile}}">
+                    <view>
+                        <block wx:if="{{state === null}}">
+                            <view class="flex items-center justify-center p-12">
+                                <view class="flex flex-col items-center">
+                                    <Loader class="w-24 h-24 animate animate-spin" />
+                                    <view class="mt-2 text-center">Loading</view>
+                                </view>
+                            </view>
+                        </block>
+                        <block wx:if="{{!state.curSource}}">
+                            <view class="flex items-center justify-center p-12">
+                                <view class="flex flex-col items-center">
+                                    <Bird class="w-24 h-24" />
+                                    <view class="mt-2 text-center">没有可切换的视频源</view>
+                                </view>
+                            </view>
+                        </block>
+                        <block wx:else>
+                            <view class="max-h-full overflow-y-auto px-4 text-w-fg-1">
+                                <view class="pb-24">
+                                    <block wx:for="{{state.curSource.files}}" wx:for-item="s" wx:key="id">
+                                        <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{state.curSource.id === s.id ? 'bg-w-bg-active' : ''}}" bind:tap="handleClickSourceFile">
+                                            <view class="break-all">{{s.name}}</view>
+                                        </view>
+                                    </block>
+                                </view>
+                            </view>
+                        </block>
+                    </view>
+                </block>
+                <block wx:if="{{menuIndex === MediaSettingsMenuKey.Rate}}">
+                    <view class="max-h-full overflow-y-auto px-4 text-w-fg-1">
+                        <view class="pb-24">
+                            <block wx:for="{{MediaRates}}" wx:for-item="rateOpt" wx:key="self">
+                                <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{rate === rateOpt ? 'bg-w-bg-active' : ''}}" bind:tap="handleClickRate">
+                                    <view class="break-all">{{rateOpt}}x</view>
+                                </view>
+                            </block>
+                        </view>
+                    </view>
+                </block>
+                <block wx:if="{{menuIndex === MediaSettingsMenuKey.Subtitle}}">
+                    <view>
+                        <view class="max-h-full overflow-y-auto px-4 text-w-fg-1">
+                            <view class="pb-24">
+                                <block wx:for="{{subtitles}}" wx:for-item="sub" wx:key="url">
+                                    <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{sub.url === subtitle.url ? 'bg-w-bg-active' : ''}}" bind:tap="handleClickSubtitle">
+                                        <view class="w-full break-all truncate">
+                                            {{sub.language.join("&")}}
+                                        </view>
+                                    </view>
+                                </block>
+                            </view>
+                        </view>
+                    </view>
+                </block>
+                <block wx:if="{{menuIndex === MediaSettingsMenuKey.Share}}">
+                    <view>
+                        <view class="max-h-full overflow-y-auto text-w-fg-1">
+                            <view class="pb-24">
+                                <view wrapclass="flex-1 overflow-y-auto" class="max-h-full flex flex-col h-full" store="{{$com.inviteeSelect.$list}}">
+                                    <view class="space-y-4 flex-1 overflow-y-auto">
+                                        <block wx:for="{{member.dataSource}}" wx:for-item="member" wx:key="id">
+                                            <view class="flex items-center justify-between space-x-2 p-4 rounded-md cursor-pointer" bind:tap="handleClickMember">
+                                                <view class="flex items-center justify-between bg-slate-300 rounded-full">
+                                                    <view class="w-8 h-8 text-xl text-center text-slate-500">
+                                                        {{member.remark.slice(0, 1).toUpperCase()}}
+                                                    </view>
+                                                </view>
+                                                <view class="flex-1 w-0">
+                                                    <h2 class="">{{member.remark}}</h2>
+                                                </view>
+                                            </view>
+                                        </block>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                </block>
+                <block wx:if="{{menuIndex === MediaSettingsMenuKey.Report}}">
+                    <view>
+                        <view class="max-h-full overflow-y-auto px-4 text-w-fg-1">
+                            <view class="pb-24">
+                                <block wx:for="{{SeasonReportList}}" wx:for-item="question" wx:key="self">
+                                    <view class="flex items-center justify-between p-4 rounded-md cursor-pointer" bind:tap="handleClickQuestion">
+                                        <view>{{question}}</view>
+                                    </view>
+                                </block>
+                            </view>
+                        </view>
+                    </view>
+                </block>
+            </view>
+        </view>
+    </view>
+</view>
+<dialog store="{{$com.ui.shareDialog}}">
+    <view class="relative w-full h-[160px]" bind:tap="handleCopyShareText">
+        <block wx:if="{{!shareLink}}">
+            <view class="flex items-center justify-center h-full">
+                <Loader2 class="w-12 h-12 animate animate-spin" />
+            </view>
+        </block>
+        <block wx:else>
+            <view class="text-center">
+                <view>点击复制该信息至粘贴板</view>
+                <view class="mt-4 rounded-md p-4 bg-w-bg-2">
+                    <view class="text-left break-all whitespace-normal text-w-fg-1">
+                        {{shareLink}}
+                    </view>
+                </view>
+            </view>
+        </block>
+    </view>
+</dialog>
+<dialog store="{{$com.ui.reportConfirmDialog}}">
+    <view class="text-w-fg-1">
+        <view>提交你发现的该电视剧的问题</view>
+        <view class="mt-2 text-xl">「{{curReportValue}}」</view>
+    </view>
+</dialog>

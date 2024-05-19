@@ -1,10 +1,10 @@
 {
   "usingComponents": {
-    "f-video": "/components/video",
-    "navigation-bar": "/components/ui/navigation-bar",
+    "bar": "/components/ui/navigation-bar",
     "tabs": "/components/ui/tabs",
     "input": "/components/ui/input",
     "icon": "/components/ui/icon",
-    "calendar": "/components/ui/calendar"
+    "calendar": "/components/ui/calendar",
+    "lazy-image": "/components/ui/image"
   }
 }

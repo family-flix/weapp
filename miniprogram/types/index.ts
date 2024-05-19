@@ -1,4 +1,4 @@
-import { BizError } from "@/domains/error";
+import { BizError } from "@/domains/error/index";
 
 export type Resp<T> = {
   data: T extends null ? null : T;
@@ -50,26 +50,6 @@ export type Unpacked<T> = T extends (infer U)[]
   : T extends Result<infer U>
   ? U
   : T;
-
-export type BaseApiResp<T> = {
-  code: number;
-  msg: string;
-  data: T;
-};
-
-export type ListResponse<T> = {
-  total: number;
-  page: number;
-  page_size: number;
-  no_more: boolean;
-  list: T[];
-};
-export type ListResponseWithCursor<T> = {
-  page_size: number;
-  total: number;
-  next_marker?: string;
-  list: T[];
-};
 
 export type RequestedResource<T extends (...args: any[]) => any> = UnpackedResult<Unpacked<ReturnType<T>>>;
 export type Shift<T extends any[]> = ((...args: T) => void) extends (arg1: any, ...rest: infer R) => void ? R : never;

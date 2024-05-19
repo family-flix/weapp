@@ -23,7 +23,7 @@ type CheckboxState = CheckboxProps & {
 };
 
 export class CheckboxCore extends BaseDomain<TheTypesOfEvents> {
-  presence: PresenceCore;
+  presence: ReturnType<typeof PresenceCore>;
 
   label: string;
   disabled: CheckboxProps["disabled"];
@@ -47,7 +47,7 @@ export class CheckboxCore extends BaseDomain<TheTypesOfEvents> {
     this.disabled = disabled;
     this.checked = checked;
 
-    this.presence = new PresenceCore();
+    this.presence = PresenceCore();
     if (onChange) {
       this.onChange(onChange);
     }

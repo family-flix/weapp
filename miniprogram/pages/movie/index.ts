@@ -46,7 +46,7 @@ const movieList = new ListCore(
 //     menu.disable();
 //   },
 // });
-const settingsSheet = new DialogCore();
+const settingsSheet = DialogCore();
 const searchInput = new InputCore({
   placeholder: "请输入关键字搜索电视剧",
   onEnter(v) {
@@ -134,7 +134,7 @@ const btn = new ButtonCore({
     });
   },
 });
-const dialog = new DialogCore({
+const dialog = DialogCore({
   onOk() {
     wx.showToast({
       title: "确认",

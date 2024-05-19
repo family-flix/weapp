@@ -2,7 +2,7 @@
  * @file 根据路由判断是否可见的视图块
  */
 import { BaseDomain, Handler } from "@/domains/base";
-import { PresenceCore } from "@/domains/ui/presence";
+import { PresenceCore } from "@/domains/ui/presence/index";
 import { NavigatorCore } from "@/domains/navigator/index";
 import { query_stringify } from "@/utils/index";
 
@@ -70,8 +70,8 @@ type RouteViewCoreProps = {
   pathname: string;
   title: string;
   // component: unknown;
-  parent: RouteViewCore | null;
-  query?: Record<string, string>;
+  parent?: RouteViewCore | null;
+  query?: Record<string, string | undefined>;
   visible?: boolean;
   /** 该视图是布局视图 */
   layout?: boolean;
@@ -92,9 +92,10 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
   debug = false;
   id = this.uid();
 
-  /** 一些配置项 */
+  /** PageKey */
   name: string;
   pathname: string;
+  /** 页面标题 */
   title: string;
   animation: Partial<{
     in: string;
@@ -103,7 +104,7 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
     hide: string;
   }> = {};
   /** 当前视图的 query */
-  query: Record<string, string> = {};
+  query: Record<string, string | undefined> = {};
   /** 当前视图的 params */
   params: Record<string, string> = {};
   // visible = false;
@@ -119,7 +120,7 @@ export class RouteViewCore extends BaseDomain<TheTypesOfEvents> {
   /** 当前所有的子视图 */
   subViews: RouteViewCore[] = [];
 
-  $presence = new PresenceCore();
+  $presence = PresenceCore();
 
   get state(): RouteViewCoreState {
     return {

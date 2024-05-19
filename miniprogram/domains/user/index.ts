@@ -1,3 +1,4 @@
+import { fetchInfo } from "@/services/index";
 import { BaseDomain, Handler } from "@/domains/base";
 import { RequestCore } from "@/domains/request/index";
 import { HttpClientCore } from "@/domains/http_client/index";
@@ -14,7 +15,6 @@ import {
   loginWithTokenId,
   loginWithWeappCode,
 } from "./services";
-import { fetchInfo } from "@/services";
 
 export enum Events {
   Tip,

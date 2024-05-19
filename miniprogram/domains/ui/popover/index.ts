@@ -24,7 +24,7 @@ type TheTypesOfEvents = {
 
 export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
   popper: PopperCore;
-  present: PresenceCore;
+  present: ReturnType<typeof PresenceCore>;
   layer: DismissableLayerCore;
 
   _side: Side;
@@ -41,7 +41,7 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
       side,
       align,
     });
-    this.present = new PresenceCore();
+    this.present = PresenceCore();
     this.layer = new DismissableLayerCore();
     this.layer.onDismiss(() => {
       this.hide();

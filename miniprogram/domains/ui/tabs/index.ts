@@ -40,7 +40,7 @@ export class TabsCore extends BaseDomain<TheTypesOfEvents> {
     super(options);
 
     this.roving = new RovingFocusCore();
-    this.presence = new PresenceCore();
+    this.presence = PresenceCore();
   }
 
   selectTab(value: string) {

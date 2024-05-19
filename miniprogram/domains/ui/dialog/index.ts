@@ -1,12 +1,12 @@
 /**
  * @file 弹窗核心类
  */
-import { Handler } from "mitt";
+import mitt, { Handler } from "mitt";
 
 import { BaseDomain } from "@/domains/base";
 import { PresenceCore } from "@/domains/ui/presence/index";
 import { ButtonCore } from "@/domains/ui/button/index";
-import { sleep } from "@/utils/index";
+import { proxy, snapshot, subscribe } from "@/utils/valtio/index";
 
 enum Events {
   BeforeShow,
@@ -49,114 +49,140 @@ export type DialogProps = {
   onUnmounted?: () => void;
 };
 
-export class DialogCore extends BaseDomain<TheTypesOfEvents> {
-  open = false;
-  title: string = "";
-  footer: boolean = true;
-  showCancel: boolean = true;
+export function DialogCore(props: DialogProps = {}) {
+  const { title = "", footer = true, cancel = true, onOk, onCancel, onUnmounted } = props;
 
-  present = new PresenceCore({ _name: "in_dialog" });
-  okBtn = new ButtonCore();
-  cancelBtn = new ButtonCore();
+  const event = mitt<TheTypesOfEvents>();
+  const state = proxy({
+    open: false,
+    title,
+    footer,
+    cancel,
+  });
 
-  get state(): DialogState {
-    return {
-      open: this.open,
-      title: this.title,
-      footer: this.footer,
-      cancel: this.showCancel,
-    };
-  }
+  subscribe(state, () => {
+    event.emit(Events.StateChange, snapshot(state));
+  });
 
-  constructor(options: Partial<{ _name: string }> & DialogProps = {}) {
-    super(options);
+  const $present = PresenceCore();
+  const okBtn = new ButtonCore();
+  const cancelBtn = new ButtonCore();
 
-    const { title, footer = true, cancel = true, onOk, onCancel, onUnmounted } = options;
-    if (title) {
-      this.title = title;
-    }
-    this.footer = footer;
-    this.showCancel = cancel;
-    if (onOk) {
-      this.onOk(onOk);
-    }
-    if (onCancel) {
-      this.onCancel(onCancel);
-    }
-    if (onUnmounted) {
-      this.onUnmounted(onUnmounted);
-    }
-    this.present.onShow(async () => {
-      this.open = true;
-      this.emit(Events.VisibleChange, true);
-      this.emit(Events.StateChange, { ...this.state });
-    });
-    this.present.onHidden(async () => {
-      this.open = false;
-      this.emit(Events.Cancel);
-      this.emit(Events.VisibleChange, false);
-      this.emit(Events.StateChange, { ...this.state });
-    });
-    this.present.onUnmounted(() => {
-      this.emit(Events.Unmounted);
-    });
-    this.okBtn.onClick(() => {
-      this.ok();
-    });
-    this.cancelBtn.onClick(() => {
-      this.hide();
-    });
-  }
-  /** 显示弹窗 */
-  show = () => {
-    if (this.open) {
-      return;
-    }
-    // this.emit(Events.BeforeShow);
-    this.present.show();
-  };
-  /** 隐藏弹窗 */
-  hide = () => {
-    if (this.open === false) {
-      return;
-    }
-    // this.emit(Events.Cancel);
-    this.present.hide();
-  };
-  ok = () => {
-    this.emit(Events.OK);
-  };
-  cancel = () => {
-    this.emit(Events.Cancel);
-  };
-  setTitle = (title: string) => {
-    this.title = title;
-    this.emit(Events.StateChange, { ...this.state });
-  };
+  // if (title) {
+  //   this.title = title;
+  // }
+  // this.footer = footer;
+  // this.showCancel = cancel;
+  // if (onOk) {
+  //   event.onOk(onOk);
+  // }
+  // if (onCancel) {
+  //   event.onCancel(onCancel);
+  // }
+  // if (onUnmounted) {
+  //   event.onUnmounted(onUnmounted);
+  // }
+  $present.onShow(async () => {
+    state.open = true;
+    event.emit(Events.VisibleChange, true);
+    // event.emit(Events.StateChange, { ...this.state });
+  });
+  $present.onHidden(async () => {
+    state.open = false;
+    event.emit(Events.Cancel);
+    event.emit(Events.VisibleChange, false);
+    // event.emit(Events.StateChange, { ...this.state });
+  });
+  $present.onUnmounted(() => {
+    event.emit(Events.Unmounted);
+  });
+  okBtn.onClick(() => {
+    // this.ok();
+  });
+  cancelBtn.onClick(() => {
+    // this.hide();
+  });
 
-  onShow = (handler: Handler<TheTypesOfEvents[Events.Show]>) => {
-    return this.on(Events.Show, handler);
+  return {
+    state,
+    $present,
+    okBtn,
+    cancelBtn,
+    /** 显示弹窗 */
+    show() {
+      // if (state.open) {
+      //   return;
+      // }
+      // event.emit(Events.BeforeShow);
+      $present.show();
+    },
+    /** 隐藏弹窗 */
+    hide() {
+      console.log("[DOMAIN]ui/dialog - hide");
+      // if (state.open === false) {
+      //   return;
+      // }
+      // event.emit(Events.Cancel);
+      $present.hide();
+    },
+    ok() {
+      event.emit(Events.OK);
+    },
+    cancel() {
+      event.emit(Events.Cancel);
+    },
+    setTitle(title: string) {
+      state.title = title;
+      // event.emit(Events.StateChange, { ...this.state });
+    },
+    onShow(handler: Handler<TheTypesOfEvents[Events.Show]>) {
+      return event.on(Events.Show, handler);
+    },
+    onHidden(handler: Handler<TheTypesOfEvents[Events.Hidden]>) {
+      return event.on(Events.Hidden, handler);
+    },
+    onUnmounted(handler: Handler<TheTypesOfEvents[Events.Unmounted]>) {
+      return event.on(Events.Unmounted, handler);
+    },
+    onVisibleChange(handler: Handler<TheTypesOfEvents[Events.VisibleChange]>) {
+      return event.on(Events.VisibleChange, handler);
+    },
+    onOk(handler: Handler<TheTypesOfEvents[Events.OK]>) {
+      return event.on(Events.OK, handler);
+    },
+    onCancel(handler: Handler<TheTypesOfEvents[Events.Cancel]>) {
+      return event.on(Events.Cancel, handler);
+    },
+    onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
+      return event.on(Events.StateChange, handler);
+    },
   };
-  onHidden = (handler: Handler<TheTypesOfEvents[Events.Hidden]>) => {
-    return this.on(Events.Hidden, handler);
-  };
-  onUnmounted = (handler: Handler<TheTypesOfEvents[Events.Unmounted]>) => {
-    return this.on(Events.Unmounted, handler);
-  };
-  onVisibleChange = (handler: Handler<TheTypesOfEvents[Events.VisibleChange]>) => {
-    return this.on(Events.VisibleChange, handler);
-  };
-  onOk = (handler: Handler<TheTypesOfEvents[Events.OK]>) => {
-    return this.on(Events.OK, handler);
-  };
-  onCancel = (handler: Handler<TheTypesOfEvents[Events.Cancel]>) => {
-    return this.on(Events.Cancel, handler);
-  };
-  onStateChange = (handler: Handler<TheTypesOfEvents[Events.StateChange]>) => {
-    return this.on(Events.StateChange, handler);
-  };
-
-  get [Symbol.toStringTag]() {
-    return "Dialog";
-  }
 }
+
+// export class DialogCore extends BaseDomain<TheTypesOfEvents> {
+//   open = false;
+//   title: string = "";
+//   footer: boolean = true;
+//   showCancel: boolean = true;
+
+//   $present = PresenceCore();
+//   okBtn = new ButtonCore();
+//   cancelBtn = new ButtonCore();
+
+//   get state(): DialogState {
+//     return {
+//       open: this.open,
+//       title: this.title,
+//       footer: this.footer,
+//       cancel: this.showCancel,
+//     };
+//   }
+
+//   constructor(options: Partial<{ _name: string }> & DialogProps = {}) {
+//     super(options);
+//   }
+
+//   get [Symbol.toStringTag]() {
+//     return "Dialog";
+//   }
+// }

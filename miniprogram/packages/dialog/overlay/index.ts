@@ -10,25 +10,35 @@ Component({
   properties: {
     _store: {
       type: null,
-      observer(store: DialogCore) {
+      observer(store: ReturnType<typeof DialogCore>) {
         if (this.mounted) {
           return;
         }
         this.mounted = true;
-        const { open } = store;
-        this.setData({
-          open,
-        });
-        // console.log("[COMPONENT]dialog/overlay - observer", store);
-        store.onStateChange((nextState) => {
-          const { open } = nextState;
-          this.setData({
-            open,
-          });
-        });
+        // const { open } = store;
+        // const { mounted, enter, exit } = store.present;
+        // this.setData({
+        //   mounted,
+        //   enter,
+        //   exit,
+        // });
+        // store.present.onStateChange((v) => {
+        //   const { mounted, enter, exit } = v;
+        //   this.setData({
+        //     mounted,
+        //     enter,
+        //     exit,
+        //   });
+        // });
       },
     },
     className: {
+      type: String,
+    },
+    enterClass: {
+      type: String,
+    },
+    exitClass: {
       type: String,
     },
     style: {
@@ -37,20 +47,24 @@ Component({
   },
   mounted: false,
   data: {
-    open: false,
+    mounted: false,
+    enter: false,
+    exit: false,
   },
   lifetimes: {
-    attached() {},
+    attached() {
+      console.log("mounted to page");
+    },
   },
   methods: {
     handleClick() {
       // console.log("[COMPONENT]package/dialog/overlay - handleClick");
       this.data._store.hide();
     },
-    handleAnimationEnd() {
-      // console.log("[COMPONENT]package/dialog/overlay - handleAnimationEnd", this.data._store);
-      this.data._store.present.unmount();
-    },
+    // handleAnimationEnd() {
+    //   // console.log("[COMPONENT]package/dialog/overlay - handleAnimationEnd", this.data._store);
+    //   this.data._store.present.unmount();
+    // },
     handleTouchMove() {
       return false;
     },

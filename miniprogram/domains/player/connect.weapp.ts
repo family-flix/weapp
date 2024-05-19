@@ -3,26 +3,27 @@ import type { VideoContext } from "miniprogram-api-typings";
 import { PlayerCore } from "@/domains/player/index";
 
 /** 连接 $video 标签和 player 领域 */
-export function connect($video: VideoContext, player: PlayerCore) {
-  // console.log("[COMPONENT]VideoPlayer/connect", $video, player, player.bindAbstractNode);
+export function connect(store: ReturnType<typeof PlayerCore>, $video: VideoContext) {
+  // store.name = "------ update update update";
+  console.log("[COMPONENT]VideoPlayer/connect", store.uid);
   $video.onloadstart = () => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.onloadstart");
   };
   $video.onloadedmetadata = (event: { detail: { width: number; height: number } }) => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.onloadedmetadata");
     const { width, height } = event.detail;
-    player.handleLoadedmetadata({ width, height });
+    store.handleLoadedmetadata({ width, height });
   };
   $video.onload = () => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.onload");
-    player.handleLoad();
+    store.handleLoad();
   };
   // 这个居然会在调整时间进度后调用？？？
   $video.oncanplay = () => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.oncanplay");
     // const { duration } = event.currentTarget as HTMLVideoElement;
     // console.log("[COMPONENT]VideoPlayer/connect - listen $video can play");
-    player.handleCanPlay();
+    store.handleCanPlay();
   };
   $video.onplay = () => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.onplay");
@@ -57,7 +58,7 @@ export function connect($video: VideoContext, player: PlayerCore) {
   $video.onresize = () => {
     const { videoHeight, videoWidth } = $video;
     // console.log("[]Video - onResize", videoWidth, videoHeight);
-    player.handleResize({ width: videoWidth, height: videoHeight });
+    store.handleResize({ width: videoWidth, height: videoHeight });
   };
   $video.onerror = () => {
     // const msg = (() => {
@@ -81,7 +82,8 @@ export function connect($video: VideoContext, player: PlayerCore) {
     // })();
     // player.handleError(msg.message);
   };
-  player.bindAbstractNode({
+  store.uid = 100;
+  store.bindAbstractNode({
     $node: $video,
     async play() {
       try {

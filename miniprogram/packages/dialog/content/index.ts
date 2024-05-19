@@ -14,6 +14,12 @@ Component({
     className: {
       type: String,
     },
+    enterClass: {
+      type: String,
+    },
+    exitClass: {
+      type: String,
+    },
     style: {
       type: String,
     },
@@ -27,16 +33,16 @@ Component({
       if (!store) {
         return;
       }
-      const { open } = store;
-      this.setData({
-        open,
-      });
-      store.onStateChange((nextState) => {
-        const { open } = nextState;
-        this.setData({
-          open,
-        });
-      });
+      // const { open } = store;
+      // this.setData({
+      //   open,
+      // });
+      // store.onStateChange((nextState) => {
+      //   const { open } = nextState;
+      //   this.setData({
+      //     open,
+      //   });
+      // });
     },
   },
 });

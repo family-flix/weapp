@@ -136,7 +136,7 @@ Page({
     //   })()
     // );
     // const [history_response] = useState(history_helper.response);
-    const $dialog = new DialogCore({
+    const $dialog = DialogCore({
       onOk() {
         wx.showToast({
           title: "确认",

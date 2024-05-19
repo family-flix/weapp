@@ -15,11 +15,14 @@ export function connect(store: HttpClientCore) {
         header: headers,
         success(result: any) {
           requests = requests.filter((r) => r.id !== id);
+          if (result.statusCode !== 200) {
+            return reject(new Error(result.data));
+          }
           return resolve(result);
         },
         fail(err: { errMsg: string }) {
           requests = requests.filter((r) => r.id !== id);
-          return reject(err.errMsg);
+          return reject(new Error(err.errMsg));
         },
       });
       if (id) {

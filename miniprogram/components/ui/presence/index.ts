@@ -3,64 +3,65 @@ import { PresenceCore } from "@/domains/ui/index";
 Component({
   externalClasses: ["class-name"],
   options: {
-    // pureDataPattern: /^_/,
     virtualHost: true,
     addGlobalClass: true,
-    // styleIsolation: "apply-shared",
   },
   properties: {
     _store: {
       type: null,
       value: null,
-      observer(store: PresenceCore) {
+      observer(store: ReturnType<typeof PresenceCore>) {
         if (this.mounted) {
           return;
         }
-        const { open, mounted } = store;
-        // console.log("[COMPONENT]ui/presence - observer", store._name, open, mounted);
+        const { visible, mounted, enter, exit } = store;
+        // console.log("[COMPONENT]ui/presence - observer", visible, mounted, store);
         this.setData({
-          open,
+          visible,
           mounted,
+          enter,
+          exit,
         });
         store.onStateChange((nextState) => {
           // console.log("[COMPONENT]ui/presence - store.onStateChange", nextState);
-          const { open, mounted } = nextState;
+          const { visible, mounted, enter, exit } = nextState;
           this.setData({
-            open,
+            visible,
             mounted,
+            enter,
+            exit,
           });
         });
         this.mounted = true;
       },
     },
-    openClassName: {
+    enterClass: {
       type: String,
     },
-    closedClassName: {
+    exitClass: {
       type: String,
+    },
+    cover: {
+      type: Boolean,
+      value: false,
     },
   },
   data: {
-    open: false,
+    visible: false,
     mounted: false,
+    enter: false,
+    exit: false,
   },
   mounted: false,
-  lifetimes: {
-    attached() {
-      // const store = this.data._store as PresenceCore;
-      // console.log("[COMPONENT]ui/presence - ready", store);
-      // if (!store) {
-      //   return;
-      // }
-    },
-  },
   methods: {
     handleAnimationEnd() {
-      // console.log("[COMPONENT]ui/presence - handleAnimationEnd");
-      if (this.data._store.open) {
-        return;
-      }
-      this.data._store.unmount();
+      const store: ReturnType<typeof PresenceCore> = this.data._store;
+      // console.log("[COMPONENT]ui/presence - handleAnimationEnd", store.state, store.pending);
+      store.handleAnimationEnd();
+      // if (store.visible) {
+      //   return;
+      // }
+      // store.unmount();
     },
   },
 });

@@ -54,7 +54,7 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
     if (delay) {
       this.delay = delay;
     }
-    this.present = new PresenceCore();
+    this.present = PresenceCore();
     this.present.onShow(() => {
       // console.log("[]ToastCore - this.present.onShow");
       this.open = true;

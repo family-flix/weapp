@@ -1,21 +1,21 @@
-<!-- <view style="z-index: 1; position: relative;">
-    <f-video _store="{{ player }}" bind:load="bindVideoContext"></f-video>
-</view> -->
 <page-meta page-style="flex flex-col overflow-hidden;" background-color="{{backgroundBottomColor}}">
-    <navigation-bar class-name="" style="height: 44px;"></navigation-bar>
+    <bar class-name=""></bar>
     <view class="fixed w-screen h-screen bg-w-bg-0" bind:tap="handleClickScreen">
-        <view class="absolute z-10 w-full" style="top: 36%;left: 50%; min-height: 120rpx; transform: translate(-50%, -50%)">
-            <f-video class-name="relative z-10" style="width: 100%;" _store="{{$logic.$player}}"></f-video>
-            <presence open-class="animate-in fade-in" closed-class="animate-out fade-out" _store="{{$page.$mask}}">
-                <view class="absolute z-20 inset-0 bg-w-fg-1 dark:bg-black opacity-20"></view>
-            </presence>
+        <view class="absolute z-10 w-full" style="top: 36%; left: 50%; min-height: 120rpx; transform: translate(-50%, -50%);">
+            <f-video class-name="relative z-10" style="width: 100%;" _store="{{$logic.$player}}" bind:load="handleVideoMounted" bind:progress="handleVideoProgress" bind:canplay="handleVideoCanPlay" bind:error="handleVideoError"></f-video>
+            <view class="page__mask absolute z-20 inset-0">
+                <presence class-name="" enter-class="animate-in fade-in" exit-class="animate-out fade-out" _store="{{$logic.ui.$mask}}">
+                    <view class="absolute inset-0 bg-w-fg-1 dark:bg-black opacity-20" style="background-color: black;"></view>
+                </presence>
+            </view>
             <view class="absolute z-30 text-w-bg-0 dark:text-w-fg-0" style="left: 50%; top: 50%; min-height: 64px; transform: translate(-50%, -50%);">
-                <presence open-class="animate-in fade-in" closed-class="animate-out fade-out" _store="{{$page.$control}}">
+                <presence enter-class="animate-in fade-in" exit-class="animate-out fade-out" _store="{{$logic.ui.$control}}">
                     <block wx:if="{{!playerState.error}}">
                         <block wx:if="{{!!playerState.ready}}">
                             <view class="flex items-center space-x-8">
-                                <view catch:tap="handleClickRewind">
-                                    <icon name="rewind" size="{{36}}" />
+                                <view class="text-center" style="width: 160rpx;" catch:tap="handleClickRewind">
+                                    <view>倒退</view>
+                                    <view class="">10s</view>
                                 </view>
                                 <view class="p-2">
                                     <block wx:if="{{playerState.playing}}">
@@ -29,8 +29,9 @@
                                         </view>
                                     </block>
                                 </view>
-                                <view catch:tap="handleClickFastForward">
-                                    <icon name="fast-forward" size="{{36}}" />
+                                <view class="text-center" style="width: 160rpx;" catch:tap="handleClickFastForward">
+                                    <view>快进</view>
+                                    <view class="">10s</view>
                                 </view>
                             </view>
                         </block>
@@ -49,22 +50,15 @@
                 </presence>
             </view>
         </view>
-        <presence _store="{{ $page.$control2}}">
-            <cover-view class="fixed top-0 left-0 w-full">
-                <cover-view class="flex items-center p-8 space-x-4">
-                    <cover-view bindtap="handleClickExitFullscreen">Close</cover-view>
-                </cover-view>
-            </cover-view>
-        </presence>
         <view class="absolute z-0 inset-0 text-w-fg-0">
             <view class="absolute top-0 z-40 w-full">
-                <presence _store="{{$page.$top}}" class="flex items-center justify-between" open-class="animate-in fade-in slide-in-from-top" closed-class="animate-out slide-out-to-top fade-out">
-                    <view class="flex items-center">
+                <presence _store="{{$logic.ui.$top}}" class="flex items-center justify-between" enter-class="animate-in fade-in slide-in-from-top" exit-class="animate-out slide-out-to-top fade-out">
+                    <view class="flex items-center" bind:tap="handleClickArrowLeft">
                         <view class="inline-block p-4">
                             <icon name="arrow-left" size="{{24}}" />
                         </view>
                         <block wx:if="{{!!state.curSource}}">
-                            <view class="truncate break-all" style="max-width: 248rpx;">
+                            <view class="overflow-hidden truncate break-all" style="text-overflow: ellipsis; white-space: nowrap; padding-right: {{menuWidth}}px;">
                                 {{state.curSource.order}}、{{state.curSource.name}}
                             </view>
                         </block>
@@ -79,122 +73,206 @@
                 </presence>
             </view>
             <view class="absolute bottom-12 z-40 w-full safe-bottom">
-                <presence _store="{{$page.$time}}">
+                <presence _store="{{$logic.ui.$time}}">
                     <view class="text-center text-xl">{{state.targetTime}}</view>
                 </presence>
-                <presence class="" _store="{{$page.$bottom}}" open-class="animate-in fade-in slide-in-from-bottom" closed-class="animate-out slide-out-to-bottom fade-out">
+                <presence class="" _store="{{$logic.ui.$bottom}}" enter-class="animate-in fade-in slide-in-from-bottom" exit-class="animate-out slide-out-to-bottom fade-out">
                     <view class="px-4"></view>
-                    <view class="flex items-center flex-reverse space-x-4 mt-6 w-full px-2">
-                        <view class="flex items-center p-2 rounded-md space-x-2" catch:tap="handleClickEpisodes">
-                            <icon name="layers" size="{{24}}" />
+                    <view class="flex items-center flex-reverse space-x-4 mt-6 w-full px-2 py-4 safe-padding-bottom">
+                        <view class="flex items-center p-2 rounded-md space-x-2" catch:tap="handleClickEpisodesMenu">
                             <view class="">选集</view>
                         </view>
                         <view class="relative p-2 rounded-md" catch:tap="handleClickNextEpisode">
-                            <icon name="skip-forward" size="{{24}}" />
+                            <view class="">下一集</view>
                         </view>
                         <view class="relative p-2 rounded-md" catch:tap="handleClickSettings">
-                            <icon name="settings" size="{{24}}" />
+                            <view class="">设置</view>
                         </view>
                         <view class="relative p-2 rounded-md" catch:tap="handleClickFullscreen">
-                            <icon name="maximize" size="{{24}}" />
+                            <view class="">全屏</view>
                         </view>
                     </view>
+                    <cover-view class="safe-block safe-block1"></cover-view>
+                    <cover-view class="safe-block safe-block2"></cover-view>
                 </presence>
             </view>
         </view>
     </view>
-    <!-- <view class="flex-1">
-        <view class="operations text-w-fg-1">
-            <view class="z-10 absolute inset-0" bind:tap="handleClickScreen">
-                <view class="absolute bottom-12 w-full safe-bottom">
-                    <presence _store="{{$page.$bottom}}" open-class-name="animate-in fade-in slide-in-from-bottom" closed-class-name="animate-out slide-out-to-bottom fade-out">
-                        <view>
-                            <view class="flex justify-between px-8 mt-18">
-                                <view class="relative">
-                                    <view class="flex flex-col items-center">
-                                        <icon name="arrow-big-left" size="{{64}}" class-name="text-2xl" style="font-size: 88rpx;" />
-                                        <p class="mt-2 text-sm">上一集</p>
-                                    </view>
-                                </view>
-                                <view class="relative">
-                                    <view class="flex flex-col items-center">
-                                        <icon name="arrow-big-right" size="{{64}}" class="text-2xl" style="font-size: 88rpx;" />
-                                        <p class="mt-2 text-sm ">下一集</p>
-                                    </view>
-                                </view>
-                            </view>
-                            <view class="grid grid-cols-5 gap-2 mt-12 w-full px-2">
-                                <view class="flex flex-col items-center" catch:tap="handleClickEpisodesMenu">
-                                    <view class="p-4 rounded-md bg-w-bg-2">
-                                        <icon name="list" class-name="text-2xl " />
-                                    </view>
-                                    <p class="mt-2 text-sm ">选集</p>
-                                </view>
-                                <view class="flex flex-col items-center" catch:tap="handleClickSourcesMenu">
-                                    <view class="p-4 rounded-md bg-w-bg-2">
-                                        <icon name="wand-2" class-name="text-2xl" />
-                                    </view>
-                                    <p class="mt-2 text-sm">切换源</p>
-                                </view>
-                                <view class="flex flex-col items-center" catch:tap="handleClickRatesMenu">
-                                    <view class="p-4 rounded-md bg-w-bg-2">
-                                        <icon name="gauge" class-name="text-2xl " />
-                                    </view>
-                                    <p class="mt-2 text-sm ">{{rate}}x</p>
-                                </view>
-                                <view class="flex flex-col items-center" catch:tap="handleClickResolutionsMenu">
-                                    <view class="p-4 rounded-md bg-w-bg-2">
-                                        <icon name="glasses" class-name="text-2xl " />
-                                    </view>
-                                    <p class="mt-2 text-sm ">{{curSource.typeText || "分辨率"}}</p>
-                                </view>
-                                <view class="flex flex-col items-center" catch:tap="handleClickMoreMenu">
-                                    <view class="p-4 rounded-md bg-w-bg-2">
-                                        <icon name="more-horizontal" class-name="text-2xl " />
-                                    </view>
-                                    <p class="mt-2 text-sm ">更多</p>
-                                </view>
-                            </view>
-                        </view>
-                    </presence>
-                </view>
-            </view>
-        </view>
-        <view class="video z-20 absolute w-full" style="top: 24%;">
-            <f-video class-name="relative z-10" style="width: 100%;" _store="{{$logic.$player}}" bind:load="bindVideoContext"></f-video>
-            <cover-view wx:if="{{subtitleState.visible}}" class="absolute {{orientation === 'vertical' ? 'bottom-8' : 'bottom-2'}} flex justify-center z-10 w-full px-4" style="box-sizing: border-box;">
-                <cover-view class="relative p-2 rounded-md overflow-hidden">
-                    <cover-view wx:if="{{subtitleState.texts.length}}" class="absolute z-10 inset-0 bg-w-bg-2 opacity-80;" />
-                    <cover-view class="relative z-20 text-min text-center {{orientation === 'vertical' ? 'text-min' : 'text-sm'}}">
-                        <block wx:for="{{subtitleState.texts}}" wx:for-item="text" wx:key="self">
-                            <cover-view>{{text}}</cover-view>
-                        </block>
+    <presence _store="{{ $logic.ui.$control2}}" enter-class="fade-in" exit-class="fade-out">
+        <cover-view class="absolute top-0 left-0 w-full h-full" bind:tap="handleClickScreen2">
+            <presence _store="{{ $logic.ui.$top2}}" cover="{{true}}" enter-class="slide-in-from-top fade-in" exit-class="slide-out-to-top fade-out">
+                <cover-view class="z-20 absolute left-0 top-0 w-full" catch:tap="prevent">
+                    <cover-view class="z-0 absolute w-full" style="position: absolute; top: 0; left: 0; width: 100%; height: 58px; background-color: black; opacity: 0.5;"></cover-view>
+                    <cover-view class="z-10 relative flex items-center justify-between z-20 p-4 px-8 text-w-white">
+                        <cover-view class="flex items-center" catch:tap="handleClickExitFullscreen">
+                            <cover-view class="inline-block mr-2">返回</cover-view>
+                            <cover-view class="">
+                                {{state.curSource.order}}、{{state.curSource.name}}
+                            </cover-view>
+                        </cover-view>
+                        <cover-view class="relative p-2 rounded-md" catch:tap="handleClickExitFullscreenAndStop">
+                            <cover-view class="">退出全屏</cover-view>
+                        </cover-view>
+                    </cover-view>
+                </cover-view>
+            </presence>
+            <presence _store="{{ $logic.ui.$bottom2}}" cover="{{true}}" enter-class="slide-in-form-bottom fade-in" exit-class="slide-out-to-bottom fade-out">
+                <cover-view class="z-20 absolute left-0 bottom-0 w-full" catch:tap="prevent">
+                    <cover-view class="z-0 absolute bottom-0 w-full" style="z-index: 0; left: 0; width: 100%; height: 68px; background-color: black; opacity: 0.5;"></cover-view>
+                    <cover-view class="z-10 flex items-center justify-between p-4 px-8 text-w-white" style="position: relative; z-index: 10;">
+                        <cover-view class="flex items-center" style="">
+                            <block wx:if="{{playerState.playing}}">
+                                <cover-view class="p-2" catch:tap="handleClickPause">
+                                    <cover-view class="" style="width: 48px;">暂停</cover-view>
+                                </cover-view>
+                            </block>
+                            <block wx:else>
+                                <cover-view class="p-2" catch:tap="handleClickPlay">
+                                    <cover-view class="" style="width: 48px;">播放</cover-view>
+                                </cover-view>
+                            </block>
+                            <cover-view class="relative" catch:tap="handleClickNextEpisode">
+                                <cover-view class="">下一集</cover-view>
+                            </cover-view>
+                        </cover-view>
+                        <cover-view class="flex items-center space-x-4 px-2">
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" catch:tap="handleClickResolutionMenu2">
+                                <cover-view class="">{{curSource.typeText || '分辨率'}}</cover-view>
+                            </cover-view>
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" catch:tap="handleClickRateMenu2">
+                                <cover-view class="">{{playerState.rate}}x</cover-view>
+                            </cover-view>
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" catch:tap="handleClickEpisodesMenu2">
+                                <cover-view class="">选集</cover-view>
+                            </cover-view>
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" catch:tap="handleClickFileMenu2">
+                                <cover-view class="">切换源</cover-view>
+                            </cover-view>
+                        </cover-view>
+                    </cover-view>
+                </cover-view>
+            </presence>
+        </cover-view>
+        <presence _store="{{$logic.ui.$episodes2}}" cover="{{true}}" enter-class="fade-in" exit-class="fade-out">
+            <cover-view class="absolute inset-0" catch:tap="handleClickEpisodesOverlay">
+                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
+                    <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
+                        <cover-view class="safe-block safe-block1"></cover-view>
+                        <cover-view class="safe-block safe-block2"></cover-view>
+                        <cover-view class="safe-block safe-block3"></cover-view>
+                        <cover-view class="safe-block safe-block4"></cover-view>
+                    </cover-view>
+                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                        <cover-view class="flex space-x-2 max-w-full overflow-x-auto">
+                            <block wx:for="{{state.groups}}" wx:for-item="group" wx:key="id">
+                                <cover-view class="py-4 {{state.curGroup.text === group.text ? 'underline' : ''}}" catch:tap="handleClickGroup">
+                                    {{group.text}}
+                                </cover-view>
+                            </block>
+                        </cover-view>
+                        <cover-view class="flex flex-wrap mt-4" style="">
+                            <block wx:for="{{state.curGroup.list}}" wx:for-item="episode" wx:key="id">
+                                <cover-view class="episode relative flex justify-center items-center p-4 rounded-md  {{state.curSource.id === episode.id ? 'bg-w-fg-1' : 'bg-w-fg-3'}}" style="margin-right: 12px; margin-bottom: 12px; width: 48px; height:48px; box-sizing: border-box;" data-id="{{episode.id}}" catch:tap="handleClickEpisode">
+                                    <cover-view class="text-w-fg-1">{{episode.order}}</cover-view>
+                                </cover-view>
+                            </block>
+                        </cover-view>
                     </cover-view>
                 </cover-view>
             </cover-view>
-        </view>
-    </view>
-    <view class="mt-2 space-y-1">
-        <block wx:for="{{subtileState.texts}}" wx:for-item="text" wx:key="self">
-            <view class="text-center text-lg">{{text}}</view>
-        </block>
-    </view> -->
-</page-meta>
-<sheet _store="{{$page.$episode}}">
-    <view class="relative box-border h-full px-4 safe-bottom">
-        <view class="flex space-x-2 max-w-full overflow-x-auto scroll--hidden">
-            <block wx:for="{{state.groups}}" wx:key="id">
-                <view class="p-2">{{item.text}}</view>
-            </block>
-        </view>
-        <view class="grid gap-2 grid-cols-6">
-            <block wx:for="{{state.curGroup.list}}" wx:key="id">
-                <view class="relative flex justify-center items-center w-12 h-12 p-2 rounded-md bg-w-fg-3">
-                    <view class="absolute right-1 top-1 text-w-fg-1" style="font-size: 10px;">
-                        {{item.order}}
+        </presence>
+        <presence _store="{{$logic.ui.$resolution2}}" cover="{{true}}" enter-class="fade-in" exit-class="fade-out">
+            <cover-view class="absolute inset-0" catch:tap="handleClickResolutionOverlay">
+                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
+                    <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
+                        <cover-view class="safe-block safe-block1"></cover-view>
+                        <cover-view class="safe-block safe-block2"></cover-view>
+                        <cover-view class="safe-block safe-block3"></cover-view>
+                        <cover-view class="safe-block safe-block4"></cover-view>
+                    </cover-view>
+                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                        <cover-view class="" style="">
+                            <block wx:for="{{curSource.resolutions}}" wx:for-item="r" wx:key="typeText">
+                                <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-type="{{r.type}}" bind:tap="handleClickResolution">
+                                    <cover-view>{{r.typeText}}</cover-view>
+                                    <cover-view wx:if="{{curSource.type === r.type}}">
+                                        选中
+                                    </cover-view>
+                                </cover-view>
+                            </block>
+                        </cover-view>
+                    </cover-view>
+                </cover-view>
+            </cover-view>
+        </presence>
+        <presence _store="{{$logic.ui.$rate2}}" cover="{{true}}" enter-class="fade-in" exit-class="fade-out">
+            <cover-view class="absolute inset-0" catch:tap="handleClickRateOverlay">
+                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
+                    <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
+                        <cover-view class="safe-block safe-block1"></cover-view>
+                        <cover-view class="safe-block safe-block2"></cover-view>
+                        <cover-view class="safe-block safe-block3"></cover-view>
+                        <cover-view class="safe-block safe-block4"></cover-view>
+                    </cover-view>
+                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                        <cover-view class="" style="">
+                            <block wx:for="{{MediaRates}}" wx:for-item="rate" wx:key="self">
+                                <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-rate="{{rate}}" bind:tap="handleClickRate">
+                                    <cover-view>{{rate}}</cover-view>
+                                    <cover-view wx:if="{{playerState.rate === rate}}">
+                                        选中
+                                    </cover-view>
+                                </cover-view>
+                            </block>
+                        </cover-view>
+                    </cover-view>
+                </cover-view>
+            </cover-view>
+        </presence>
+        <presence _store="{{$logic.ui.$file2}}" cover="{{true}}" enter-class="fade-in" exit-class="fade-out">
+            <cover-view class="absolute inset-0" catch:tap="handleClickFileOverlay">
+                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
+                    <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
+                        <cover-view class="safe-block safe-block1"></cover-view>
+                        <cover-view class="safe-block safe-block2"></cover-view>
+                        <cover-view class="safe-block safe-block3"></cover-view>
+                        <cover-view class="safe-block safe-block4"></cover-view>
+                    </cover-view>
+                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                        <cover-view class="" style="">
+                            <block wx:for="{{state.curSource.files}}" wx:for-item="file" wx:key="self">
+                                <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-id="{{file.id}}" bind:tap="handleClickFile">
+                                    <cover-view>{{file.name}}</cover-view>
+                                    <cover-view wx:if="{{state.curSource.curFileId === file.id}}">
+                                        选中
+                                    </cover-view>
+                                </cover-view>
+                            </block>
+                        </cover-view>
+                    </cover-view>
+                </cover-view>
+            </cover-view>
+        </presence>
+    </presence>
+    <sheet _store="{{$logic.ui.$episodes}}">
+        <view class="relative box-border h-full px-4 safe-bottom">
+            <view class="flex space-x-2 max-w-full overflow-x-auto scroll--hidden">
+                <block wx:for="{{state.groups}}" wx:for-item="group" wx:key="id">
+                    <view class="p-2 {{state.curGroup.text === group.text ? 'underline' : ''}}" bind:tap="handleClickGroup">
+                        {{group.text}}
                     </view>
-                </view>
-            </block>
+                </block>
+            </view>
+            <view class="grid gap-2 grid-cols-6">
+                <block wx:for="{{state.curGroup.list}}" wx:for-item="episode" wx:key="id">
+                    <view class="relative flex justify-center items-center w-12 h-12 p-2 rounded-md  {{state.curSource.id === episode.id ? 'bg-w-fg-1' : 'bg-w-fg-3'}}" data-id="{{episode.id}}" bind:tap="handleClickEpisode">
+                        <view class="absolute right-1 top-1 text-w-fg-1">{{episode.order}}</view>
+                    </view>
+                </block>
+            </view>
         </view>
-    </view>
-</sheet>
+    </sheet>
+    <sheet _store="{{$logic.ui.$settings}}" hide-title="{{true}}">
+        <media-settings _media="{{$logic.$tv}}" _player="{{$logic.$player}}"></media-settings>
+    </sheet>
+</page-meta>

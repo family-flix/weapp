@@ -2,8 +2,8 @@
  * @file 电视剧
  */
 import { BaseDomain, Handler } from "@/domains/base";
-import { MediaSourceFileCore } from "@/domains/source";
-import { RequestCore } from "@/domains/request";
+import { MediaSourceFileCore } from "@/domains/source/index";
+import { RequestCore } from "@/domains/request/index";
 import { MediaResolutionTypes } from "@/domains/source/constants";
 import { HttpClientCore } from "@/domains/http_client/index";
 import { debounce } from "@/utils/lodash/debounce";
@@ -113,7 +113,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     });
   }
 
-  async fetchProfile(season_id: string) {
+  async fetchProfile(season_id?: string) {
     if (season_id === undefined) {
       const msg = this.tip({ text: ["缺少季 id 参数"] });
       return Result.Err(msg);

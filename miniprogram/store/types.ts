@@ -1,13 +1,13 @@
 // import { JSX } from "solid-js/jsx-runtime";
 // import { NamedExoticComponent } from "react";
 
-import { Application } from "@/domains/app";
-import { HistoryCore } from "@/domains/history";
-import { RouteViewCore } from "@/domains/route_view";
-import { ScrollViewCore } from "@/domains/ui";
-import { HttpClientCore } from "@/domains/http_client";
+import { Application } from "@/domains/app/index";
+import { HistoryCore } from "@/domains/history/index";
+import { RouteViewCore } from "@/domains/route_view/index";
+import { ScrollViewCore } from "@/domains/ui/index";
+import { HttpClientCore } from "@/domains/http_client/index";
 // import { BottomMenuCore } from "@/domains/bottom_menu";
-import { StorageCore } from "@/domains/storage";
+import { StorageCore } from "@/domains/storage/index";
 
 import { PageKeys, RouteConfig } from "./routes";
 import { storage } from "./storage";
@@ -23,4 +23,24 @@ export type ViewComponentProps = {
     view: RouteViewCore;
     scrollView?: ScrollViewCore;
   };
+};
+
+export type BaseApiResp<T> = {
+  code: number;
+  msg: string;
+  data: T;
+};
+
+export type ListResponse<T> = {
+  total: number;
+  page: number;
+  page_size: number;
+  no_more: boolean;
+  list: T[];
+};
+export type ListResponseWithCursor<T> = {
+  page_size: number;
+  total: number;
+  next_marker?: string;
+  list: T[];
 };
