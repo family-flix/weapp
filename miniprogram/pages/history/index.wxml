@@ -5,7 +5,7 @@
     <scroll-view class="h-full">
         <list-view _store="{{$page.$list}}" class="pt-4">
             <block wx:for="{{response.dataSource}}" wx:for-item="record" wx:key="id">
-                <view class="relative flex w-full mt-2 cursor-pointer select-none" data-elm="history" data-id="{{record.id}}" bind:tap="handleClickElm">
+                <view class="relative flex w-full mt-2 cursor-pointer select-none" data-elm="history" data-id="{{record.id}}" data-media-id="{{record.media_id}}" bind:tap="handleClickElm">
                     <view class="relative w-full bg-w-bg-2 rounded-lg">
                         <view class="relative w-full h-[124px] overflow-hidden rounded-t-md" style="height: 124px;">
                             <lazy-image class="w-full h-full object-cover" src="{{record.thumbnail_path}}" alt="{{record.name}}"></lazy-image>

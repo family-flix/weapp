@@ -159,6 +159,9 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
   }
   /** 执行 service 函数 */
   async run(...args: Parameters<F>) {
+    if (!this.service) {
+      return Result.Err("缺少 service");
+    }
     if (this.pending !== null) {
       const r = await this.pending;
       this.loading = false;

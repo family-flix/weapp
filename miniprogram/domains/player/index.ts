@@ -410,6 +410,7 @@ export function PlayerCore(props: PlayerProps) {
       if (!this._abstractNode) {
         return;
       }
+      state.error = "";
       this._abstractNode.load(url);
     },
     startAdjustCurrentTime() {

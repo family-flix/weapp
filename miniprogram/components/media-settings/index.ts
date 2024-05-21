@@ -243,10 +243,11 @@ Component({
     },
   },
   methods: {
-    handleClickRateMenu() {
+    handleClickMenu(event: { currentTarget: { dataset: { id: number } } }) {
+      const { id } = event.currentTarget.dataset;
       this.setData({
-        menuIndex: MediaSettingsMenuKey.Rate,
-        curMenu: menus.find((m) => m.value === MediaSettingsMenuKey.Rate),
+        menuIndex: id,
+        curMenu: menus.find((m) => m.value === id),
         style: "transform: translate(-100%);",
       });
     },
@@ -306,7 +307,7 @@ Component({
       if (elm) {
         this.triggerEvent("click", {
           elm,
-          payload,
+          ...payload,
         });
         return;
       }

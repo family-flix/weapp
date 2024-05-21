@@ -106,15 +106,15 @@ function HistoryPageLogic(props: ViewComponentProps) {
     ready() {
       $list.init();
     },
-    handleClickHistory(record: { id: string; type: MediaTypes }) {
-      const { id, type } = record;
+    handleClickHistory(record: { id: string; media_id: string; type: MediaTypes }) {
+      const { id, media_id, type } = record;
       if (app.$user.permissions.includes("002")) {
         if (type === MediaTypes.Season) {
-          history.push("root.season_playing", { id, type });
+          history.push("root.season_playing", { id: media_id, type });
           return;
         }
         if (type === MediaTypes.Movie) {
-          history.push("root.movie_playing", { id, type });
+          history.push("root.movie_playing", { id: media_id, type });
           return;
         }
         app.tip({
@@ -122,7 +122,7 @@ function HistoryPageLogic(props: ViewComponentProps) {
         });
         return;
       }
-      history.push("root.profile", { id, type });
+      history.push("root.profile", { id: media_id, type });
     },
   };
 }

@@ -21,7 +21,11 @@ Page({
     curSource: null as null | ReturnType<typeof SeasonPlayingPageLogic>["$tv"]["$source"]["profile"],
   },
   event: mitt(),
+  events: [] as string[],
   onClick(elm: string, handler: (payload: any) => void) {
+    if (!this.events.includes(elm)) {
+      this.events.push(elm);
+    }
     this.event.on(elm, handler);
   },
   emitClick<T extends Record<string, string>>(elm: string, payload: T) {
@@ -47,11 +51,6 @@ Page({
       state: $logic.$tv.state,
       curSource: $logic.$tv.$source.profile,
     });
-    // $logic.$view.query = query;
-    const media_id = query.id;
-    if (!media_id) {
-      return;
-    }
     console.log("[PAGE]tv_play - onLoad", storage.values);
     $logic.$tv.onStateChange((v) => {
       this.setData({
@@ -194,6 +193,7 @@ Page({
     });
     this.onClick("file", (payload: { id: string }) => {
       const { id } = payload;
+      console.log('payload', payload);
       const matched = $logic.$tv.curSource?.files.find((f) => f.id === id);
       if (!matched) {
         app.tip({
@@ -208,11 +208,14 @@ Page({
       $logic.$player.exitFullscreen();
       $logic.$player.updateCurTime();
     });
+    this.onClick("exit-fullscreen", () => {
+      $logic.ui.$control2.hide();
+      $logic.$player.exitFullscreen();
+    });
     this.onClick("exit-fullscreen-and-pause", () => {
       $logic.ui.$control2.hide();
       $logic.$player.pause();
       $logic.$player.exitFullscreen();
-      $logic.$player.updateCurTime();
     });
     this.onClick("screen2", () => {
       $logic.prepareToggle2();
@@ -229,9 +232,11 @@ Page({
     if (!$logic) {
       return;
     }
-    $logic.$tv.profile = null;
-    $logic.$tv.curSource = null;
     $logic.prepareHide();
+    $logic.$tv.destroy();
+    for (let i = 0; i < this.events.length; i += 1) {
+      this.event.off(this.events[i]);
+    }
     _$logic = null;
   },
   handleVideoProgress(event: {

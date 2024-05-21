@@ -200,20 +200,20 @@ function SeasonTabContentCom(props: ViewComponentProps) {
     },
     handleClickSeason(season: ItemTypeFromListCore<typeof $list>) {
       const { id, type } = season;
-      if (app.$user.permissions.includes("002")) {
-        if (type === MediaTypes.Season) {
-          history.push("root.season_playing", { id, type });
-          return;
-        }
-        if (type === MediaTypes.Movie) {
-          history.push("root.movie_playing", { id, type });
-          return;
-        }
-        app.tip({
-          text: ["未知的媒体类型"],
-        });
-        return;
-      }
+      // if (app.env.prod === "develop" || app.$user.permissions.includes("002")) {
+      //   if (type === MediaTypes.Season) {
+      //     history.push("root.season_playing", { id, type });
+      //     return;
+      //   }
+      //   if (type === MediaTypes.Movie) {
+      //     history.push("root.movie_playing", { id, type });
+      //     return;
+      //   }
+      //   app.tip({
+      //     text: ["未知的媒体类型"],
+      //   });
+      //   return;
+      // }
       history.push("root.profile", { id, type });
     },
   };

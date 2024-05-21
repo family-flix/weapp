@@ -304,6 +304,12 @@ function SeasonPlayingPageLogic(props: ViewComponentProps) {
   $player.onUrlChange(async ({ url }) => {
     $player.load(url);
   });
+  app.onHidden(() => {
+    $player.pause();
+  });
+  app.onShow(() => {
+    $player.setCurrentTime($player.currentTime);
+  });
 
   return {
     $tv,
@@ -331,12 +337,6 @@ function SeasonPlayingPageLogic(props: ViewComponentProps) {
       $subtitle2,
     },
     ready() {
-      app.onHidden(() => {
-        $player.pause();
-      });
-      app.onShow(() => {
-        $player.setCurrentTime($player.currentTime);
-      });
       // $player.beforeAdjustCurrentTime(() => {
       //   $page.$time.show();
       //   $page.stopHide();

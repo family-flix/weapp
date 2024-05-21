@@ -34,7 +34,7 @@
                         <view class="{{subtitle === null ? 'text-w-fg-2' : 'text-w-fg-1'}}"></view>
                     </view>
                 </view> -->
-                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Rate}}" bind:tap="handleClickRateMenu">
+                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Rate}}" bind:tap="handleClickMenu">
                     <view>播放倍率</view>
                     <view class="flex items-center space-x-2 text-w-fg-1">
                         <view class="px-2">{{playerState.rate}}x</view>
@@ -111,9 +111,9 @@
                             <view class="max-h-full overflow-y-auto px-4 text-w-fg-1">
                                 <view class="pb-24">
                                     <block wx:for="{{state.curSource.files}}" wx:for-item="file" wx:key="id">
-                                        <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{state.curSource.id === file.id ? 'bg-w-bg-active' : ''}}" data-elm="file" data-id="{{file.id}}" bind:tap="handleClickElm">
+                                        <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{curSource.id === file.id ? 'bg-w-bg-active' : ''}}" data-elm="file" data-id="{{file.id}}" bind:tap="handleClickElm">
                                             <view class="break-all">{{file.name}}</view>
-                                            <view wx:if="{{state.curSource.id === file.id}}">
+                                            <view wx:if="{{curSource.id === file.id}}">
                                                 选中
                                             </view>
                                         </view>

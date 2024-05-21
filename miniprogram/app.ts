@@ -17,13 +17,19 @@ App<IAppOption>({
       right,
     };
     const { theme } = wx.getAppBaseInfo();
-    console.log(theme);
     if (theme === "dark") {
       wx.setTabBarStyle({
-        // color: "#FF0000",
-        // selectedColor: "#00FF00",
-        backgroundColor: "#000000",
-        // borderStyle: "white",
+        backgroundColor: "#191919",
+      });
+      wx.setNavigationBarColor({
+        frontColor: "#ffffff",
+        backgroundColor: "#191919",
+      });
+    }
+    if (theme === "light") {
+      wx.setNavigationBarColor({
+        frontColor: "#000000",
+        backgroundColor: "#ffffff",
       });
     }
     const {

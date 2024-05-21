@@ -123,14 +123,12 @@
                         <cover-view class="flex items-center" style="">
                             <block wx:if="{{playerState.playing}}">
                                 <cover-view class="p-2" data-elm="pause" catch:tap="handleClickElm">
-                                    <cover-view class="icon icon-pause" style="width: 48px;">
-                                        暂停
-                                    </cover-view>
+                                    <cover-view style="width: 48px;">暂停</cover-view>
                                 </cover-view>
                             </block>
                             <block wx:else>
                                 <cover-view class="p-2" data-elm="play" catch:tap="handleClickElm">
-                                    <cover-view class="icon icon-play" style="width: 48px;"></cover-view>
+                                    <cover-view style="width: 48px;">播放</cover-view>
                                 </cover-view>
                             </block>
                             <cover-view class="relative" data-elm="next-episode" catch:tap="handleClickElm">
@@ -242,12 +240,10 @@
                     </cover-view>
                     <cover-view class="flex-1 safe-margin-left safe-margin-right">
                         <cover-view class="" style="">
-                            <block wx:for="{{state.curSource.files}}" wx:for-item="file" wx:key="self">
+                            <block wx:for="{{state.curSource.files}}" wx:for-item="file" wx:key="id">
                                 <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="file" data-id="{{file.id}}" bind:tap="handleClickElm">
                                     <cover-view>{{file.name}}</cover-view>
-                                    <cover-view wx:if="{{state.curSource.curFileId === file.id}}">
-                                        选中
-                                    </cover-view>
+                                    <cover-view wx:if="{{curSource.id === file.id}}">选中</cover-view>
                                 </cover-view>
                             </block>
                         </cover-view>

@@ -77,7 +77,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     posterPath: string;
   } = null;
   sourceGroups: SeasonEpisodeGroup[] = [];
-  /** 该电视剧名称、剧集等信息 */
+  /** 当前播放的剧集 */
   curSource: null | CurMediaSource = null;
   curGroup: null | SeasonEpisodeGroup = null;
   /** 当前影片播放进度 */
@@ -90,6 +90,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
 
   $source: MediaSourceFileCore;
   $client: HttpClientCore;
+  $update: RequestCore<typeof updatePlayHistory>;
 
   get state(): SeasonCoreState {
     return {
@@ -111,6 +112,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
       resolution,
       client,
     });
+    this.$update = new RequestCore(updatePlayHistory, { client });
   }
 
   async fetchProfile(season_id?: string) {
@@ -142,19 +144,17 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     // this.fetchSeries(id);
     this.sourceGroups = sourceGroups;
     this.curGroup = sourceGroups.find((group) => group.cur) ?? null;
-    this.emit(Events.ProfileLoaded, { profile: this.profile, curSource: curSource });
+    this.emit(Events.ProfileLoaded, { profile: this.profile, curSource });
     this.emit(Events.StateChange, { ...this.state });
     return Result.Ok({ ...this.state });
   }
-
   fetchSeries(media_id: string) {
     fetchMediaSeries({
       media_id,
     });
   }
-
   /** 播放该电视剧下指定影片 */
-  async playEpisode(source: MediaSource, extra: { currentTime: number }) {
+  async playEpisode(source: MediaSource & { curFileId?: string }, extra: { currentTime: number }) {
     const { currentTime = 0 } = extra;
     console.log("[DOMAIN]media/season - playEpisode", source, this.curSource);
     const { id, files } = source;
@@ -170,8 +170,16 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
       });
       return Result.Err(tip);
     }
-    const file = files[0];
-    console.log("[DOMAIN]media/season - playEpisode before this.$source.load", source);
+    const file = (() => {
+      if (source.curFileId) {
+        const matched = files.find((f) => f.id === source.curFileId);
+        if (matched) {
+          return matched;
+        }
+      }
+      return files[0];
+    })();
+    // console.log("[DOMAIN]media/season - playEpisode before this.$source.load", source, file);
     this.curSource = { ...source, currentTime, thumbnailPath: source.stillPath, curFileId: file.id };
     const res = await this.$source.load(file);
     if (res.error) {
@@ -395,10 +403,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     if (this.$source.profile === null) {
       return;
     }
-    const request = new RequestCore(updatePlayHistory, {
-      client: this.$client,
-    });
-    request.run({
+    this.$update.run({
       media_id: this.profile.id,
       media_source_id: this.curSource.id,
       current_time: parseFloat(currentTime.toFixed(2)),

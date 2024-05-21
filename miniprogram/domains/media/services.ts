@@ -5,7 +5,7 @@ import { request, TmpRequestResp } from "@/domains/request/utils";
 import { FetchParams } from "@/domains/list/typing";
 import { SubtitleFileResp } from "@/domains/subtitle/types";
 import { MediaResolutionTypes, MediaResolutionTypeTexts } from "@/domains/source/constants";
-import { RequestedResource, Result, UnpackedResult } from "@/types/index";
+import { RequestedResource, Result, Unpacked, UnpackedResult } from "@/types/index";
 import { MediaTypes, MediaOriginCountry, SeasonGenresTexts, SeasonMediaOriginCountryTexts } from "@/constants/index";
 import { episode_to_chinese_num, minute_to_hour2, relative_time_from_now } from "@/utils/index";
 
@@ -189,7 +189,6 @@ export function fetchMediaPlayingEpisodeProcess(r: TmpRequestResp<typeof fetchMe
     vote_average,
     source_groups,
   } = r.data;
-  console.log("media playing", cur_source);
   const episodes = sources.map(normalizeEpisode);
   const sourceGroups = (() => {
     return source_groups.map((group) => {
@@ -223,22 +222,39 @@ export function fetchMediaPlayingEpisodeProcess(r: TmpRequestResp<typeof fetchMe
   // })();
   const curSource = (() => {
     if (curMediaSource) {
+      const file = (() => {
+        const matched = curMediaSource.files.find((f) => f.id === cur_source.cur_source_file_id);
+        if (matched) {
+          return matched;
+        }
+        return curMediaSource.files[0];
+      })();
       return {
         ...curMediaSource,
-        ...normalizeCurEpisode(cur_source),
+        ...normalizeCurEpisode({
+          ...cur_source,
+          cur_source_file_id: file.id,
+        }),
       };
     }
     const first = episodes[0];
     if (!first) {
       return null;
     }
+    const file = (() => {
+      const matched = first.files.find((f) => f.id === cur_source.cur_source_file_id);
+      if (matched) {
+        return matched;
+      }
+      return first.files[0];
+    })();
     return {
       ...first,
       ...normalizeCurEpisode({
         ...first,
         current_time: 0,
         thumbnail_path: "",
-        cur_source_file_id: first.files[0]?.id,
+        cur_source_file_id: file.id,
       }),
     };
   })();
@@ -351,10 +367,11 @@ export function fetchEpisodesWithNextMarker(body: { media_id: string; next_marke
     media_id,
     next_marker,
     page_size,
+    with_subtitle: false,
     with_file: true,
   });
 }
-export function fetchEpisodesWithNextMarkerProcess(r: TmpRequestResp<typeof fetchEpisodesWithNextMarker>) {
+export function fetchEpisodesWithNextMarkerProcess(r: TmpRequestResp<typeof fetchSourceInGroup>) {
   if (r.error) {
     return Result.Err(r.error.message);
   }
@@ -444,7 +461,6 @@ export function updatePlayHistory(body: {
   source_id: string;
 }) {
   const { media_id, media_source_id, current_time, duration, source_id } = body;
-  console.log("before update history", current_time);
   return request.post<null>("/api/v2/wechat/history/update", {
     media_id,
     media_source_id,
