@@ -440,7 +440,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
     return [];
   }
 
-  onSourceFileChange(handler: Handler<TheTypesOfEvents[Events.SourceFileChange]>) {
+  onSourceFileChange = (handler: Handler<TheTypesOfEvents[Events.SourceFileChange]>) => {
     return this.on(Events.SourceFileChange, handler);
   }
   onProfileLoaded(handler: Handler<TheTypesOfEvents[Events.ProfileLoaded]>) {
@@ -449,7 +449,7 @@ export class SeasonMediaCore extends BaseDomain<TheTypesOfEvents> {
   onEpisodeChange(handler: Handler<TheTypesOfEvents[Events.EpisodeChange]>) {
     return this.on(Events.EpisodeChange, handler);
   }
-  onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
+  onStateChange = (handler: Handler<TheTypesOfEvents[Events.StateChange]>) => {
     return this.on(Events.StateChange, handler);
   }
   onBeforeNextEpisode(handler: Handler<TheTypesOfEvents[Events.BeforeNextEpisode]>) {

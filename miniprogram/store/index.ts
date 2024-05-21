@@ -101,11 +101,11 @@ export const app = new Application({
   user,
   storage,
   async beforeReady() {
-    if (app.env.prod === "develop") {
-      app.hostname = "https://media-t.frp.funzm.com";
-      client.hostname = app.hostname;
-      ImageCore.setPrefix(app.hostname);
-    }
+    // if (app.env.prod === "develop") {
+    //   app.hostname = "https://media-t.frp.funzm.com";
+    //   client.hostname = app.hostname;
+    //   ImageCore.setPrefix(app.hostname);
+    // }
     if (user.isLogin) {
       const r0 = await wxResultify(wx.checkSession)();
       console.log(r0);

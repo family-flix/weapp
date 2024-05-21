@@ -1,5 +1,7 @@
-import { InputCore } from "@/domains/ui/index";
 import { app } from "@/store/index";
+
+// import { NavigatorCore } from "@/domains/navigator/index";
+import { InputCore } from "@/domains/ui/index";
 
 Component({
   externalClasses: ["class-name"],
@@ -9,9 +11,19 @@ Component({
     styleIsolation: "apply-shared",
     multipleSlots: true,
   },
+  mounted: false,
   properties: {
-    store: {
+    _store: {
       type: Object,
+      // observer(store) {
+      //   if (!store) {
+      //     return;
+      //   }
+      //   if (this.mounted) {
+      //     return;
+      //   }
+      //   this.mounted = true;
+      // },
     },
     style: {
       type: String,
@@ -25,13 +37,14 @@ Component({
   data: {
     paddingTop: app.screen.statusBarHeight || 34,
     paddingRight: app.screen.menuButton?.width || 87,
-    height: 34,
+    height: app.screen.statusBarHeight || 34,
   },
   lifetimes: {
     attached() {
-      console.log("[COMPONENT]ui/navigation-bar", app.screen);
+      // console.log("[COMPONENT]ui/navigation-bar", app.screen);
       this.setData({
-        paddingTop: app.screen.statusBarHeight || 0,
+        paddingTop: app.screen.statusBarHeight || 34,
+        height: app.screen.statusBarHeight || 34,
         paddingRight: (() => {
           if (!app.screen.menuButton) {
             return 87;
@@ -54,6 +67,9 @@ Component({
     async handleViewMounted() {
       const $bar = await this.select(".navigation-bar__inner");
       this.setData({
+        height: $bar.height,
+      });
+      this.triggerEvent("mounted", {
         height: $bar.height,
       });
     },

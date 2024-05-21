@@ -189,7 +189,7 @@ export function fetchMediaPlayingEpisodeProcess(r: TmpRequestResp<typeof fetchMe
     vote_average,
     source_groups,
   } = r.data;
-  console.log('media playing', cur_source);
+  console.log("media playing", cur_source);
   const episodes = sources.map(normalizeEpisode);
   const sourceGroups = (() => {
     return source_groups.map((group) => {
@@ -343,6 +343,28 @@ export function fetchSourceInGroupProcess(r: TmpRequestResp<typeof fetchSourceIn
     })
   );
 }
+export function fetchEpisodesWithNextMarker(body: { media_id: string; next_marker: string; page_size: number }) {
+  const { media_id, next_marker, page_size } = body;
+  return request.post<{
+    list: SeasonEpisodeResp[];
+  }>("/api/v2/wechat/media/episode", {
+    media_id,
+    next_marker,
+    page_size,
+    with_file: true,
+  });
+}
+export function fetchEpisodesWithNextMarkerProcess(r: TmpRequestResp<typeof fetchEpisodesWithNextMarker>) {
+  if (r.error) {
+    return Result.Err(r.error.message);
+  }
+  return Result.Ok({
+    ...r.data,
+    list: r.data.list.map((episode) => {
+      return normalizeEpisode(episode);
+    }),
+  });
+}
 
 /**
  * 获取视频源播放信息
@@ -422,7 +444,7 @@ export function updatePlayHistory(body: {
   source_id: string;
 }) {
   const { media_id, media_source_id, current_time, duration, source_id } = body;
-  console.log('before update history', current_time);
+  console.log("before update history", current_time);
   return request.post<null>("/api/v2/wechat/history/update", {
     media_id,
     media_source_id,

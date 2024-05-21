@@ -70,7 +70,7 @@ export function loginWithTokenId(v: { token: string }) {
  */
 export function loginWithWeappCode(values: { code: string }) {
   const { code } = values;
-  return request.post<{ id: string; email: string; token: string }>("/api/v2/wechat/auth/weapp", {
+  return request.post<{ id: string; email: string; token: string; permissions: string[] }>("/api/v2/wechat/auth/weapp", {
     code,
   });
 }

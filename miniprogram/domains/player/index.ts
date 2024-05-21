@@ -255,6 +255,7 @@ export function PlayerCore(props: PlayerProps) {
     },
     pendingRate: null as null | number,
     changeRate(v: number) {
+      console.log("[DOMAIN]player - changeRate", this._abstractNode);
       if (this._abstractNode === null) {
         this.pendingRate = v;
         return;

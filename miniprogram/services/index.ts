@@ -403,3 +403,7 @@ export function createInvitationCode(values: { count: number }) {
     }[];
   }>("/api/v2/wechat/invitation_code/create", values);
 }
+
+export function bindExistingMember(values: { member_id: string }) {
+  return request.post<void>("/api/v2/wechat/mine/bind_weapp", values);
+}

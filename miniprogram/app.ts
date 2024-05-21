@@ -16,6 +16,16 @@ App<IAppOption>({
       left,
       right,
     };
+    const { theme } = wx.getAppBaseInfo();
+    console.log(theme);
+    if (theme === "dark") {
+      wx.setTabBarStyle({
+        // color: "#FF0000",
+        // selectedColor: "#00FF00",
+        backgroundColor: "#000000",
+        // borderStyle: "white",
+      });
+    }
     const {
       miniProgram: { appId, envVersion, version },
     } = wx.getAccountInfoSync();

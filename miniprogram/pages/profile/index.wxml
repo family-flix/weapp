@@ -1,0 +1,76 @@
+<page-meta class="" page-style="" background-color="{{backgroundBottomColor}}">
+    <bar class-name="bg-w-bg-2" fixed="{{true}}" bind:mounted="handleMounted">
+        <view class="py-2 px-4 text-2xl overflow-hidden text-ellipsis truncate break-keep whitespace-nowrap">
+            {{profile.name}}
+        </view>
+    </bar>
+    <scroll-view class="relative h-full" style="top: 48px;">
+        <view class="flex px-3 py-2 mb-2 rounded-md cursor-pointer bg-w-bg-3" bind:tap="handleClickElm">
+            <view class="relative mr-4 rounded-lg overflow-hidden" style="width: 256rpx; height: 396rpx">
+                <image class="w-full h-full object-cover" src="{{profile.poster_path}}" alt="{{profile.name}}"></image>
+            </view>
+            <view class="flex-1 max-w-full overflow-hidden text-w-fg-0">
+                <view>{{profile.overview}}</view>
+                <view>
+                    <block wx:if="{{profile.original_name}}">
+                        <view class="mt-2">{{profile.original_name}}</view>
+                    </block>
+                    <block wx:if="{{profile.alias}}">
+                        <view class="mt-2">{{profile.alias}}</view>
+                    </block>
+                </view>
+                <view class="mt-1">
+                    <view>{{profile.air_date}}</view>
+                </view>
+                <block wx:if="{{profile.episode_count_text}}">
+                    <view class="mx-2 ">·</view>
+                    <view class="relative flex items-center bg-gray-100 rounded-md dark:bg-gray-800" style="padding: 2px 4px; font-size: 12px;">
+                        {{profile.episode_count_text}}
+                    </view>
+                </block>
+                <block wx:if="{{profile.actors}}">
+                    <view class="flex flex-wrap mt-1">
+                        <block wx:for="{{profile.actors}}" wx:for-item="actor" wx:key="id">
+                            <view class="mr-2 text-sm rounded-md bg-blue-100 text-blue-600" style="font-size: 12px;">
+                                {{actor.name}}
+                            </view>
+                        </block>
+                    </view>
+                </block>
+                <block wx:if="{{profile.vote}}">
+                    <view class="mt-2">
+                        <view class="relative">
+                            <span class="italic tracking-tight font-mono text-lg">
+                                {{profile.vote}}
+                            </span>
+                            <span class="relative ml-1 italic" style="top: -1; left: -2; font-size: 10px;">
+                                分
+                            </span>
+                        </view>
+                    </view>
+                </block>
+                <view class="mt-2 flex items-center flex-wrap gap-2 max-w-full">
+                    <block wx:for="{{season.genres}}" wx:for-item="tag" wx:key="self">
+                        <view class="py-1 px-2 leading-none rounded-lg break-keep whitespace-nowrap border border-w-fg-1" style="font-size: 24rpx; line-height: 24rpx;">
+                            {{tag}}
+                        </view>
+                    </block>
+                </view>
+            </view>
+        </view>
+        <list-view _store="{{$page.$episodes}}" class="pt-4">
+            <block wx:for="{{response.dataSource}}" wx:for-item="episode" wx:key="id">
+                <view class="px-4 py-2 rounded-md" data-elm="episode" data-id="{{episode.id}}" bind:tap="handleClickElm">
+                    <view class="flex items-center">
+                        <view>{{episode.order}}、</view>
+                        <view class="ml-4">{{episode.name}}</view>
+                    </view>
+                </view>
+            </block>
+        </list-view>
+        <view class="safe-block3"></view>
+    </scroll-view>
+    <dialog _store="{{$page.ui.$updateDialog}}">
+        <view class="px-4 text-w-fg-1">添加观看记录</view>
+    </dialog>
+</page-meta>

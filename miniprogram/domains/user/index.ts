@@ -169,6 +169,7 @@ export class UserCore extends BaseDomain<TheTypesOfEvents> {
     this.id = r.data.id;
     this.email = r.data.email;
     this.token = r.data.token;
+    this.permissions = r.data.permissions;
     this.isLogin = true;
     this.emit(Events.Login, { ...this.state });
     return Result.Ok({ ...this.state });

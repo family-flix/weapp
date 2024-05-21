@@ -64,9 +64,23 @@ export function DialogCore(props: DialogProps = {}) {
     event.emit(Events.StateChange, snapshot(state));
   });
 
-  const $present = PresenceCore();
-  const okBtn = new ButtonCore();
-  const cancelBtn = new ButtonCore();
+  const $present = PresenceCore({});
+  $present.onHidden(() => {
+    state.open = false;
+    event.emit(Events.Cancel);
+    event.emit(Events.VisibleChange, false);
+  });
+  const okBtn = new ButtonCore({
+    onClick() {
+      event.emit(Events.OK);
+    },
+  });
+  const cancelBtn = new ButtonCore({
+    onClick() {
+      console.log('hidden');
+      $present.hide();
+    },
+  });
 
   // if (title) {
   //   this.title = title;
@@ -96,18 +110,21 @@ export function DialogCore(props: DialogProps = {}) {
   $present.onUnmounted(() => {
     event.emit(Events.Unmounted);
   });
-  okBtn.onClick(() => {
-    // this.ok();
-  });
-  cancelBtn.onClick(() => {
-    // this.hide();
-  });
+  if (onOk) {
+    event.on(Events.OK, onOk);
+  }
+  if (onCancel) {
+    event.on(Events.Cancel, onCancel);
+  }
 
   return {
     state,
     $present,
     okBtn,
     cancelBtn,
+    get open() {
+      return state.open;
+    },
     /** 显示弹窗 */
     show() {
       // if (state.open) {

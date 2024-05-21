@@ -2,5 +2,5 @@
     <block wx:if="{{loading}}">
         <icon name="loader" class-name="w-4 h-4 mr-2 animation animate-spin" />
     </block>
-    {{text}}
+    <slot />
 </button>

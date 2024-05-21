@@ -10,6 +10,30 @@ Component({
   properties: {
     _store: {
       type: Object,
+      observer(store: CalendarCore) {
+        if (!store) {
+          return;
+        }
+        const { day, month, weeks, selectedDay } = store;
+        console.log("cur month", month, weeks);
+        this.setData({
+          title: month.text,
+          day,
+          month,
+          weeks,
+          selectedDay,
+        });
+        store.onStateChange((nextState) => {
+          const { day, month, weeks, selected } = nextState;
+          this.setData({
+            title: month.text,
+            day,
+            month,
+            weeks,
+            selectedDay: selected,
+          });
+        });
+      },
     },
   },
   data: {
@@ -24,28 +48,6 @@ Component({
       const { _store } = this.data;
       const store = _store as CalendarCore;
       // console.log("[COMPONENT]ui/dialog - attached", store);
-      if (!store) {
-        return;
-      }
-      const { day, month, weeks, selectedDay } = store;
-      // console.log("cur month", month, month?.toLocaleString());
-      this.setData({
-        title: month.text,
-        day,
-        month,
-        weeks,
-        selectedDay,
-      });
-      store.onStateChange((nextState) => {
-        const { day, month, weeks, selected } = nextState;
-        this.setData({
-          title: month.text,
-          day,
-          month,
-          weeks,
-          selectedDay: selected,
-        });
-      });
     },
   },
   methods: {},

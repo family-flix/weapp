@@ -1,210 +1,217 @@
-import { client } from "@/store/request";
-import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/domains/media/services";
-import { ButtonCore, CheckboxGroupCore, DialogCore, InputCore } from "@/domains/ui/index";
+import mitt from "mitt";
+import { app, history, storage, client } from "@/store/index";
+import { ViewComponentProps } from "@/store/types";
+import {
+  PlayHistoryItem,
+  deleteHistory,
+  fetchPlayingHistories,
+  fetchPlayingHistoriesProcess,
+} from "@/domains/media/services";
+import { DialogCore, ImageInListCore, NodeInListCore, ScrollViewCore } from "@/domains/ui/index";
 import { RequestCore } from "@/domains/request/index";
 import { ListCore } from "@/domains/list/index";
-import { TVGenresOptions, TVSourceOptions } from "@/constants/index";
-import { storage } from "@/store/storage";
+import { RefCore } from "@/domains/cur/index";
+import { RouteViewCore } from "@/domains/route_view/index";
+import { MediaTypes, TVGenresOptions, TVSourceOptions } from "@/constants/index";
 
-const seasonList = new ListCore(
-  new RequestCore(fetchSeasonList, {
-    process: fetchSeasonListProcess,
-    client,
-  }),
-  {
-    pageSize: 20,
-    beforeSearch() {
-      searchInput.setLoading(true);
+function HistoryPageLogic(props: ViewComponentProps) {
+  const { app, client, history } = props;
+
+  const $scroll = new ScrollViewCore({
+    os: app.env,
+    async onPullToRefresh() {
+      await $list.refresh();
+      $scroll.finishPullToRefresh();
     },
-    afterSearch() {
-      searchInput.setLoading(false);
+    async onReachBottom() {
+      await $list.loadMore();
+      $scroll.finishLoadingMore();
     },
-  }
-);
-seasonList.onError((tip) => {
-  wx.showToast({
-    title: tip.message,
-    icon: "none",
   });
-});
-// const scrollView = new ScrollViewCore({
-//   onScroll(pos) {
-//     if (!menu) {
-//       return;
-//     }
-//     if (pos.scrollTop > app.screen.height) {
-//       menu.setCanTop({
-//         icon: <ArrowUp className="w-6 h-6" />,
-//         text: "回到顶部",
-//       });
-//       return;
-//     }
-//     if (pos.scrollTop === 0) {
-//       menu.setCanRefresh();
-//       return;
-//     }
-//     menu.disable();
-//   },
-// });
-const settingsSheet = DialogCore();
-const searchInput = new InputCore({
-  placeholder: "请输入关键字搜索电视剧",
-  onEnter(v) {
-    seasonList.search({
-      name: v,
-    });
-  },
-  onBlur(v) {
-    seasonList.search({
-      name: v,
-    });
-  },
-  onClear() {
-    // console.log("[PAGE]home/index - onClear", helper, helper.response.search);
-    seasonList.search({
-      name: "",
-    });
-  },
-});
-const { language = [] } = storage.get("tv_search");
-const sourceCheckboxGroup = new CheckboxGroupCore({
-  values: TVSourceOptions.filter((opt) => {
-    return language.includes(opt.value);
-  }).map((opt) => opt.value),
-  options: TVSourceOptions.map((opt) => {
-    return {
-      ...opt,
-      checked: language.includes(opt.value),
-    };
-  }),
-  onChange(options) {
-    storage.merge("tv_search", {
-      language: options,
-    });
-    //     setHasSearch(!!options.length);
-    seasonList.search({
-      language: options.join("|"),
-    });
-  },
-});
-const genresCheckboxGroup = new CheckboxGroupCore({
-  options: TVGenresOptions,
-  onChange(options) {
-    // app.cache.merge("tv_search", {
-    //   genres: options,
-    // });
-    //     setHasSearch(!!options.length);
-    // settingsSheet.hide();
-    seasonList.search({
-      genres: options.join("|"),
-    });
-  },
-});
-// const mediaRequest = new MediaRequestCore({});
-// const mediaRequestBtn = new ButtonCore({
-//   onClick() {
-//     mediaRequest.input.change(searchInput.value);
-//     mediaRequest.dialog.show();
-//   },
-// });
-
-// const [response, setResponse] = useState(seasonList.response);
-// const [hasSearch, setHasSearch] = useState(
-//   (() => {
-//     const { language = [] } = app.cache.get("tv_search", {
-//       language: [] as string[],
-//     });
-//     return language.length !== 0;
-//   })()
-// );
-
-// const [history_response] = useState(history_helper.response);
-const btn = new ButtonCore({
-  onClick() {
-    // wx.showToast({
-    //   title: "点击",
-    //   icon: "none",
-    // });
-    dialog.show();
-    wx.pageScrollTo({
-      scrollTop: 0,
-      duration: 0, // 设置滚动到顶部的速度为0，禁用滚动
-    });
-  },
-});
-const dialog = DialogCore({
-  onOk() {
-    wx.showToast({
-      title: "确认",
-      icon: "none",
-    });
-  },
-  onCancel() {
-    //
-  },
-});
+  const $list = new ListCore(
+    new RequestCore(fetchPlayingHistories, {
+      process: fetchPlayingHistoriesProcess,
+      client,
+    }),
+    {
+      pageSize: 20,
+    }
+  );
+  const $cur = new RefCore<PlayHistoryItem>();
+  const $deletingConfirmDialog = DialogCore({
+    onOk() {
+      if (!$cur.value) {
+        return;
+      }
+      $deletingRequest.run({ history_id: $cur.value.id });
+    },
+  });
+  const $deletingRequest = new RequestCore(deleteHistory, {
+    client,
+    onLoading(loading) {
+      $deletingConfirmDialog.okBtn.setLoading(loading);
+    },
+    onFailed(error) {
+      app.tip({
+        text: ["删除失败", error.message],
+      });
+    },
+    onSuccess(v) {
+      app.tip({
+        text: ["删除成功"],
+      });
+      $deletingConfirmDialog.hide();
+      $list.deleteItem((history) => {
+        if (history.id === $cur.value?.id) {
+          return true;
+        }
+        return false;
+      });
+      $cur.clear();
+    },
+  });
+  const $poster = new ImageInListCore();
+  const $card = new NodeInListCore<PlayHistoryItem>({
+    onClick(record) {
+      if (!record) {
+        return;
+      }
+      const { type, media_id } = record;
+      if (type === MediaTypes.Season) {
+        history.push("root.season_playing", { id: media_id });
+        return;
+      }
+      if (type === MediaTypes.Movie) {
+        history.push("root.movie_playing", { id: media_id });
+        return;
+      }
+    },
+    // onLongPress(record) {
+    //   console.log("123");
+    //   alert(record?.name);
+    // },
+  });
+  const $thumbnail = new ImageInListCore({
+    scale: 1.38,
+  });
+  return {
+    $list,
+    ui: {
+      $scroll,
+      $deletingConfirmDialog,
+      $poster,
+      $thumbnail,
+      $card,
+    },
+    ready() {
+      $list.init();
+    },
+    handleClickHistory(record: { id: string; type: MediaTypes }) {
+      const { id, type } = record;
+      if (app.$user.permissions.includes("002")) {
+        if (type === MediaTypes.Season) {
+          history.push("root.season_playing", { id, type });
+          return;
+        }
+        if (type === MediaTypes.Movie) {
+          history.push("root.movie_playing", { id, type });
+          return;
+        }
+        app.tip({
+          text: ["未知的媒体类型"],
+        });
+        return;
+      }
+      history.push("root.profile", { id, type });
+    },
+  };
+}
 
 Page({
   data: {
-    response: seasonList.response,
-    hasSearch: (() => {
-      const { language = [] } = storage.get("tv_search");
-      return language.length !== 0;
-    })(),
-    searchInput,
-    btn,
-    dialog,
+    menuClient: app.screen.menuButton,
+    response: null as null | ReturnType<typeof HistoryPageLogic>["$list"]["response"],
+    hasSearch: false,
+  },
+  event: mitt(),
+  onClick(elm: string, handler: (payload: any) => void) {
+    this.event.on(elm, handler);
+  },
+  emitClick<T extends Record<string, string>>(elm: string, payload: T) {
+    this.event.emit(elm, payload);
   },
   onLoad() {
-    //     if (menu) {
-    //       menu.onScrollToTop(() => {
-    //         scrollView.scrollTo({ top: 0 });
-    //       });
-    //       menu.onRefresh(async () => {
-    //         scrollView.startPullToRefresh();
-    //         await seasonList.refresh();
-    //         scrollView.stopPullToRefresh();
-    //       });
-    //     }
-    // scrollView.onPullToRefresh(async () => {
-    //   await seasonList.refresh();
-    //   app.tip({
-    //     text: ["刷新成功"],
-    //   });
-    //   scrollView.stopPullToRefresh();
-    // });
-    // scrollView.onReachBottom(() => {
-    //   seasonList.loadMore();
-    // });
-    seasonList.onStateChange((nextResponse) => {
-      this.setData({
-        response: nextResponse,
-      });
+    const $page = HistoryPageLogic({
+      app,
+      client,
+      storage,
+      history,
+      view: new RouteViewCore({
+        name: "/",
+        title: "观看记录",
+        pathname: "/history",
+      }),
     });
-    //     mediaRequest.onTip((msg) => {
-    //       app.tip(msg);
-    //     });
-    const search = (() => {
-      const { language = [] } = storage.get("tv_search");
-      if (!language.length) {
-        return {};
+    this.onClick("history", (payload: { id: string }) => {
+      const { id } = payload;
+      const matched = $page.$list.response.dataSource.find((h) => h.id === id);
+      if (!matched) {
+        app.tip({
+          text: ["异常操作"],
+        });
+        return;
       }
-      return {
-        language: language.join("|"),
-      };
-    })();
-    seasonList.init(search);
+      $page.handleClickHistory(matched);
+    });
+    this.onClick("reach-bottom", () => {
+      $page.$list.loadMore();
+    });
+    this.onClick("pull-down-refresh", () => {
+      $page.$list.refresh();
+    });
+    $page.$list.onStateChange((v) => {
+      this.setData({ response: v });
+    });
+    this.setData({
+      $page,
+      response: $page.$list.response,
+    });
+    $page.ready();
+  },
+  onPullDownRefresh() {
+    this.emitClick("pull-down-refresh", {});
   },
   onReachBottom() {
-    console.log(111);
-    seasonList.loadMore();
+    this.emitClick("reach-bottom", {});
   },
-  handleClickSeason(event: { currentTarget: { dataset: { data: SeasonItem } } }) {
-    const { data } = event.currentTarget.dataset;
-    console.log(data);
-    const { id } = data;
-    wx.navigateTo({
-      url: `/pages/tv_play/index?id=${id}`,
-    });
+  handleClickElm(event: {
+    detail: { elm: string } & Record<string, string>;
+    currentTarget: { dataset: { elm: string } & Record<string, string> };
+  }) {
+    const { elm, payload } = (() => {
+      if (event.detail.elm) {
+        const { elm, ...rest } = event.detail;
+        return {
+          elm,
+          payload: rest,
+        };
+      }
+      if (event.currentTarget.dataset.elm) {
+        const { elm, ...rest } = event.currentTarget.dataset;
+        return {
+          elm,
+          payload: rest,
+        };
+      }
+      return {
+        elm: null,
+        payload: null,
+      };
+    })();
+    if (elm === null) {
+      console.warn("缺少 data-elm 属性");
+      return;
+    }
+    this.emitClick(elm, payload);
   },
 });

@@ -124,7 +124,6 @@ Component({
         if (this.mounted) {
           return;
         }
-        const { position, size } = this.data;
         this.mounted = true;
         const { title, footer, cancel } = store.state;
         console.log("position, size", this.data);

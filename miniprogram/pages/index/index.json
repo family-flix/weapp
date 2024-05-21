@@ -5,6 +5,7 @@
     "input": "/components/ui/input",
     "icon": "/components/ui/icon",
     "calendar": "/components/ui/calendar",
+    "list-view": "/components/list-view/index",
     "lazy-image": "/components/ui/image"
   }
 }

@@ -198,6 +198,9 @@ export class ListCore<
     if (afterSearch) {
       this.onAfterSearch(afterSearch);
     }
+    // fetch.onError((err) => {
+    //   this.emit(Events.Error, err);
+    // });
     this.initialize(options);
   }
   private initialize(options: ListProps<T>) {
@@ -670,9 +673,9 @@ export class ListCore<
     this.emit(Events.ParamsChange, { ...this.params });
   }
 
-  onStateChange(handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) {
+  onStateChange = (handler: Handler<TheTypesOfEvents<T>[Events.StateChange]>) => {
     return this.on(Events.StateChange, handler);
-  }
+  };
   onLoadingChange(handler: Handler<TheTypesOfEvents<T>[Events.LoadingChange]>) {
     return this.on(Events.LoadingChange, handler);
   }

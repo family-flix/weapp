@@ -62,6 +62,13 @@ page {
     --w-brand: #07c160;
     background-color: var(--background);
   }
+  view,
+  text,
+  input,
+  :before,
+  :after {
+    color: var(--w-fg-1);
+  }
 }
 
 view,
@@ -73,7 +80,82 @@ input,
   border-width: 0;
   border-style: solid;
   border-color: #e5e7eb;
+  color: var(--w-fg-1);
 }
+// .icon {
+//   background-image: url("/assets/sprite.png");
+// }
+// .icon-airplay {
+//   background-position: 0px 0px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-alert-triangle {
+//   background-position: -144px 0px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-arrow-left {
+//   background-position: 0px -144px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-chevrons-left {
+//   background-position: -144px -144px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-chevrons-right {
+//   background-position: -288px 0px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-help-circle {
+//   background-position: -288px -144px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-layers {
+//   background-position: 0px -288px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-loader-2 {
+//   background-position: -144px -288px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-loader {
+//   background-position: -288px -288px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-maximize {
+//   background-position: -432px 0px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-pause {
+//   background-position: -432px -144px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-play {
+//   background-position: -432px -288px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-settings {
+//   background-position: 0px -432px;
+//   width: 144px;
+//   height: 144px;
+// }
+// .icon-skip-forward {
+//   background-position: -144px -432px;
+//   width: 144px;
+//   height: 144px;
+// }
+
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
   padding-bottom: constant(safe-area-inset-bottom);
@@ -105,28 +187,28 @@ input,
   width: constant(safe-area-inset-top);
   height: env(safe-area-inset-top);
   height: constant(safe-area-inset-top);
-  background-color: red;
+  // background-color: red;
 }
 .safe-block2 {
   width: env(safe-area-inset-right);
   width: constant(safe-area-inset-right);
   height: env(safe-area-inset-right);
   height: constant(safe-area-inset-right);
-  background-color: green;
+  // background-color: green;
 }
 .safe-block3 {
   width: env(safe-area-inset-bottom);
   width: constant(safe-area-inset-bottom);
   height: env(safe-area-inset-bottom);
   height: constant(safe-area-inset-bottom);
-  background-color: yellow;
+  // background-color: yellow;
 }
 .safe-block4 {
   width: env(safe-area-inset-left);
   width: constant(safe-area-inset-left);
   height: env(safe-area-inset-left);
   height: constant(safe-area-inset-left);
-  background-color: pink;
+  // background-color: pink;
 }
 .episode:nth-child(5n) {
   margin-right: 0;
@@ -305,16 +387,34 @@ input,
 .opacity-80 {
   opacity: 0.8;
 }
+.truncate {
 
+}
+.text-ellipsis {
+  text-overflow: ellipsis;
+}
+.break-keep {
+  word-break: keep-all;
+}
+.whitespace-nowrap {
+  white-space: nowrap;
+}
 .mt-1 {
   margin-top: 0.25rem;
 }
 .mt-2 {
   margin-top: 0.5rem;
 }
+.mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
 .mx-2 {
   margin-left: 0.5rem;
   margin-right: 0.5rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
 }
 .mb-3 {
   margin-bottom: 0.75rem;
@@ -361,6 +461,9 @@ input,
 .rounded-md {
   border-radius: 0.375rem;
 }
+.rounded-xl {
+  border-radius: 1.25rem;
+}
 .rounded-tl-xl {
   border-top-left-radius: 1.25rem;
 }
@@ -393,6 +496,10 @@ input,
 .py-2 {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 .px-2 {
   padding-left: 0.5rem;
@@ -433,6 +540,9 @@ input,
 }
 .pt-6 {
   padding-top: 1.5rem;
+}
+.pb-4 {
+  padding-bottom: 1rem;
 }
 .pb-6 {
   padding-bottom: 1.5rem;
@@ -495,6 +605,9 @@ input,
 }
 .h-12 {
   height: 3rem;
+}
+.w-16 {
+  width: 4rem;
 }
 .h-16 {
   height: 4rem;

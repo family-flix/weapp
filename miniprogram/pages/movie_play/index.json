@@ -2,9 +2,10 @@
   "usingComponents": {
     "lazy-image": "/components/ui/image",
     "f-video": "/components/video",
-    "navigation-bar": "/components/ui/navigation-bar",
+    "bar": "/components/ui/navigation-bar",
     "icon": "/components/ui/icon/index",
     "presence": "/components/ui/presence/index",
+    "media-settings": "/components/media-settings",
     "sheet": "/components/ui/sheet/index"
   },
   "pageOrientation": "auto"

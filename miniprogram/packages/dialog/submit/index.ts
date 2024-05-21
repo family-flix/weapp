@@ -19,12 +19,4 @@ Component({
     },
   },
   data: {},
-  lifetimes: {
-    ready() {
-      const store = this.data._store as DialogCore;
-      if (!store) {
-        return;
-      }
-    },
-  },
 });

@@ -66,6 +66,18 @@ const configure = {
           require: ["login"],
         },
       },
+      profile: {
+        title: "影视剧详情",
+        pathname: "/profile",
+        options: {
+          keep_alive: true,
+          animation: {
+            in: "fade-in",
+            out: "fade-out",
+          },
+          require: ["login"],
+        },
+      },
       history_updated: {
         title: "我的",
         pathname: "/home/updated_history",

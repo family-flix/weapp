@@ -1,0 +1,123 @@
+<page-meta class="" page-style="" background-color="{{backgroundBottomColor}}">
+    <bar class-name="bg-w-bg-2" fixed="{{true}}">
+        <view class="py-2 px-4 text-2xl">个人中心</view>
+    </bar>
+    <scroll-view class="h-full">
+        <view class="p-4">
+            <calendar _store="{{$page.ui.$calendar}}" />
+        </view>
+        <view class="relative px-4 py-2 space-y-2 text-w-fg-1">
+            <view class="relative flex mt-4 p-4 rounded-lg bg-w-bg-3">
+                <view class="mr-4 w-16 h-16 rounded-full overflow-hidden">
+                    <lazy-image class="w-full h-full" store="{{$page.ui.$avatar}}"></lazy-image>
+                </view>
+                <view class="mt-2 flex-1 w-0">
+                    <view class="w-full text-xl break-all truncate text-ellipsis text-w-fg-0">
+                        {{profile.email || profile.id}}
+                    </view>
+                </view>
+            </view>
+            <view class="mt-4 rounded-lg bg-w-bg-3 text-w-fg-0">
+                <view class="flex items-center justify-between" data-elm="bind" bind:tap="handleClickElm">
+                    <view class="flex items-center">
+                        <view class="relative p-4">
+                            <MessageSquare class="w-5 h-5"></MessageSquare>
+                        </view>
+                        <view class="flex-1 py-4">
+                            <view>关联账号</view>
+                        </view>
+                    </view>
+                </view>
+                <!-- <view class="flex items-center justify-between">
+                    <view class="flex items-center">
+                        <view class="relative p-4">
+                            <MessageSquare class="w-5 h-5"></MessageSquare>
+                            <block wx:if="{{!!messageResponse.total}}">
+                                <view class="absolute top-3 right-3 w-2 h-2 rounded-full bg-w-red" />
+                            </block>
+                        </view>
+                        <view class="flex-1 py-4">
+                            <view>消息</view>
+                        </view>
+                    </view>
+                </view> -->
+                <!-- <view class="mx-4 bg-w-fg-3 transform scale-y-50" style="height: 1px;"></view>
+                <view class="">
+                    <view class="flex items-center">
+                        <view class="p-4">
+                            <HelpCircle class="w-5 h-5"></HelpCircle>
+                        </view>
+                        <view class="flex-1 py-4">
+                            <view>帮助中心</view>
+                        </view>
+                    </view>
+                </view>
+                <view class="mx-4 bg-w-fg-3 transform scale-y-50" style="height: 1px;"></view>
+                <view class="">
+                    <view class="flex items-center">
+                        <view class="p-4">
+                            <MailQuestion class="w-5 h-5"></MailQuestion>
+                        </view>
+                        <view class="flex-1 py-4">
+                            <view>问题反馈</view>
+                        </view>
+                    </view>
+                </view>
+                <view class="mx-4 bg-w-fg-3 transform scale-y-50" style="height: 1px;"></view>
+                <view class="">
+                    <view class="flex items-center">
+                        <view class="p-4">
+                            <Tv class="w-5 h-5"></Tv>
+                        </view>
+                        <view class="flex-1 py-4">
+                            <view>想看</view>
+                        </view>
+                    </view>
+                </view>
+                <view class="mx-4 bg-w-fg-3 transform scale-y-50" style="height: 1px;"></view>
+                <view class="relative">
+                    <view class="flex items-center">
+                        <view class="p-4">
+                            <block wx:if="{{loading}}">
+                                <Loader class="w-5 h-5 animate-spin" />
+                            </block>
+                            <block>
+                                <HelpingHand class="w-5 h-5" />
+                            </block>
+                        </view>
+                        <view class="flex-1 py-4">
+                            <view>邀请好友</view>
+                        </view>
+                    </view>
+                </view> -->
+            </view>
+        </view>
+    </scroll-view>
+    <dialog store="{{$page.ui.$tip}}">
+        <view class="text-w-fg-1">敬请期待</view>
+    </dialog>
+    <dialog store="{{$page.ui.$reportDialog}}">
+        <view class="text-w-fg-1">
+            <view>提交你认为存在问题或需要改进的地方</view>
+            <view class="mt-4">
+                <Input store="{{$page.ui.$reportInput}}" />
+            </view>
+        </view>
+    </dialog>
+    <dialog store="{{$page.ui.$requireDialog}}">
+        <view class="text-w-fg-1">
+            <view>你可以提交想看的电视剧或电影</view>
+            <view class="mt-4">
+                <Input store="{{$page.ui.$requireInput}}" />
+            </view>
+        </view>
+    </dialog>
+    <dialog _store="{{$page.ui.$bindDialog}}">
+        <view class="px-4 text-w-fg-1">
+            <view class="mt-4">
+                <input _store="{{$page.ui.$bindInput}}" />
+            </view>
+            <view></view>
+        </view>
+    </dialog>
+</page-meta>

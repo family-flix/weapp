@@ -67,6 +67,7 @@ export class StorageCore<T extends Record<string, unknown>> extends BaseDomain<T
       [key]: values,
     };
     this.values = nextValues;
+    console.log("client setItem", key, values);
     this.client.setItem(this.key, JSON.stringify(this.values));
     this.emit(Events.StateChange, { ...this.state });
   }) as (key: keyof T, value: unknown) => void;
@@ -92,6 +93,7 @@ export class StorageCore<T extends Record<string, unknown>> extends BaseDomain<T
         ...prevValues,
         ...values,
       };
+      console.log("[DOMAIN]storage/index - merge", key, nextValues);
       this.set(key, nextValues);
       return nextValues;
     }

@@ -14,13 +14,14 @@
                         <block wx:if="{{!!curSource.typeText}}">
                             <view class="px-2">{{curSource.typeText}}</view>
                         </block>
+                        <view>切换</view>
                     </view>
                 </view>
                 <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.SourceFile}}" bind:tap="handleClickMenu">
                     <view>视频源</view>
-                    <view class=" text-w-fg-1"></view>
+                    <view class=" text-w-fg-1">切换</view>
                 </view>
-                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Subtitle}}" bind:tap="handleClickMenu">
+                <!-- <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Subtitle}}" bind:tap="handleClickMenu">
                     <view>字幕列表</view>
                     <view class="flex items-center">
                         <view class="px-4" catch:tap="handleClickSubtitleBtn">
@@ -32,21 +33,22 @@
                         </view>
                         <view class="{{subtitle === null ? 'text-w-fg-2' : 'text-w-fg-1'}}"></view>
                     </view>
-                </view>
+                </view> -->
                 <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Rate}}" bind:tap="handleClickRateMenu">
                     <view>播放倍率</view>
                     <view class="flex items-center space-x-2 text-w-fg-1">
                         <view class="px-2">{{playerState.rate}}x</view>
+                        <view>切换</view>
                     </view>
                 </view>
-                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Share}}" bind:tap="handleClickMenu">
+                <!-- <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Share}}" bind:tap="handleClickMenu">
                     <view>分享</view>
                     <view class="flex items-center space-x-2 text-w-fg-1"></view>
-                </view>
-                <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Report}}" bind:tap="handleClickMenu">
+                </view> -->
+                <!-- <view class="flex items-center justify-between py-2 px-4" data-id="{{MediaSettingsMenuKey.Report}}" bind:tap="handleClickMenu">
                     <view>反馈问题</view>
                     <view class="flex items-center space-x-2 text-w-fg-1"></view>
-                </view>
+                </view> -->
             </view>
         </view>
         <view class="panel__second relative w-full h-full flex-shrink-0">
@@ -78,7 +80,7 @@
                             <view class="max-h-full text-w-fg-1 px-4 overflow-y-auto">
                                 <view class="pb-24">
                                     <block wx:for="{{curSource.resolutions}}" wx:for-item="r" wx:key="typeText">
-                                        <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{curSource.typeText === r.typeText ? 'bg-w-bg-active' : ''}}" bind:tap="handleClickType">
+                                        <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{curSource.type === r.type ? 'bg-w-bg-active' : ''}}" data-elm="resolution" data-resolution="{{r.type}}" bind:tap="handleClickElm">
                                             <view>{{r.typeText}}</view>
                                         </view>
                                     </block>
@@ -108,9 +110,12 @@
                         <block wx:else>
                             <view class="max-h-full overflow-y-auto px-4 text-w-fg-1">
                                 <view class="pb-24">
-                                    <block wx:for="{{state.curSource.files}}" wx:for-item="s" wx:key="id">
-                                        <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{state.curSource.id === s.id ? 'bg-w-bg-active' : ''}}" bind:tap="handleClickSourceFile">
-                                            <view class="break-all">{{s.name}}</view>
+                                    <block wx:for="{{state.curSource.files}}" wx:for-item="file" wx:key="id">
+                                        <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{state.curSource.id === file.id ? 'bg-w-bg-active' : ''}}" data-elm="file" data-id="{{file.id}}" bind:tap="handleClickElm">
+                                            <view class="break-all">{{file.name}}</view>
+                                            <view wx:if="{{state.curSource.id === file.id}}">
+                                                选中
+                                            </view>
                                         </view>
                                     </block>
                                 </view>
@@ -121,9 +126,10 @@
                 <block wx:if="{{menuIndex === MediaSettingsMenuKey.Rate}}">
                     <view class="max-h-full overflow-y-auto px-4 text-w-fg-1">
                         <view class="pb-24">
-                            <block wx:for="{{MediaRates}}" wx:for-item="rateOpt" wx:key="self">
-                                <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{rate === rateOpt ? 'bg-w-bg-active' : ''}}" bind:tap="handleClickRate">
-                                    <view class="break-all">{{rateOpt}}x</view>
+                            <block wx:for="{{MediaRates}}" wx:for-item="rate" wx:key="self">
+                                <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{playerState.rate === rate ? 'bg-w-bg-active' : ''}}" data-elm="rate" data-rate="{{rate}}" bind:tap="handleClickElm">
+                                    <view class="break-all">{{rate}}x</view>
+                                    <view wx:if="{{playerState.rate === rate}}">选中</view>
                                 </view>
                             </block>
                         </view>
@@ -134,7 +140,7 @@
                         <view class="max-h-full overflow-y-auto px-4 text-w-fg-1">
                             <view class="pb-24">
                                 <block wx:for="{{subtitles}}" wx:for-item="sub" wx:key="url">
-                                    <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{sub.url === subtitle.url ? 'bg-w-bg-active' : ''}}" bind:tap="handleClickSubtitle">
+                                    <view class="flex items-center justify-between p-4 rounded-md cursor-pointer {{sub.url === subtitle.url ? 'bg-w-bg-active' : ''}}" data-elm="subtitle" data-id="{{subtitle.id}}" bind:tap="handleClickElm">
                                         <view class="w-full break-all truncate">
                                             {{sub.language.join("&")}}
                                         </view>
@@ -173,7 +179,7 @@
                         <view class="max-h-full overflow-y-auto px-4 text-w-fg-1">
                             <view class="pb-24">
                                 <block wx:for="{{SeasonReportList}}" wx:for-item="question" wx:key="self">
-                                    <view class="flex items-center justify-between p-4 rounded-md cursor-pointer" bind:tap="handleClickQuestion">
+                                    <view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="question" data-question="{{question}}" bind:tap="handleClickElm">
                                         <view>{{question}}</view>
                                     </view>
                                 </block>

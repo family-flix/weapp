@@ -20,6 +20,7 @@ export const pages: Record<PageKeys, string> = {
   "root.live": "",
   "root.season_playing": "/pages/tv_play/index",
   "root.movie_playing": "/pages/movie_play/index",
+  "root.profile": "/pages/profile/index",
   "root.invitation_code": "",
   "root.help": "",
   "root.login": "",

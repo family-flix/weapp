@@ -1,15 +1,18 @@
-import { DialogCore } from "@/domains/ui/index";
+import { ButtonCore, DialogCore } from "@/domains/ui/index";
 
 Component({
   externalClasses: ["class"],
   options: {
-    pureDataPattern: /^_/,
+    // pureDataPattern: /^_/,
     virtualHost: true,
     styleIsolation: "apply-shared",
   },
   properties: {
     _store: {
       type: Object,
+      observer(store: ButtonCore) {
+        console.log('[COMPONENT]dialog/cancel - store observer', store);
+      },
     },
     className: {
       type: String,
@@ -20,11 +23,5 @@ Component({
   },
   data: {},
   lifetimes: {
-    ready() {
-      const store = this.data._store as DialogCore;
-      if (!store) {
-        return;
-      }
-    },
   },
 });

@@ -27,12 +27,14 @@ type InputProps = {
   disabled: boolean;
   defaultValue: string;
   placeholder: string;
-  focus?: boolean;
   type: string;
+  autoFocus: boolean;
+  autoComplete: boolean;
   onChange: (v: string) => void;
   onEnter: (v: string) => void;
   onBlur: (v: string) => void;
   onClear: () => void;
+  onMounted?: () => void;
 };
 type InputState = {
   value: string;
@@ -40,8 +42,10 @@ type InputState = {
   disabled: boolean;
   loading: boolean;
   type: string;
+  tmpType: string;
   allowClear: boolean;
-  focus: boolean;
+  autoFocus: boolean;
+  autoComplete: boolean;
 };
 
 export class InputCore extends BaseDomain<TheTypesOfEvents> {
@@ -50,10 +54,12 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
   placeholder: string;
   disabled: boolean;
   allowClear: boolean = true;
-  focus: boolean = false;
+  autoComplete: boolean = false;
+  autoFocus: boolean = false;
   type: string;
   loading = false;
   valueUsed = "";
+  tmpType = "";
 
   get state(): InputState {
     return {
@@ -62,7 +68,9 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
       disabled: this.disabled,
       loading: this.loading,
       type: this.type,
-      focus: this.focus,
+      tmpType: this.tmpType,
+      autoComplete: this.autoComplete,
+      autoFocus: this.autoFocus,
       allowClear: this.allowClear,
     };
   }
@@ -76,19 +84,22 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
       placeholder = "请输入",
       type = "string",
       disabled = false,
-      focus = false,
+      autoFocus = false,
+      autoComplete = false,
       onChange,
       onBlur,
       onEnter,
       onClear,
+      onMounted,
     } = options;
     if (name) {
-      this._name = name;
+      this.unique_id = name;
     }
     this.placeholder = placeholder;
     this.type = type;
     this.disabled = disabled;
-    this.focus = focus;
+    this.autoComplete = autoComplete;
+    this.autoFocus = autoFocus;
     if (defaultValue) {
       this._defaultValue = defaultValue;
     }
@@ -99,7 +110,9 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
       this.onChange(onChange);
     }
     if (onEnter) {
-      this.onEnter(onEnter);
+      this.onEnter(() => {
+        onEnter(this.value);
+      });
     }
     if (onBlur) {
       this.onBlur(onBlur);
@@ -107,47 +120,39 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
     if (onClear) {
       this.onClear(onClear);
     }
+    if (onMounted) {
+      this.onMounted(onMounted);
+    }
   }
-  setMounted = () => {
+  setMounted() {
     this.emit(Events.Mounted);
-  };
-  handleEnter = () => {
-    // wx.showToast({
-    //   title: "handleEnter",
-    // });
+  }
+  handleEnter() {
     // if (this.value === this.valueUsed) {
     //   return;
     // }
     this.valueUsed = this.value;
     this.emit(Events.Enter, this.value);
-  };
-  handleBlur = () => {
+  }
+  handleBlur() {
     if (this.value === this.valueUsed) {
       return;
     }
     this.valueUsed = this.value;
     this.emit(Events.Blur, this.value);
-  };
-  handleChange = (value: string) => {
-    this.value = value;
-    this.emit(Events.Change, value);
-    this.emit(Events.StateChange, { ...this.state });
-  };
-  setLoading = (loading: boolean) => {
+  }
+  setLoading(loading: boolean) {
     this.loading = loading;
     this.emit(Events.StateChange, { ...this.state });
-  };
-  setFocus = () => {
+  }
+  focus() {
     console.log("请在 connect 中实现 focus 方法");
-  };
-  setBlur = () => {
-    console.log("请在 connect 中实现 blur 方法");
-  };
+  }
   change = (value: string) => {
     this.value = value;
     this.emit(Events.Change, value);
     this.emit(Events.StateChange, { ...this.state });
-  };
+  }
   enable() {
     this.disabled = true;
     this.emit(Events.StateChange, { ...this.state });
@@ -156,8 +161,16 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
     this.disabled = false;
     this.emit(Events.StateChange, { ...this.state });
   }
+  showText() {
+    this.tmpType = "text";
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  hideText() {
+    this.tmpType = "";
+    this.emit(Events.StateChange, { ...this.state });
+  }
   clear() {
-    // console.log("[COMPONENT]ui/input/index - clear", this._defaultValue);
+    console.log("[COMPONENT]ui/input/index - clear", this._defaultValue);
     this.value = this._defaultValue;
     // this.emit(Events.Change, this.value);
     this.emit(Events.Clear);
@@ -167,13 +180,16 @@ export class InputCore extends BaseDomain<TheTypesOfEvents> {
     this.value = this._defaultValue;
     this.emit(Events.StateChange, { ...this.state });
   }
+  enter() {
+    this.emit(Events.Enter);
+  }
 
   onChange(handler: Handler<TheTypesOfEvents[Events.Change]>) {
     return this.on(Events.Change, handler);
   }
   onStateChange = (handler: Handler<TheTypesOfEvents[Events.StateChange]>) => {
     return this.on(Events.StateChange, handler);
-  };
+  }
   onMounted(handler: Handler<TheTypesOfEvents[Events.Mounted]>) {
     return this.on(Events.Mounted, handler);
   }

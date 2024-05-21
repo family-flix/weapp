@@ -1,50 +1,54 @@
 <page-meta class="" page-style="" background-color="{{backgroundBottomColor}}">
-    <navigation-bar class-name="bg-w-bg-0" fixed="{{true}}"></navigation-bar>
-    <navigation-bar class-name="bg-w-bg-0" fixed="{{true}}">
-        <view class="p-2" bind:tap="handleClickArrowLeftIcon">
-            <icon name="arrow-left" size="{{24}}" />
-        </view>
+    <bar class-name="bg-w-bg-0" fixed="{{true}}">
         <view slot="footer" class="flex items-center justify-between w-full py-2 px-4 text-w-fg-2 space-x-3">
             <view class="w-full">
-                <input _store="{{$search.input}}" />
+                <input _store="{{$page.ui.$input}}" />
             </view>
-            <view class="relative w-12" bind:tap="handleClickSearchBtn">
+            <view class="relative w-12" data-elm="search-btn" data-keyword="{{keyword}}" bind:tap="handleClickElm">
                 {{ keyword ? '搜索' : '取消'}}
             </view>
         </view>
-    </navigation-bar>
+    </bar>
     <scroll-view class="bg-w-bg-3 text-w-fg-1">
         <view class="w-full min-h-screen">
-            <list-view class="h-full grid grid-cols-1">
+            <list-view class="h-full grid grid-cols-1" _store="{{$page.$list}}">
                 <block wx:for="{{response.dataSource}}" wx:key="id" wx:for-item="season">
-                    <view class="flex px-4 py-2 mb-3 cursor-pointer" data-data="{{season}}" bind:tap="handleClickSeason">
+                    <view class="flex px-3 py-2 mb-2 rounded-md cursor-pointer bg-w-bg-3" data-elm="season" data-id="{{season.id}}" bind:tap="handleClickElm">
                         <view class="relative mr-4 rounded-lg overflow-hidden" style="width: 256rpx; height: 396rpx">
                             <lazy-image class="w-full h-full object-cover" src="{{season.poster_path}}" alt="{{season.name}}" />
-                            <show when="{{season.episode_count_text}}">
-                                <view class="absolute z-10 w-full bottom-0 flex flex-row-reverse items-center">
-                                    <view class="absolute z-10 inset-0 opacity-80 bg-gradient-to-t to-transparent from-w-fg-0"></view>
-                                    <view class="relative z-20 p-2 pt-6 text-w-bg-1" style="font-size: 24rpx;">
+                        </view>
+                        <view class="flex-1 max-w-full overflow-hidden text-w-fg-0">
+                            <view class="flex items-center">
+                                <h2 class="text-xl text-w-fg-0">{{season.name}}</h2>
+                            </view>
+                            <view class="flex items-center mt-1">
+                                <view>{{season.air_date}}</view>
+                                <block wx:if="{{season.episode_count_text}}">
+                                    <view class="mx-2 ">·</view>
+                                    <view class="relative flex items-center bg-gray-100 rounded-md dark:bg-gray-800" style="padding: 2px 4px; font-size: 12px;">
                                         {{season.episode_count_text}}
                                     </view>
-                                </view>
-                            </show>
-                        </view>
-                        <view class="mt-2 flex-1 w-0 max-w-full overflow-hidden">
-                            <view class="flex items-center">
-                                <view class="text-xl text-w-fg-0">{{season.name}}</view>
+                                </block>
                             </view>
-                            <view class="flex items-center mt-1 ">
-                                <view>{{season.air_date}}</view>
-                                <view class="mx-2 ">·</view>
-                                <view class="whitespace-nowrap">{{season.season_text}}</view>
-                                <view class="mx-2 ">·</view>
-                                <view class="relative flex items-center">
-                                    <icon name="star" class-name="absolute" size="{{18}}" style="top: 50%; transform: translateY(-50%);" />
-                                    <view class="pl-6">{{season.vote}}</view>
+                            <block wx:if="{{season.actors}}">
+                                <view class="mt-1 text-sm rounded-md bg-blue-100 text-blue-600 overflow-hidden text-ellipsis break-keep whitespace-nowrap" style="padding: 2px 4px; fontSize: 12;">
+                                    {{season.actors}}
                                 </view>
-                            </view>
+                            </block>
+                            <block wx:if="{{season.vote}}">
+                                <view class="mt-2">
+                                    <view class="relative">
+                                        <span class="italic tracking-tight font-mono text-lg">
+                                            {{season.vote}}
+                                        </span>
+                                        <span class="relative ml-1 italic" style="top: -1; left: -2; font-size: 10px;">
+                                            分
+                                        </span>
+                                    </view>
+                                </view>
+                            </block>
                             <view class="mt-2 flex items-center flex-wrap gap-2 max-w-full">
-                                <block wx:for="{{season.genres}}" wx:key="self" wx:for-item="tag">
+                                <block wx:for="{{season.genres}}" wx:for-item="tag" wx:key="self">
                                     <view class="py-1 px-2 leading-none rounded-lg break-keep whitespace-nowrap border border-w-fg-1" style="font-size: 24rpx; line-height: 24rpx;">
                                         {{tag}}
                                     </view>
@@ -57,5 +61,3 @@
         </view>
     </scroll-view>
 </page-meta>
-<!-- <view class="red text-white">Hello</view>
-<portal class="red text-white">Hello</portal> -->

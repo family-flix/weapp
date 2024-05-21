@@ -1,7 +1,6 @@
 import { VariantProps, cva } from "class-variance-authority";
 
 import { ButtonCore } from "@/domains/ui/index";
-import { cn } from "@/utils/index";
 
 const buttonVariants = cva(
   "active:scale-95 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:opacity-50 dark:focus:ring-slate-400 disabled:pointer-events-none dark:focus:ring-offset-slate-900 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800",
@@ -39,6 +38,31 @@ Component({
   properties: {
     _store: {
       type: Object,
+      observer(store: ButtonCore) {
+        if (!store) {
+          return;
+        }
+        if (this.mounted) {
+          return;
+        }
+        this.mounted = true;
+        const { disabled, loading, text } = store.state;
+        const c = buttonVariants({ variant: this.data.variant, size: this.data.size, class: "w-full space-x-2" });
+        this.setData({
+          disabled,
+          loading,
+          text,
+          className: c,
+        });
+        store.onStateChange((nextState) => {
+          const { disabled, loading, text } = nextState;
+          this.setData({
+            disabled,
+            loading,
+            text,
+          });
+        });
+      },
     },
     variant: {
       type: String,
@@ -54,35 +78,11 @@ Component({
     },
   },
   data: { className: "", text: "确定" },
-  lifetimes: {
-    ready() {
-      console.log("[COMPONENT]ui/button - ready", cn);
-      const { variant, size } = this.data;
-      const c = buttonVariants({ variant, size, class: "w-full space-x-2" });
-      this.setData({ className: c });
-      const store = this.data._store as ButtonCore;
-      if (!store) {
-        return;
-      }
-      const { disabled, loading, text } = store.state;
-      this.setData({
-        disabled,
-        loading,
-        text,
-      });
-      store.onStateChange((nextState) => {
-        const { disabled, loading, text } = nextState;
-        this.setData({
-          disabled,
-          loading,
-          text,
-        });
-      });
-    },
-  },
+  lifetimes: {},
   methods: {
     handleClick() {
       const store = this.data._store as ButtonCore;
+      console.log("click", store);
       if (!store) {
         return;
       }

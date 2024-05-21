@@ -187,7 +187,7 @@ function SeasonMediaSettingsComponent(
 Component({
   externalClasses: ["class-name"],
   options: {
-    pureDataPattern: /^_/,
+    // pureDataPattern: /^_/,
     virtualHost: true,
     styleIsolation: "apply-shared",
   },
@@ -212,13 +212,33 @@ Component({
   },
   lifetimes: {
     ready() {
+      console.log(this.data);
+      const $media: SeasonMediaCore = this.data._media;
+      const $player: ReturnType<typeof PlayerCore> = this.data._player;
       const $com = SeasonMediaSettingsComponent({
-        $media: this.data._media,
-        $player: this.data._player,
+        $media,
+        $player,
         app,
         client,
         storage,
         history,
+      });
+      $media.onStateChange((v) => this.setData({ state: v }));
+      $media.onSourceFileChange((v) => this.setData({ curSource: v }));
+      // $media.$source.onSubtitleChange((v) => setSubtitle(v));
+      // $player.onRateChange((v) => setRate(v.rate));
+      $player.onStateChange((v) => {
+        console.log("[COMPONENT]$player.onStateChange", v);
+        this.setData({ playerState: v });
+      });
+      // $com.subscribe($com.state, (v) => setShareLink(snapshot($com.state).shareLink));
+      // $com.curReport.onChange((v) => setCurReportValue(v));
+      // $com.inviteeSelect.onResponseChange((v) => setMember(v));
+      this.setData({
+        $com,
+        state: $media.state,
+        playerState: $player.state,
+        curSource: $media.$source.profile,
       });
     },
   },
@@ -240,6 +260,57 @@ Component({
           curMenu: null,
         });
       }, 300);
+    },
+    // handleClickResolution(event: { currentTarget: { dataset: { type: string } } }) {
+    //   const { type } = event.currentTarget.dataset;
+    //   this.triggerEvent("resolution", {
+    //     type,
+    //   });
+    // },
+    // handleClickRate(event: { currentTarget: { dataset: { rate: string } } }) {
+    //   const { rate } = event.currentTarget.dataset;
+    //   this.triggerEvent("rate", {
+    //     rate,
+    //   });
+    // },
+    // handleClickFile(event: { currentTarget: { dataset: { id: string } } }) {
+    //   const { id } = event.currentTarget.dataset;
+    //   this.triggerEvent("file", {
+    //     id,
+    //   });
+    // },
+    handleClickElm(event: {
+      detail: { elm: string } & Record<string, string>;
+      currentTarget: { dataset: { elm: string } & Record<string, string> };
+    }) {
+      const { elm, payload } = (() => {
+        if (event.detail.elm) {
+          const { elm, ...rest } = event.detail;
+          return {
+            elm,
+            payload: rest,
+          };
+        }
+        if (event.currentTarget.dataset.elm) {
+          const { elm, ...rest } = event.currentTarget.dataset;
+          return {
+            elm,
+            payload: rest,
+          };
+        }
+        return {
+          elm: null,
+          payload: null,
+        };
+      })();
+      if (elm) {
+        this.triggerEvent("click", {
+          elm,
+          payload,
+        });
+        return;
+      }
+      this.triggerEvent("tap", {});
     },
   },
 });

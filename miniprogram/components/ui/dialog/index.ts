@@ -15,6 +15,61 @@ Component({
   properties: {
     _store: {
       type: Object,
+      observer(store: ReturnType<typeof DialogCore>) {
+        if (this.mounted) {
+          return;
+        }
+        this.mounted = true;
+        const { title, footer, cancel } = store.state;
+        console.log("position, size", this.data);
+        // const contentClassName = sheetVariants({ position, size });
+        this.setData({
+          title,
+          footer,
+          cancel,
+          // contentClassName,
+        });
+        store.$present.onStateChange((v) => {
+          const { enter, exit } = v;
+          // const overlayAnimationClassName = (() => {
+          //   if (enter) {
+          //     return `animate-in fade-in`;
+          //   }
+          //   if (exit) {
+          //     return ` animate-out fade-out-0`;
+          //   }
+          //   return "";
+          // })();
+          // const contentClassName = "";
+          // const contentAnimationClassName = (() => {
+          //   if (enter) {
+          //     return `animate-in slide-in-from-bottom`;
+          //   }
+          //   if (exit) {
+          //     return `animate-out slide-out-to-bottom`;
+          //   }
+          //   return "";
+          // })();
+          // this.setData({
+          //   overlayClassName: overlayAnimationClassName,
+          //   contentClassName: contentAnimationClassName,
+          // });
+        });
+        store.onStateChange((nextState) => {
+          const { title, footer, cancel, open } = nextState;
+          const overlayAnimationClassName = open ? `animate-in fade-in` : ` animate-out fade-out-0`;
+          const contentAnimationClassName = open
+            ? `animate-in slide-in-from-bottom`
+            : `animate-out slide-out-to-bottom`;
+          this.setData({
+            title,
+            footer,
+            cancel,
+            overlayClassName: overlayAnimationClassName,
+            contentClassName: contentAnimationClassName,
+          });
+        });
+      },
     },
   },
   data: {
@@ -24,35 +79,6 @@ Component({
     overlayClassName: defaultOverlayClassName,
     contentClassName: defaultContentClassName,
   },
-  lifetimes: {
-    attached() {
-      const store = this.data._store as DialogCore;
-      console.log("[COMPONENT]ui/dialog - attached", store);
-      if (!store) {
-        return;
-      }
-      const { open, title, footer, showCancel } = store;
-      this.setData({
-        title,
-        footer,
-        cancel: showCancel,
-      });
-      store.onStateChange((nextState) => {
-        const { title, footer, cancel, open } = nextState;
-        const s = open ? "open" : "closed";
-        const overlayAnimationClassName = open ? `animate-in fade-in` : ` animate-out fade-out-0`;
-        const contentAnimationClassName = open
-          ? `animate-in fade-in-0 zoom-in-95`
-          : `animate-out fade-out-0 zoom-out-95`;
-        this.setData({
-          title,
-          footer,
-          cancel,
-          overlayClassName: [overlayAnimationClassName].join(" "),
-          contentClassName: [contentAnimationClassName].join(" "),
-        });
-      });
-    },
-  },
+  lifetimes: {},
   methods: {},
 });

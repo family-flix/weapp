@@ -85,7 +85,7 @@ export class MovieMediaCore extends BaseDomain<TheTypesOfEvents> {
     });
   }
 
-  async fetchProfile(media_id: string) {
+  async fetchProfile(media_id?: string) {
     if (media_id === undefined) {
       const msg = this.tip({ text: ["缺少电影 id 参数"] });
       return Result.Err(msg);
@@ -270,13 +270,13 @@ export class MovieMediaCore extends BaseDomain<TheTypesOfEvents> {
     return [name];
   }
 
-  onSourceFileChange(handler: Handler<TheTypesOfEvents[Events.SourceFileChange]>) {
+  onSourceFileChange = (handler: Handler<TheTypesOfEvents[Events.SourceFileChange]>) => {
     return this.on(Events.SourceFileChange, handler);
   }
   onProfileLoaded(handler: Handler<TheTypesOfEvents[Events.ProfileLoaded]>) {
     return this.on(Events.ProfileLoaded, handler);
   }
-  onStateChange(handler: Handler<TheTypesOfEvents[Events.StateChange]>) {
+  onStateChange = (handler: Handler<TheTypesOfEvents[Events.StateChange]>) => {
     return this.on(Events.StateChange, handler);
   }
 }
