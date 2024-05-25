@@ -35,10 +35,16 @@ Component({
         this.mounted = true;
       },
     },
+    className: {
+      type: String,
+    },
     enterClass: {
       type: String,
     },
     exitClass: {
+      type: String,
+    },
+    style: {
       type: String,
     },
     cover: {

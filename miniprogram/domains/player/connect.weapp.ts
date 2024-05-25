@@ -1,3 +1,4 @@
+// @ts-ignore
 import type { VideoContext } from "miniprogram-api-typings";
 
 import { PlayerCore } from "@/domains/player/index";

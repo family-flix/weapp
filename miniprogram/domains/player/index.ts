@@ -155,6 +155,7 @@ export function PlayerCore(props: PlayerProps) {
   const state = proxy({
     ready: false,
     playing: false,
+    url: "",
     poster: "",
     width: 0,
     height: 0,
@@ -175,6 +176,9 @@ export function PlayerCore(props: PlayerProps) {
   const result = {
     uid: uid(),
     state,
+    get url() {
+      return state.url;
+    },
     get playing() {
       return state.playing;
     },
@@ -393,6 +397,7 @@ export function PlayerCore(props: PlayerProps) {
       this.metadata = video;
       this._canPlay = false;
       this.errorMsg = "";
+      state.url = video.url;
       event.emit(Events.UrlChange, video);
       // event.emit(Events.StateChange, { ...this.state });
     },
@@ -411,6 +416,7 @@ export function PlayerCore(props: PlayerProps) {
         return;
       }
       state.error = "";
+      state.url = url;
       this._abstractNode.load(url);
     },
     startAdjustCurrentTime() {

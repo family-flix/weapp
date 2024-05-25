@@ -6,6 +6,7 @@
     "pages/search/index",
     "pages/tv_play/index",
     "pages/movie_play/index",
+    "pages/video/index",
     "pages/profile/index"
   ],
   "window": {

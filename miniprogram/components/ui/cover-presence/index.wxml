@@ -1,5 +1,5 @@
 <block wx:if="{{mounted}}">
-    <cover-view class="presence class-name {{open ? openClassName : closedClassName}}" role="presentation" bindanimationend="handleAnimationEnd">
+    <cover-view class="presence class-name {{className}} {{enter ? enterClass : ''}} {{ exit ? exitClass : ''}}" style="{{style}}" role="presentation" bind:animationend="handleAnimationEnd">
         <slot />
     </cover-view>
 </block>

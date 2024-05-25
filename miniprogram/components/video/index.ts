@@ -17,7 +17,7 @@ Component({
     },
   },
   data: {
-    url: "",
+    // url: this.data._store.state.url,
   },
   lifetimes: {
     ready() {

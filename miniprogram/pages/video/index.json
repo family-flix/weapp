@@ -1,0 +1,13 @@
+{
+  "usingComponents": {
+    "lazy-image": "/components/ui/image",
+    "f-video": "/components/video",
+    "bar": "/components/ui/navigation-bar",
+    "icon": "/components/ui/icon/index",
+    "presence": "/components/ui/presence/index",
+    "cover-presence": "/components/ui/cover-presence/index",
+    "media-settings": "/components/media-settings",
+    "sheet": "/components/ui/sheet/index"
+  },
+  "pageOrientation": "auto"
+}

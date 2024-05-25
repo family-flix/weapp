@@ -9,6 +9,13 @@
     "miniprogram": {
       "list": [
         {
+          "name": "视频播放",
+          "pathName": "pages/video/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
           "name": "影视剧详情",
           "pathName": "pages/profile/index",
           "query": "id=NsTN9ZZAdqWLsQp&type=1",
