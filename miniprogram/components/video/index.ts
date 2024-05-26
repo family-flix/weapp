@@ -52,13 +52,18 @@ Component({
       // }
       // store.handleTimeUpdate({ currentTime, duration });
     },
-    handleLoadedmetadata() {
+    handleLoadedmetadata(event) {
       // const store: ReturnType<typeof PlayerCore> = this.data._store;
       // if (!store) {
       //   return;
       // }
       // store.handleCanPlay();
-      this.triggerEvent("canplay", {});
+      const { duration, width, height } = event.detail;
+      this.triggerEvent("canplay", {
+        duration,
+        width,
+        height,
+      });
     },
     handleError(event: { detail: { errMsg: string } }) {
       // const store: ReturnType<typeof PlayerCore> = this.data._store;

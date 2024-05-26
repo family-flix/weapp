@@ -5,6 +5,7 @@ import { MediaRates } from "@/domains/media/constants";
 import { PlayerCore } from "@/domains/player/index";
 import { DialogCore, PresenceCore } from "@/domains/ui/index";
 import { DynamicContentCore, DynamicContentInListCore } from "@/domains/ui/dynamic-content/index";
+import { seconds_to_hour } from "@/utils/index";
 
 // import { SeasonPlayingPageLogic } from "./store";
 
@@ -15,6 +16,7 @@ const $top = PresenceCore({ mounted: true, visible: true });
 const $bottom = PresenceCore({ mounted: true, visible: true });
 const $control = PresenceCore({ mounted: true, visible: true });
 const $control2 = PresenceCore({ mounted: true, visible: true });
+const $control3 = PresenceCore({ mounted: true, visible: true });
 const $top2 = PresenceCore({ mounted: true, visible: true });
 const $bottom2 = PresenceCore({ mounted: true, visible: true });
 const $time = PresenceCore({ mounted: true, visible: true });
@@ -55,6 +57,7 @@ const ui = {
   $rate2,
   $file2,
   $subtitle2,
+  $control3,
 };
 const $player = PlayerCore({ app, volume: 1, rate: 1 });
 let visible = false;
@@ -117,11 +120,11 @@ const methods = {
     }
   },
   prepareToggle2() {
-    if (timer2 === null) {
-      this.toggle2();
-      return;
-    }
-    clearTimeout(timer2);
+    // if (timer2 === null) {
+    //   this.toggle2();
+    //   return;
+    // }
+    // clearTimeout(timer2);
     this.toggle2();
   },
   toggle2() {
@@ -136,7 +139,13 @@ Page({
     menuWidth: app.screen.menuButton?.width || 0,
     orientation: "vertical",
     MediaRates,
-
+    duration: 0,
+    virtualCurTime: "00:00",
+    progress: 0,
+    times: {
+      currentTime: "00:00",
+      duration: "00:00",
+    },
     ui,
     $player,
     // playerState: null as null | ReturnType<typeof PlayerCore>["state"],
@@ -196,7 +205,7 @@ Page({
     }
     this.event.on(elm, handler);
   },
-  emitClick<T extends Record<string, string>>(elm: string, payload: T) {
+  emitClick<T extends Record<string, string | number | undefined>>(elm: string, payload: T) {
     this.event.emit(elm, payload);
   },
   onLoad(query) {
@@ -205,6 +214,11 @@ Page({
       // console.log("[PAGE]tv_play - $logic.$player.onStateChange", $logic.$player.state);
       this.setData({
         playerState: $player.state,
+      });
+    });
+    $player.onCurrentTimeChange((v) => {
+      this.setData({
+        progress: v.currentTime,
       });
     });
     this.onClick("arrow-left", () => {
@@ -282,11 +296,46 @@ Page({
     this.onClick("screen2", () => {
       methods.prepareToggle2();
     });
-    this.onClick("video-can-play", () => {
-      $player.handleCanPlay();
+    this.onClick("video-can-play", (values) => {
+      console.log("emit player canPlay", values);
+      $player.handleCanPlay(values);
+      this.setData({
+        times: {
+          currentTime: "00:00",
+          duration: seconds_to_hour($player._duration),
+        },
+      });
     });
     this.onClick("video-mounted", (event) => {
       connect($player, event.detail.context);
+    });
+    this.onClick("video-progress", (v) => {
+      const { currentTime, duration } = v;
+      $player.handleTimeUpdate({ currentTime, duration });
+    });
+    this.onClick("video-virtual-set-current-time", (v) => {
+      let virtual = $player._currentTime + v.percent * $player._duration;
+      console.log("video-virtual-set-current-time", v.percent * $player._duration);
+      if (virtual < 0) {
+        virtual = 0;
+      }
+      if (virtual > $player._duration) {
+        virtual = $player._duration;
+      }
+      this.setData({
+        virtualCurTime: seconds_to_hour(virtual),
+      });
+    });
+    this.onClick("update-percent", (v) => {
+      const { percent } = v;
+      let targetTime = percent * $player._duration;
+      $player.adjustCurrentTime(targetTime);
+    });
+    this.onClick("update-percent-added", (v) => {
+      const { percent } = v;
+      const targetTime = $player._currentTime + percent * $player._duration;
+      // console.log("target time is", targetTime);
+      $player.adjustCurrentTime(targetTime);
     });
     const url =
       "http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400";
@@ -296,9 +345,10 @@ Page({
       ui.$rate2.hide();
       ui.$file2.hide();
       // ui.$bottom2.hide();
+      ui.$control3.hide();
       // ui.$top2.hide();
-      // ui.$control2.show();
-      methods.prepareToggle();
+      ui.$control2.hide();
+      // methods.prepareToggle();
       // methods.prepareToggle2();
       $player.loadSource({
         url,
@@ -306,8 +356,20 @@ Page({
     }, 1000);
   },
   onUnload() {},
+  handleUpdatePercent(event: { detail: { percent: number } }) {
+    this.emitClick("update-percent", event.detail);
+  },
+  handleMove(data: { percent: number }) {
+    this.emitClick("video-virtual-set-current-time", data);
+  },
+  handleMoveEnd(data: { percent: number }) {
+    // console.log(this);
+    // console.log("[COMPONENT]video-progress - handleMoveEnd", data.percent);
+    // this.triggerEvent("percent", data);
+    this.emitClick("update-percent-added", data);
+  },
   handleVideoCanPlay(event: { detail: {} }) {
-    this.emitClick("video-can-play", {});
+    this.emitClick("video-can-play", event.detail);
   },
   handleVideoError(event: { detail: { msg: string } }) {
     // const { msg } = event.detail;
@@ -318,11 +380,15 @@ Page({
       text: [event.detail.msg],
     });
   },
+  handleVideoProgress(event: {
+    detail: {
+      currentTime: number;
+      duration: number;
+    };
+  }) {
+    this.emitClick("video-progress", event.detail);
+  },
   handleVideoMounted(event: { detail: { context: unknown } }) {
-    // const $logic = _$logic;
-    // if (!$logic) {
-    //   return;
-    // }
     this.emitClick("video-mounted", event as any);
   },
   handleClickElm(event: {
@@ -349,13 +415,27 @@ Page({
         payload: null,
       };
     })();
+    console.log("click elm is", elm, payload);
     if (elm === null) {
       console.warn("缺少 data-elm 属性");
-      return;
+      return false;
     }
     this.emitClick(elm, payload);
+    return false;
   },
-  prevent() {
+  prevent(event: { detail: {} }) {
+    return false;
+  },
+  prevent2(event: {
+    type: string;
+    detail: { elm: string } & Record<string, string>;
+    currentTarget: { dataset: { elm: string } & Record<string, string> };
+  }) {
+    console.log('prevent2', event);
+    if (event.type === "touchstart") {
+      this.handleClickElm(event);
+      return;
+    }
     return false;
   },
 });

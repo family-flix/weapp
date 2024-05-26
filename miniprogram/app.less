@@ -38,7 +38,6 @@ page {
   --tw-ring-shadow: 0 0 #000000;
   --tw-shadow: 0 0 #000000;
   --tw-shadow-colored: 0 0 #000000;
-  background-color: var(--background);
 }
 @media (prefers-color-scheme: dark) {
   page {
@@ -60,17 +59,11 @@ page {
     --w-bg-color-active: #373737;
     --w-red: #fa5151;
     --w-brand: #07c160;
-    background-color: var(--background);
-  }
-  view,
-  text,
-  input,
-  :before,
-  :after {
-    color: var(--w-fg-1);
   }
 }
-
+page {
+  background-color: var(--background) !important;
+}
 view,
 text,
 input,
@@ -322,6 +315,9 @@ input,
 }
 .absolute {
   position: absolute;
+}
+.z-0 {
+  z-index: 0;
 }
 .z-10 {
   z-index: 10;
@@ -712,8 +708,12 @@ input,
   --tw-bg-opacity: 1;
   background-color: rgb(220 252 231 / var(--tw-bg-opacity));
 }
+.bg-green-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(220 252 231 / var(--tw-bg-opacity));
+}
 .text-gray-500 {
-  --tw-text-opacity: 1;
+  --tw-text-opacity: 50;
   color: rgb(107 114 128 / var(--tw-text-opacity));
 }
 .text-green-500 {

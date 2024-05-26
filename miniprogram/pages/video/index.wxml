@@ -1,7 +1,7 @@
 <page-meta page-style="flex flex-col overflow-hidden;" background-color="{{backgroundBottomColor}}">
     <bar class-name=""></bar>
-    <view class="page absolute top-0 w-screen h-screen" data-elm="screen" bind:tap="handleClickElm">
-        <view class="page__content-video_with_control z-10 absolute w-full" style="top: 36%; left: 50%; min-height: 120rpx; transform: translate(-50%, -50%);">
+    <view class="fixed top-0 w-screen h-screen bg-w-bg-0" data-elm="screen" bind:tap="handleClickElm">
+        <view class="z-10 absolute w-full" style="top: 36%; left: 50%; min-height: 120rpx; transform: translate(-50%, -50%);">
             <f-video class-name="z-10 relative" style="width: 100%;" _store="{{$player}}" bind:load="handleVideoMounted" bind:progress="handleVideoProgress" bind:canplay="handleVideoCanPlay" bind:error="handleVideoError"></f-video>
             <view class="page__mask absolute z-20 inset-0">
                 <presence class-name="" enter-class="animate-in fade-in" exit-class="animate-out fade-out" _store="{{ui.$mask}}">
@@ -50,181 +50,298 @@
                 </presence>
             </view>
         </view>
-        <view class="z-20 absolute top-0 w-full">
-            <presence _store="{{ui.$top}}" class="flex items-center justify-between" enter-class="animate-in fade-in slide-in-from-top" exit-class="animate-out slide-out-to-top fade-out">
-                <view class="flex items-center" data-elm="arrow-left" bind:tap="handleClickElm">
-                    <view class="inline-block p-4">
-                        <icon name="arrow-left" size="{{24}}" />
+        <view class="z-0 absolute left-0 top-0 w-full h-full">
+            <view class="z-40 absolute top-0 w-full">
+                <presence _store="{{ui.$top}}" class="flex items-center justify-between" enter-class="animate-in fade-in slide-in-from-top" exit-class="animate-out slide-out-to-top fade-out">
+                    <view class="flex items-center" data-elm="arrow-left" bind:tap="handleClickElm">
+                        <view class="inline-block p-4">
+                            <icon name="arrow-left" size="{{24}}" />
+                        </view>
+                        <block wx:if="{{!!state.curSource}}">
+                            <view class="overflow-hidden truncate break-all" style="text-overflow: ellipsis; white-space: nowrap; padding-right: {{menuWidth}}px;">
+                                {{state.curSource.order}}、{{state.curSource.name}}
+                            </view>
+                        </block>
                     </view>
-                    <block wx:if="{{!!state.curSource}}">
-                        <view class="overflow-hidden truncate break-all" style="text-overflow: ellipsis; white-space: nowrap; padding-right: {{menuWidth}}px;">
-                            {{state.curSource.order}}、{{state.curSource.name}}
+                    <block>
+                        <view class="flex items-center">
+                            <view class="inline-block p-4" data-elm="airplay" catch:tap="handleClickElm">
+                                <icon name="airplay" size="{{24}}" />
+                            </view>
                         </view>
                     </block>
-                </view>
-                <block>
-                    <view class="flex items-center">
-                        <view class="inline-block p-4" data-elm="airplay" catch:tap="handleClickElm">
-                            <icon name="airplay" size="{{24}}" />
+                </presence>
+            </view>
+            <view class="z-40 absolute bottom-0 w-full safe-bottom">
+                <presence _store="{{ui.$time}}">
+                    <view class="text-center text-xl">{{state.targetTime}}</view>
+                </presence>
+                <presence class="" _store="{{ui.$bottom}}" enter-class="animate-in fade-in slide-in-from-bottom" exit-class="animate-out slide-out-to-bottom fade-out">
+                    <view class="px-4" catch:tap="prevent">
+                        <video-progress _store="{{$player}}" bind:percent="handleUpdatePercent" />
+                    </view>
+                    <view class="flex items-center flex-reverse space-x-4 mt-6 w-full px-2 py-4 safe-padding-bottom">
+                        <view class="relative p-2 rounded-md" data-elm="settings-menu" catch:tap="handleClickElm">
+                            <view class="">设置</view>
+                        </view>
+                        <view class="relative p-2 rounded-md" data-elm="fullscreen-menu" catch:tap="handleClickElm">
+                            <view class="">全屏</view>
                         </view>
                     </view>
-                </block>
-            </presence>
-        </view>
-        <view class="z-20 absolute bottom-0 w-full">
-            <presence _store="{{ui.$time}}">
-                <view class="text-center text-xl">{{state.targetTime}}</view>
-            </presence>
-            <presence class="" _store="{{ui.$bottom}}" enter-class="animate-in fade-in slide-in-from-bottom" exit-class="animate-out slide-out-to-bottom fade-out">
-                <view class="px-4"></view>
-                <view class="flex items-center flex-reverse space-x-4 mt-6 w-full px-2 py-4 safe-padding-bottom">
-                    <view class="relative p-2 rounded-md" data-elm="settings-menu" catch:tap="handleClickElm">
-                        <view class="">设置</view>
-                    </view>
-                    <view class="relative p-2 rounded-md" data-elm="fullscreen-menu" catch:tap="handleClickElm">
-                        <view class="">全屏</view>
-                    </view>
-                </view>
-            </presence>
-            <cover-view class="safe-block safe-block1"></cover-view>
-            <cover-view class="safe-block safe-block2"></cover-view>
+                    <cover-view class="safe-block safe-block1"></cover-view>
+                    <cover-view class="safe-block safe-block2"></cover-view>
+                </presence>
+            </view>
         </view>
     </view>
-    <presence _store="{{ui.$control2}}" cover="{{true}}" style="z-index: 100; position: relative;" enter-class="fade-in" exit-class="fade-out">
-        <cover-view class="fixed top-0 left-0 w-screen h-screen" data-elm="screen2" bind:tap="handleClickElm">
-            <presence _store="{{ui.$top2}}" cover="{{true}}" style="z-index: 110; position: relative;" enter-class="slide-in-from-top fade-in" exit-class="slide-out-to-top fade-out">
-                <cover-view class="z-20 absolute left-0 top-0 w-full" style="height: 58px;" catch:tap="prevent">
-                    <cover-view class="z-0 absolute w-full" style="position: absolute; top: 0; left: 0; width: 100%; background-color: black; opacity: 0.5;"></cover-view>
+    <presence _store="{{ui.$control2}}" style="z-index: 100;" cover="{{true}}" enter-class="fade-in" exit-class="fade-out">
+        <cover-view class="__a screen2 absolute top-0 left-0 w-full h-full" style="z-index: 100; background-color: green;" data-elm="screen2" bind:touchstart="{{m1.handleTouchStart}}" bind:touchmove="{{m1.handleTouchMove}}" bind:touchend="{{m1.handleTouchEnd}}" bind:animationend="{{m1.handleAnimationEnd}}">
+            <presence _store="{{ui.$top2}}" cover="{{true}}" style="z-index: 110;" enter-class="slide-in-from-top fade-in" exit-class="slide-out-to-top fade-out">
+                <cover-view class="absolute left-0 top-0 w-full" style="z-index: 110;" catch:tap="prevent" catch:touchstart="prevent" catch:touchmove="prevent" catch:touchend="prevent">
+                    <cover-view class="operation__mask absolute top-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
                     <cover-view class="z-10 relative flex items-center justify-between z-20 p-4 px-8 text-w-white">
-                        <cover-view class="flex items-center" data-elm="exit-fullscreen" catch:tap="handleClickElm">
+                        <cover-view class="flex items-center" data-elm="exit-fullscreen" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
                             <cover-view class="inline-block mr-2">返回</cover-view>
                             <cover-view class="">
                                 {{state.curSource.order}}、{{state.curSource.name}}
                             </cover-view>
                         </cover-view>
-                        <cover-view class="relative p-2 rounded-md" data-elm="exit-fullscreen-and-pause" catch:tap="handleClickElm">
+                        <cover-view class="relative p-2 rounded-md" data-elm="exit-fullscreen-and-pause" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
                             <cover-view class="">退出全屏</cover-view>
                         </cover-view>
                     </cover-view>
                 </cover-view>
             </presence>
-            <presence _store="{{ui.$bottom2}}" cover="{{true}}" style="z-index: 120; position: relative;" enter-class="slide-in-form-bottom fade-in" exit-class="slide-out-to-bottom fade-out">
-                <cover-view class="absolute left-0 bottom-0 w-full" style="height: 68px;" catch:tap="prevent">
-                    <cover-view class="z-0 absolute top-0 left-0 w-full" style="z-index: 0; left: 0; width: 100%; background-color: black; opacity: 0.5;"></cover-view>
-                    <cover-view class="flex items-center justify-between p-4 px-8 text-w-white" style="position: relative; z-index: 10;">
+            <presence _store="{{ui.$bottom2}}" cover="{{true}}" style="z-index: 120; position: absolute; bottom: 0; width: 100%; min-height: 115px;" enter-class="slide-in-form-bottom fade-in" exit-class="slide-out-to-bottom fade-out">
+                <cover-view class="absolute left-0 bottom-0 w-full" style="z-index: 120;" catch:tap="prevent" catch:touchstart="prevent" catch:touchmove="prevent" catch:touchend="prevent">
+                    <cover-view class="operation__mask absolute bottom-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
+                    <cover-view class="pt-4 px-8">
+                        <cover-video-progress _store="{{$player}}" bind:percent="handleUpdatePercent" />
+                    </cover-view>
+                    <cover-view class="flex items-center justify-between px-8 py-4 text-w-white" style="z-index: 2; position: relative;" catch:tap="prevent" catch:touchstart="prevent">
                         <cover-view class="flex items-center" style="">
                             <block wx:if="{{playerState.playing}}">
-                                <cover-view class="p-2" data-elm="pause" catch:tap="handleClickElm">
+                                <cover-view class="p-2" data-elm="pause" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
                                     <cover-view style="width: 48px;">暂停</cover-view>
                                 </cover-view>
                             </block>
                             <block wx:else>
-                                <cover-view class="p-2" data-elm="play" catch:tap="handleClickElm">
+                                <cover-view class="p-2" data-elm="play" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
                                     <cover-view style="width: 48px;">播放</cover-view>
                                 </cover-view>
                             </block>
                         </cover-view>
                         <cover-view class="flex items-center space-x-4 px-2">
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="resolution-menu2" catch:tap="handleClickElm">
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="resolution-menu2" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
                                 <cover-view class="">{{curSource.typeText || '分辨率'}}</cover-view>
                             </cover-view>
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="rate-menu2" catch:tap="handleClickElm">
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="rate-menu2" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
                                 <cover-view class="">{{playerState.rate}}x</cover-view>
                             </cover-view>
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="file-menu2" catch:tap="handleClickElm">
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="file-menu2" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
                                 <cover-view class="">切换源</cover-view>
                             </cover-view>
                         </cover-view>
                     </cover-view>
                 </cover-view>
             </presence>
-            <presence _store="{{ui.$episodes2}}" cover="{{true}}" style="z-index: 130; position: absolute; left: 0; top: 0; width: 100%; height: 100%;" enter-class="fade-in" exit-class="fade-out">
-                <cover-view class="absolute inset-0" data-elm="episodes-overlay" catch:tap="handleClickElm"></cover-view>
-                <!-- <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent"></cover-view> -->
-                <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
-                    <cover-view class="safe-block safe-block1"></cover-view>
-                    <cover-view class="safe-block safe-block2"></cover-view>
-                    <cover-view class="safe-block safe-block3"></cover-view>
-                    <cover-view class="safe-block safe-block4"></cover-view>
-                </cover-view>
-                <cover-view class="flex-1 safe-margin-left safe-margin-right">
-                    <cover-view class="flex space-x-2 max-w-full overflow-x-auto">
-                        <block wx:for="{{state.groups}}" wx:for-item="group" wx:key="id">
-                            <cover-view class="py-4 {{state.curGroup.text === group.text ? 'underline' : ''}}" data-elm="group" data-id="{{group.id}}" catch:tap="handleClickElm">
-                                {{group.text}}
-                            </cover-view>
-                        </block>
-                    </cover-view>
-                    <cover-view class="flex flex-wrap mt-4" style="">
-                        <block wx:for="{{state.curGroup.list}}" wx:for-item="episode" wx:key="id">
-                            <cover-view class="episode relative flex justify-center items-center p-4 rounded-md  {{state.curSource.id === episode.id ? 'bg-w-fg-1' : 'bg-w-fg-3'}}" style="margin-right: 12px; margin-bottom: 12px; width: 48px; height:48px; box-sizing: border-box;" data-elm="episode" data-id="{{episode.id}}" catch:tap="handleClickElm">
-                                <cover-view class="text-w-fg-1">{{episode.order}}</cover-view>
-                            </cover-view>
-                        </block>
-                    </cover-view>
-                </cover-view>
-            </presence>
-            <presence _store="{{ui.$resolution2}}" cover="{{true}}" style="z-index: 140; position: absolute; left: 0; top: 0; width: 100%; height: 100%;" enter-class="fade-in" exit-class="fade-out">
-                <cover-view class="" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;" data-elm="resolution-overlay" catch:tap="handleClickElm"></cover-view>
-                <!-- <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent"></cover-view> -->
-                <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
-                    <cover-view class="safe-block safe-block1"></cover-view>
-                    <cover-view class="safe-block safe-block2"></cover-view>
-                    <cover-view class="safe-block safe-block3"></cover-view>
-                    <cover-view class="safe-block safe-block4"></cover-view>
-                </cover-view>
-                <cover-view class="" style="position: absolute; height: 100vh; overflow-y: scroll;">
-                    <block wx:for="{{resolutions}}" wx:for-item="r" wx:key="typeText">
-                        <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="resolution" data-type="{{r.type}}" bind:tap="handleClickElm">
-                            <cover-view>{{r.typeText}}</cover-view>
-                            <cover-view wx:if="{{curSource.type === r.type}}">选中</cover-view>
-                        </cover-view>
-                    </block>
-                </cover-view>
-            </presence>
-            <presence _store="{{ui.$rate2}}" cover="{{true}}" style="z-index: 150; position: absolute; left: 0; top: 0; width: 100%; height: 100%;" enter-class="fade-in" exit-class="fade-out">
-                <cover-view class="absolute inset-0" data-elm="rate-overlay" catch:tap="handleClickElm"></cover-view>
-                <!-- <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent"></cover-view> -->
-                <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
-                    <cover-view class="safe-block safe-block1"></cover-view>
-                    <cover-view class="safe-block safe-block2"></cover-view>
-                    <cover-view class="safe-block safe-block3"></cover-view>
-                    <cover-view class="safe-block safe-block4"></cover-view>
-                </cover-view>
-                <cover-view class="flex-1 safe-margin-left safe-margin-right">
-                    <cover-view class="" style="">
-                        <block wx:for="{{MediaRates}}" wx:for-item="rate" wx:key="self">
-                            <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="rate" data-rate="{{rate}}" bind:tap="handleClickElm">
-                                <cover-view>{{rate}}</cover-view>
-                                <cover-view wx:if="{{playerState.rate === rate}}">选中</cover-view>
-                            </cover-view>
-                        </block>
-                    </cover-view>
-                </cover-view>
-            </presence>
-            <presence _store="{{ui.$file2}}" cover="{{true}}" style="z-index: 160; position: absolute; left: 0; top: 0; width: 100%; height: 100%;" enter-class="fade-in" exit-class="fade-out">
-                <cover-view class="absolute inset-0" data-elm="file-overlay" catch:tap="handleClickElm"></cover-view>
-                <!-- <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent"></cover-view> -->
-                <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
-                    <cover-view class="safe-block safe-block1"></cover-view>
-                    <cover-view class="safe-block safe-block2"></cover-view>
-                    <cover-view class="safe-block safe-block3"></cover-view>
-                    <cover-view class="safe-block safe-block4"></cover-view>
-                </cover-view>
-                <cover-view class="flex-1 safe-margin-left safe-margin-right">
-                    <cover-view class="" style="">
-                        <block wx:for="{{state.curSource.files}}" wx:for-item="file" wx:key="id">
-                            <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="file" data-id="{{file.id}}" bind:tap="handleClickElm">
-                                <cover-view>{{file.name}}</cover-view>
-                                <cover-view wx:if="{{curSource.id === file.id}}">选中</cover-view>
-                            </cover-view>
-                        </block>
-                    </cover-view>
-                </cover-view>
-            </presence>
         </cover-view>
+        <presence _store="{{ui.$episodes2}}" cover="{{true}}" style="z-index: 130;" enter-class="fade-in" exit-class="fade-out">
+            <cover-view class="absolute inset-0" style="z-index: 130;" data-elm="episodes-overlay" catch:tap="handleClickElm" catch:touchstart="prevent">
+                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
+                    <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
+                        <cover-view class="safe-block safe-block1"></cover-view>
+                        <cover-view class="safe-block safe-block2"></cover-view>
+                        <cover-view class="safe-block safe-block3"></cover-view>
+                        <cover-view class="safe-block safe-block4"></cover-view>
+                    </cover-view>
+                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                        <cover-view class="flex space-x-2 max-w-full overflow-x-auto">
+                            <block wx:for="{{state.groups}}" wx:for-item="group" wx:key="id">
+                                <cover-view class="py-4 {{state.curGroup.text === group.text ? 'underline' : ''}}" data-elm="group" data-id="{{group.id}}" catch:tap="handleClickElm">
+                                    {{group.text}}
+                                </cover-view>
+                            </block>
+                        </cover-view>
+                        <cover-view class="flex flex-wrap mt-4" style="">
+                            <block wx:for="{{state.curGroup.list}}" wx:for-item="episode" wx:key="id">
+                                <cover-view class="episode relative flex justify-center items-center p-4 rounded-md  {{state.curSource.id === episode.id ? 'bg-w-fg-1' : 'bg-w-fg-3'}}" style="margin-right: 12px; margin-bottom: 12px; width: 48px; height:48px; box-sizing: border-box;" data-elm="episode" data-id="{{episode.id}}" catch:tap="handleClickElm">
+                                    <cover-view class="text-w-fg-1">{{episode.order}}</cover-view>
+                                </cover-view>
+                            </block>
+                        </cover-view>
+                    </cover-view>
+                </cover-view>
+            </cover-view>
+        </presence>
+        <presence _store="{{ui.$resolution2}}" cover="{{true}}" style="z-index: 140; position: absolute; top: 0; left: 0; width: 100%; height: 100%;" enter-class="fade-in" exit-class="fade-out">
+            <cover-view class="absolute" style="z-index: 140; left: 0; top: 0; width: 100%; height: 100%;" data-elm="resolution-overlay" catch:tap="handleClickElm">
+                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
+                    <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
+                        <cover-view class="safe-block safe-block1"></cover-view>
+                        <cover-view class="safe-block safe-block2"></cover-view>
+                        <cover-view class="safe-block safe-block3"></cover-view>
+                        <cover-view class="safe-block safe-block4"></cover-view>
+                    </cover-view>
+                    <cover-view class="flex-1 safe-margin-left safe-margin-right" style="height: 375px; overflow-y: scroll;">
+                        <block wx:for="{{resolutions}}" wx:for-item="r" wx:key="typeText">
+                            <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="resolution" data-type="{{r.type}}" bind:tap="handleClickElm">
+                                <cover-view>{{r.typeText}}</cover-view>
+                                <cover-view wx:if="{{curSource.type === r.type}}">选中</cover-view>
+                            </cover-view>
+                        </block>
+                    </cover-view>
+                </cover-view>
+            </cover-view>
+        </presence>
+        <presence _store="{{ui.$rate2}}" cover="{{true}}" style="z-index: 150;" enter-class="fade-in" exit-class="fade-out">
+            <cover-view class="absolute inset-0" style="z-index: 150;" data-elm="rate-overlay" catch:tap="handleClickElm">
+                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
+                    <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
+                        <cover-view class="safe-block safe-block1"></cover-view>
+                        <cover-view class="safe-block safe-block2"></cover-view>
+                        <cover-view class="safe-block safe-block3"></cover-view>
+                        <cover-view class="safe-block safe-block4"></cover-view>
+                    </cover-view>
+                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                        <cover-view class="" style="">
+                            <block wx:for="{{MediaRates}}" wx:for-item="rate" wx:key="self">
+                                <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="rate" data-rate="{{rate}}" bind:tap="handleClickElm">
+                                    <cover-view>{{rate}}</cover-view>
+                                    <cover-view wx:if="{{playerState.rate === rate}}">
+                                        选中
+                                    </cover-view>
+                                </cover-view>
+                            </block>
+                        </cover-view>
+                    </cover-view>
+                </cover-view>
+            </cover-view>
+        </presence>
+        <presence _store="{{ui.$file2}}" cover="{{true}}" style="z-index: 160;" enter-class="fade-in" exit-class="fade-out">
+            <cover-view class="absolute inset-0" style="z-index: 160;" data-elm="file-overlay" catch:tap="handleClickElm">
+                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
+                    <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
+                        <cover-view class="safe-block safe-block1"></cover-view>
+                        <cover-view class="safe-block safe-block2"></cover-view>
+                        <cover-view class="safe-block safe-block3"></cover-view>
+                        <cover-view class="safe-block safe-block4"></cover-view>
+                    </cover-view>
+                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                        <cover-view class="" style="">
+                            <block wx:for="{{state.curSource.files}}" wx:for-item="file" wx:key="id">
+                                <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="file" data-id="{{file.id}}" bind:tap="handleClickElm">
+                                    <cover-view>{{file.name}}</cover-view>
+                                    <cover-view wx:if="{{curSource.id === file.id}}">选中</cover-view>
+                                </cover-view>
+                            </block>
+                        </cover-view>
+                    </cover-view>
+                </cover-view>
+            </cover-view>
+        </presence>
     </presence>
     <!-- <sheet _store="{{ui.$settings}}" hide-title="{{true}}">
         <media-settings _media="{{$tv}}" _player="{{$player}}" bind:click="handleClickElm" bind:rate="handleClickRate" bind:resolution="handleClickResolution" bind:file="handleClickFile"></media-settings>
     </sheet> -->
 </page-meta>
+<root-portal>
+    <cover-view class="fixed toast p-4 rouned-md" style="display: none; top: 32%; left: 50%; width: 240px; transform: translate(-50%, -50%);">
+        <cover-view class="z-0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; background-color: #000; opacity: 0.8;"></cover-view>
+        <cover-view class="z-10 relative" style="">
+            <cover-view class="text-md text-w-fg-1 text-center" style="width: 100%; font-size: 24px; color: #898989;">
+                {{virtualCurTime}}/{{times.duration}}
+            </cover-view>
+        </cover-view>
+    </cover-view>
+</root-portal>
+<wxs module="m1">
+var startX = 0;
+var touchStartTime = 0;
+var length = 0;
+var rect =  {
+    left: 0,
+    width: 0,
+};
+var rect2 =  {
+    left: 0,
+    width: 0,
+};
+var _distance = 0;
+var pos = {
+    clientX: 0,
+};
+var _tmpCur = 0;
+var _percent = 0;
+var cur = 0;
+var _curTime = 0;
+var _duration = 0;
+var hasShow = 0;
+module.exports = {
+    handleAnimationEnd: function (event, ownerInstance) {
+        var instance1 = ownerInstance.selectComponent('.screen2')
+        var _rect = instance1.getBoundingClientRect();
+        rect = _rect;
+    },
+    handleTouchStart: function (event, ownerInstance) {
+        var touches = event.touches;
+        var finger = touches[0];
+        startX = finger.clientX;
+        cur = startX - rect.left;
+        touchStartTime = event.timeStamp;
+        return false;
+    },
+    handleTouchMove: function(event, ownerInstance) {
+        var instance3 = ownerInstance.selectComponent('.toast')
+        var now = event.timeStamp;
+        if (now - touchStartTime > 200) {
+            if (!hasShow) {
+                hasShow = 1;
+                instance3.setStyle({
+                    display: 'block',
+                });
+            }
+        }
+        var touches = event.touches;
+        var finger = touches[0];
+        var distance = finger.clientX - startX;
+        var percent = distance / rect.width;
+        console.log('move distance', distance, percent);
+        if (percent < -1) {
+            percent = -1;
+        }
+        if (percent > 1) {
+            percent = 1;
+        }
+        _distance = distance;
+        _tmpCur = distance;
+        _percent = percent;
+        pos = finger;
+        ownerInstance.callMethod('handleMove', { percent })
+        return false;
+    },
+    handleTouchEnd: function (event, ownerInstance) {
+        var now = event.timeStamp;
+        console.log(now - touchStartTime);
+        if (now - touchStartTime <= 200) {
+            ownerInstance.callMethod('handleClickElm', { detail: { elm: 'screen2' } });
+            return;
+        }
+        if (hasShow) {
+            var instance3 = ownerInstance.selectComponent('.toast')
+            instance3.setStyle({
+                display: 'none',
+            });
+            hasShow = 0;
+        }
+        cur = _tmpCur;
+        var percent = cur / rect.width;
+        ownerInstance.callMethod('handleMoveEnd', { percent })
+        return false;
+    },
+    propObserver: function(newValue, oldValue, ownerInstance, instance) {
+        // console.log('prop observer', newValue, oldValue)
+        _duration = newValue;
+    }
+}
+</wxs>

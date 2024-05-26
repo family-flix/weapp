@@ -8,6 +8,7 @@ import { MediaResolutionTypes } from "@/domains/source/constants";
 import { Application } from "@/domains/app/index";
 import { Result } from "@/types/index";
 import { proxy, snapshot, subscribe } from "@/utils/valtio/index";
+import { sleep } from "@/utils/index";
 
 enum Events {
   Mounted,
@@ -23,6 +24,7 @@ enum Events {
   ResolutionChange,
   /** 音量改变 */
   VolumeChange,
+  DurationChange,
   /** 播放倍率改变 */
   RateChange,
   /** 宽高改变 */
@@ -60,6 +62,7 @@ type TheTypesOfEvents = {
   [Events.CurrentTimeChange]: { currentTime: number };
   [Events.BeforeAdjustCurrentTime]: void;
   [Events.TargetTimeChange]: number;
+  [Events.DurationChange]: number;
   [Events.AfterAdjustCurrentTime]: void;
   [Events.ResolutionChange]: {
     type: MediaResolutionTypes;
@@ -163,6 +166,7 @@ export function PlayerCore(props: PlayerProps) {
     rate,
     volume,
     currentTime: 0,
+    duration: 0,
     subtitle: null as PlayerState["subtitle"],
     prepareFullscreen: false,
   });
@@ -428,9 +432,19 @@ export function PlayerCore(props: PlayerProps) {
       this.virtualProgress = percent;
       event.emit(Events.TargetTimeChange, targetTime);
     },
-    adjustCurrentTime(targetTime: number) {
-      this.setCurrentTime(targetTime);
-      this.play();
+    async adjustCurrentTime(targetTime: number) {
+      if (!this.playing) {
+        this.play();
+      }
+      console.log("[DOMAIN]player - adjustCurrentTime", this.playing, targetTime);
+      let time = targetTime;
+      if (time < 0) {
+        time = 0;
+      }
+      if (time > this._duration) {
+        time = this._duration;
+      }
+      this.setCurrentTime(time);
       event.emit(Events.AfterAdjustCurrentTime);
     },
     async screenshot(): Promise<Result<string>> {
@@ -460,7 +474,7 @@ export function PlayerCore(props: PlayerProps) {
       }
       const progress = Math.floor((currentTime / this._duration) * 100);
       this._progress = progress;
-      console.log("before emit Events.Progress", currentTime, this._currentTime);
+      // console.log("before emit Events.Progress", currentTime, this._currentTime);
       event.emit(Events.Progress, {
         currentTime: this._currentTime,
         duration: this._duration,
@@ -551,8 +565,17 @@ export function PlayerCore(props: PlayerProps) {
     handleLoad() {
       event.emit(Events.Loaded);
     },
-    handleCanPlay() {
-      console.log("[]player - handleCanPlay");
+    handleCanPlay(values?: { duration: number }) {
+      const $video = this._abstractNode;
+      if (!$video) {
+        return;
+      }
+      console.log("[]player - handleCanPlay", values?.duration);
+      if (values?.duration) {
+        state.duration = values.duration;
+        this._duration = values.duration;
+        event.emit(Events.DurationChange, values.duration);
+      }
       // if (this._canPlay) {
       //   return;
       // }
@@ -613,6 +636,9 @@ export function PlayerCore(props: PlayerProps) {
     },
     onResolutionChange(handler: Handler<TheTypesOfEvents[Events.ResolutionChange]>) {
       return event.on(Events.ResolutionChange, handler);
+    },
+    onDurationChange(handler: Handler<TheTypesOfEvents[Events.DurationChange]>) {
+      return event.on(Events.DurationChange, handler);
     },
     onCanSetCurrentTime(handler: Handler<TheTypesOfEvents[Events.CanSetCurrentTime]>) {
       return event.on(Events.CanSetCurrentTime, handler);

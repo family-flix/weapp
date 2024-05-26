@@ -7,6 +7,8 @@
     "presence": "/components/ui/presence/index",
     "cover-presence": "/components/ui/cover-presence/index",
     "media-settings": "/components/media-settings",
+    "video-progress": "/components/video-progress/index",
+    "cover-video-progress": "/components/cover-video-progress/index",
     "sheet": "/components/ui/sheet/index"
   },
   "pageOrientation": "auto"
