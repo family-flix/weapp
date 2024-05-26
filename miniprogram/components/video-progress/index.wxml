@@ -227,6 +227,9 @@ module.exports = {
         _duration = newValue;
     },
     progressObserver: function (v, _, ownerInstance) {
+        if (moving) {
+            return;
+        }
         var instance1 = (function () {
             if (_instance1) {
                 return _instance1;
