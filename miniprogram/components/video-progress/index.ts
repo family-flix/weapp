@@ -34,31 +34,51 @@ Component({
         }
         this.mounted = true;
         $player.onProgress((v) => {
+          // console.log("[COMPONENT]$player.onProgress", v, this.data.rect);
+          if (this.data.isMoving) {
+            return;
+          }
+          const width = (v.progress / 100) * this.data.rect.width;
           this.setData({
-            progress: v.progress,
+            curTime: v.currentTime,
+            // progress: v.progress,
+            width,
+            left: width,
             times: {
               currentTime: seconds_to_hour(v.currentTime),
               duration: seconds_to_hour(v.duration),
             },
           });
         });
-        // $player.onDurationChange((v) => {
-        //   this.setData({
-        //     duration: v,
-        //     times: {
-        //       currentTime: "00:00",
-        //       duration: seconds_to_hour(v),
-        //     },
-        //   });
-        // });
-        // onClick("update-percent", (v) => {
-        //   $player.adjustProgressManually(v.percent);
-        // });
+        $player.onDurationChange((v) => {
+          this.setData({
+            duration: v,
+            times: {
+              currentTime: "00:00",
+              duration: seconds_to_hour(v),
+            },
+          });
+        });
+        $player.afterAdjustCurrentTime(({ time }) => {
+          this.setData({
+            curTime: time,
+          });
+        });
+        onClick("update-percent", (v) => {
+          $player.adjustProgressManually(v.percent);
+        });
       },
     },
   },
   data: {
+    width: 0,
+    left: -6,
+    rect: {
+      width: 0,
+      left: 0,
+    },
     duration: 0,
+    curTime: 0,
     virtualCurTime: "00:00",
     progress: 0,
     times: {
@@ -70,6 +90,11 @@ Component({
   moving: false,
   startX: 0,
   methods: {
+    handleMounted(rect) {
+      this.setData({
+        rect,
+      });
+    },
     handleTouchStart(event: { changedTouches: { clientX: number; clientY: number; pageX: number; pageY: number }[] }) {
       this.start = true;
       const finger = event.changedTouches[0];
@@ -83,12 +108,15 @@ Component({
     handleTouchEnd() {},
     handleMove(data) {
       this.setData({
+        isMoving: true,
         virtualCurTime: seconds_to_hour(data.percent * this.data.duration),
       });
     },
     handleMoveEnd(data) {
-      // console.log(this);
       console.log("[COMPONENT]video-progress - handleMoveEnd", data.percent);
+      this.setData({
+        isMoving: false,
+      });
       this.triggerEvent("percent", data);
     },
   },

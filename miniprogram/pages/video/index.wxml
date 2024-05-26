@@ -1,8 +1,8 @@
 <page-meta page-style="flex flex-col overflow-hidden;" background-color="{{backgroundBottomColor}}">
     <bar class-name=""></bar>
     <view class="fixed top-0 w-screen h-screen bg-w-bg-0" data-elm="screen" bind:tap="handleClickElm">
-        <view class="z-10 absolute w-full" style="top: 36%; left: 50%; min-height: 120rpx; transform: translate(-50%, -50%);">
-            <f-video class-name="z-10 relative" style="width: 100%;" _store="{{$player}}" bind:load="handleVideoMounted" bind:progress="handleVideoProgress" bind:canplay="handleVideoCanPlay" bind:error="handleVideoError"></f-video>
+        <view class="z-10 absolute w-full" style="z-index: 999; top: 36%; left: 50%; min-height: 120rpx; transform: translate(-50%, -50%);">
+            <f-video class-name="z-10 relative" style="width: 100%;" _store="{{$player}}" bind:load="handleVideoMounted" bind:progress="handleVideoProgress" bind:canplay="handleVideoCanPlay" bind:ended="handleVideoEnded" bind:error="handleVideoError"></f-video>
             <view class="page__mask absolute z-20 inset-0">
                 <presence class-name="" enter-class="animate-in fade-in" exit-class="animate-out fade-out" _store="{{ui.$mask}}">
                     <view class="absolute inset-0 bg-w-fg-1 dark:bg-black opacity-20" style="background-color: black;"></view>
@@ -95,59 +95,58 @@
         </view>
     </view>
     <presence _store="{{ui.$control2}}" style="z-index: 100;" cover="{{true}}" enter-class="fade-in" exit-class="fade-out">
-        <cover-view class="__a screen2 absolute top-0 left-0 w-full h-full" style="z-index: 100; background-color: green;" data-elm="screen2" bind:touchstart="{{m1.handleTouchStart}}" bind:touchmove="{{m1.handleTouchMove}}" bind:touchend="{{m1.handleTouchEnd}}" bind:animationend="{{m1.handleAnimationEnd}}">
-            <presence _store="{{ui.$top2}}" cover="{{true}}" style="z-index: 110;" enter-class="slide-in-from-top fade-in" exit-class="slide-out-to-top fade-out">
-                <cover-view class="absolute left-0 top-0 w-full" style="z-index: 110;" catch:tap="prevent" catch:touchstart="prevent" catch:touchmove="prevent" catch:touchend="prevent">
-                    <cover-view class="operation__mask absolute top-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
-                    <cover-view class="z-10 relative flex items-center justify-between z-20 p-4 px-8 text-w-white">
-                        <cover-view class="flex items-center" data-elm="exit-fullscreen" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
-                            <cover-view class="inline-block mr-2">返回</cover-view>
-                            <cover-view class="">
-                                {{state.curSource.order}}、{{state.curSource.name}}
-                            </cover-view>
+        <cover-view class="__a screen2 absolute top-0 left-0 w-full h-full" style="z-index: 100;" data-elm="screen2" bind:touchstart="{{m1.handleTouchStart}}" bind:touchmove="{{m1.handleTouchMove}}" bind:touchend="{{m1.handleTouchEnd}}" bind:animationend="{{m1.handleAnimationEnd}}"></cover-view>
+        <presence _store="{{ui.$top2}}" cover="{{true}}" style="z-index: 110; position: absolute; top: 0; width: 100%; min-height: 67px;" enter-class="slide-in-from-top fade-in" exit-class="slide-out-to-top fade-out">
+            <cover-view class="absolute left-0 top-0 w-full" style="z-index: 110;" catch:tap="prevent">
+                <cover-view class="operation__mask absolute top-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
+                <cover-view class="z-10 relative flex items-center justify-between z-20 p-4 px-8 text-w-white">
+                    <cover-view class="flex items-center" data-elm="exit-fullscreen" catch:tap="handleClickElm">
+                        <cover-view class="inline-block mr-2">返回</cover-view>
+                        <cover-view class="">
+                            {{state.curSource.order}}、{{state.curSource.name}}
                         </cover-view>
-                        <cover-view class="relative p-2 rounded-md" data-elm="exit-fullscreen-and-pause" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
-                            <cover-view class="">退出全屏</cover-view>
+                    </cover-view>
+                    <cover-view class="relative p-2 rounded-md" data-elm="exit-fullscreen-and-pause">
+                        <cover-view class="">退出全屏</cover-view>
+                    </cover-view>
+                </cover-view>
+            </cover-view>
+        </presence>
+        <presence _store="{{ui.$bottom2}}" cover="{{true}}" style="z-index: 120; position: absolute; bottom: 0; width: 100%; min-height: 115px;" enter-class="slide-in-form-bottom fade-in" exit-class="slide-out-to-bottom fade-out">
+            <cover-view class="absolute left-0 bottom-0 w-full" style="z-index: 120;" catch:tap="prevent">
+                <cover-view class="operation__mask absolute bottom-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
+                <cover-view class="pt-4 px-8" style="z-index: 3; position: relative;">
+                    <cover-video-progress _store="{{$player}}" bind:percent="handleUpdatePercent" />
+                </cover-view>
+                <cover-view class="flex items-center justify-between px-8 py-4 text-w-white" style="z-index: 2; position: relative;">
+                    <cover-view class="flex items-center" style="">
+                        <block wx:if="{{playerState.playing}}">
+                            <cover-view class="p-2" data-elm="pause" catch:tap="handleClickElm">
+                                <cover-view style="width: 48px;">暂停</cover-view>
+                            </cover-view>
+                        </block>
+                        <block wx:else>
+                            <cover-view class="p-2" data-elm="play" catch:tap="handleClickElm">
+                                <cover-view style="width: 48px;">播放</cover-view>
+                            </cover-view>
+                        </block>
+                    </cover-view>
+                    <cover-view class="flex items-center space-x-4 px-2">
+                        <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="resolution-menu2" catch:tap="handleClickElm">
+                            <cover-view class="">{{curSource.typeText || '分辨率'}}</cover-view>
+                        </cover-view>
+                        <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="rate-menu2">
+                            <cover-view class="">{{playerState.rate}}x</cover-view>
+                        </cover-view>
+                        <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="file-menu2">
+                            <cover-view class="">切换源</cover-view>
                         </cover-view>
                     </cover-view>
                 </cover-view>
-            </presence>
-            <presence _store="{{ui.$bottom2}}" cover="{{true}}" style="z-index: 120; position: absolute; bottom: 0; width: 100%; min-height: 115px;" enter-class="slide-in-form-bottom fade-in" exit-class="slide-out-to-bottom fade-out">
-                <cover-view class="absolute left-0 bottom-0 w-full" style="z-index: 120;" catch:tap="prevent" catch:touchstart="prevent" catch:touchmove="prevent" catch:touchend="prevent">
-                    <cover-view class="operation__mask absolute bottom-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
-                    <cover-view class="pt-4 px-8">
-                        <cover-video-progress _store="{{$player}}" bind:percent="handleUpdatePercent" />
-                    </cover-view>
-                    <cover-view class="flex items-center justify-between px-8 py-4 text-w-white" style="z-index: 2; position: relative;" catch:tap="prevent" catch:touchstart="prevent">
-                        <cover-view class="flex items-center" style="">
-                            <block wx:if="{{playerState.playing}}">
-                                <cover-view class="p-2" data-elm="pause" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
-                                    <cover-view style="width: 48px;">暂停</cover-view>
-                                </cover-view>
-                            </block>
-                            <block wx:else>
-                                <cover-view class="p-2" data-elm="play" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
-                                    <cover-view style="width: 48px;">播放</cover-view>
-                                </cover-view>
-                            </block>
-                        </cover-view>
-                        <cover-view class="flex items-center space-x-4 px-2">
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="resolution-menu2" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
-                                <cover-view class="">{{curSource.typeText || '分辨率'}}</cover-view>
-                            </cover-view>
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="rate-menu2" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
-                                <cover-view class="">{{playerState.rate}}x</cover-view>
-                            </cover-view>
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="file-menu2" catch:tap="handleClickElm" catch:touchstart="prevent2" catch:touchmove="prevent2" catch:touchend="prevent2">
-                                <cover-view class="">切换源</cover-view>
-                            </cover-view>
-                        </cover-view>
-                    </cover-view>
-                </cover-view>
-            </presence>
-        </cover-view>
+            </cover-view>
+        </presence>
         <presence _store="{{ui.$episodes2}}" cover="{{true}}" style="z-index: 130;" enter-class="fade-in" exit-class="fade-out">
-            <cover-view class="absolute inset-0" style="z-index: 130;" data-elm="episodes-overlay" catch:tap="handleClickElm" catch:touchstart="prevent">
+            <cover-view class="absolute inset-0" style="z-index: 130;" data-elm="episodes-overlay" catch:tap="handleClickElm">
                 <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
                     <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
                         <cover-view class="safe-block safe-block1"></cover-view>

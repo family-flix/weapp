@@ -1,6 +1,6 @@
 <cover-view class="flex items-center user-select-none" bind:touchstart="{{m1.handleTouchStart}}" bind:touchmove="{{m1.handleTouchMove}}" bind:touchend="{{m1.handleTouchEnd}}">
     <cover-view class="text-sm" style="min-width: 80px;">{{times.currentTime}}</cover-view>
-    <cover-view class="__a progress__wrap relative mx-4 w-full py-4 bg-gray-300 cursor-pointer rounded-md overflow-hidden" change:duration="{{m1.propObserver}}" duration="{{duration}}" style="" bind:animationend="{{m1.handleAnimationEnd}}">
+    <cover-view class="__a progress__wrap relative mx-4 w-full py-4 bg-gray-300 cursor-pointer rounded-md overflow-hidden" change:duration="{{m1.durationObserver}}" change:cur="{{m1.progressObserver}}" duration="{{duration}}" cur="{{curTime}}" style="" bind:animationend="{{m1.handleAnimationEnd}}">
         <cover-view class="progress__mask absolute left-0" style="top: 50%; width: 100%; height: 4px; background-color: #333; transform: translateY(-50%);"></cover-view>
         <cover-view class="progress__bar absolute left-0 bg-green-500" style="top: 50%; width: {{progress}}%; height: 4px; transform: translateY(-50%);"></cover-view>
         <cover-view class="progress__cursor absolute" style="left: {{progress}}%; top: 50%; width: 12px; height: 12px; border-radius: 50%; background-color: #fff; transform: translateY(-50%);"></cover-view>
@@ -24,6 +24,7 @@
     </cover-view>
 </root-portal>
 <wxs module="m1">
+var cursorWidth = 6;
 var startX = 0;
 var length = 0;
 var rect =  {
@@ -72,7 +73,7 @@ module.exports = {
             width: finger.clientX - rect.left + 'px'
         });
         instance2.setStyle({
-            left: (finger.clientX - rect.left - 6) + 'px'
+            left: (finger.clientX - rect.left - cursorWidth) + 'px'
         });
     },
     handleTouchMove: function(event, ownerInstance) {
@@ -96,7 +97,7 @@ module.exports = {
             width: (rect2.width * percent) + 'px'
         });
         instance2.setStyle({
-            left: (distance - 6) + 'px'
+            left: (distance - cursorWidth) + 'px'
         });
         _distance = distance;
         _tmpCur = distance;
@@ -113,9 +114,23 @@ module.exports = {
         var percent = cur / rect.width;
         ownerInstance.callMethod('handleMoveEnd', { percent })
     },
-    propObserver: function(newValue, oldValue, ownerInstance, instance) {
+    durationObserver: function(newValue, oldValue, ownerInstance, instance) {
         // console.log('prop observer', newValue, oldValue)
         _duration = newValue;
+    },
+    progressObserver: function (v, _, ownerInstance) {
+        var instance1 = ownerInstance.selectComponent('.progress__bar')
+        var instance2 = ownerInstance.selectComponent('.progress__cursor')
+        var percent = v / _duration;
+        var width = percent * rect.width;
+        cur = width;
+        console.log('prop observer', v, width);
+        instance1.setStyle({
+            width: width + 'px'
+        });
+        instance2.setStyle({
+            left: (width - cursorWidth) + 'px'
+        });
     }
 }
 </wxs>

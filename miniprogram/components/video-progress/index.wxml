@@ -1,9 +1,9 @@
 <view class="flex items-center user-select-none" bind:touchstart="{{m1.handleTouchStart}}" bind:touchmove="{{m1.handleTouchMove}}" bind:touchend="{{m1.handleTouchEnd}}">
     <view class="text-sm" style="min-width: 80px;">{{times.currentTime}}</view>
-    <view class="__a progress__wrap relative mx-4 w-full py-4 bg-gray-300 cursor-pointer rounded-md overflow-hidden" change:duration="{{m1.propObserver}}" duration="{{duration}}" style="" bind:animationend="{{m1.handleAnimationEnd}}">
-        <view class="progress__mask absolute left-0" style="top: 50%; width: 100%; height: 4px; background-color: #333; transform: translateY(-50%);"></view>
-        <view class="progress__bar absolute left-0 bg-green-500" style="top: 50%; width: {{progress}}%; height: 4px; transform: translateY(-50%);"></view>
-        <view class="progress__cursor absolute" style="left: {{progress}}%; top: 50%; width: 12px; height: 12px; border-radius: 50%; background-color: #fff; transform: translateY(-50%);"></view>
+    <view class="__a progress__wrap relative mx-4 w-full py-4 bg-gray-300 cursor-pointer rounded-md" change:duration="{{m1.durationObserver}}" change:cur="{{m1.progressObserver}}" duration="{{duration}}" cur="{{curTime}}" bind:animationend="{{m1.handleAnimationEnd}}">
+        <view class="progress__mask absolute left-0" style="top: 50%; width: 100%; height: 100%; background-color: #333; transform: translateY(-50%);"></view>
+        <view class="progress__bar absolute left-0 bg-green-500" style="top: 50%; width: {{width}}px; height: 24px; transform: translateY(-50%);"></view>
+        <view class="progress__cursor absolute" style="left: {{left}}px; top: 50%; width: 12px; height: 12px; border-radius: 50%; background-color: #fff; transform: translate(0px, -50%);"></view>
     </view>
     <view class="text-sm text-w-fg-1" style="min-width: 80px; text-align: right;">
         {{times.duration}}
@@ -18,12 +18,14 @@
             </view>
             <view class="__a progress__wrap2 relative mx-4 w-full py-4 bg-gray-300 cursor-pointer rounded-md overflow-hidden" style="" bind:animationend="{{m1.handleAnimationEnd2}}">
                 <view class="progress__mask2 absolute left-0" style="top: 50%; width: 100%; height: 4px; background-color: #333; transform: translateY(-50%);"></view>
-                <view class="progress__bar2 absolute left-0 bg-green-500" style="top: 50%; width: {{progress}}%; height: 4px; transform: translateY(-50%);"></view>
+                <view class="progress__bar2 absolute left-0 bg-green-500" style="top: 50%; width: {{width}}px; height: 4px; transform: translateY(-50%);"></view>
             </view>
         </view>
     </view>
 </root-portal>
 <wxs module="m1">
+var cursorWidth = 6;
+var touchStartTime = 0;
 var startX = 0;
 var length = 0;
 var rect =  {
@@ -49,6 +51,7 @@ module.exports = {
         var instance1 = ownerInstance.selectComponent('.progress__wrap')
         var _rect = instance1.getBoundingClientRect();
         rect = _rect;
+        ownerInstance.callMethod('handleMounted', _rect)
         // var dataset = instance1.getDataset();
         // console.log(JSON.stringify(dataset));
     },
@@ -66,13 +69,17 @@ module.exports = {
         });
         var touches = event.touches;
         var finger = touches[0];
+        touchStartTime = event.timeStamp;
         startX = finger.clientX;
         cur = startX - rect.left;
+        var percent = (finger.clientX - rect.left) / rect.width;
         instance1.setStyle({
             width: finger.clientX - rect.left + 'px'
+            // width: (percent * 100) + '%'
         });
         instance2.setStyle({
-            left: (finger.clientX - rect.left - 6) + 'px'
+            left: (finger.clientX - rect.left - cursorWidth) + 'px'
+            // left: (percent * 100) + '%'
         });
     },
     handleTouchMove: function(event, ownerInstance) {
@@ -89,14 +96,17 @@ module.exports = {
             return;
         }
         var percent = (finger.clientX - rect.left) / rect.width;
+        // console.log('move', percent, rect.width, finger.clientX - rect.left)
         instance1.setStyle({
             width: distance + 'px'
         });
         instance3.setStyle({
             width: (rect2.width * percent) + 'px'
+            // width: (percent * 100) + '%'
         });
         instance2.setStyle({
-            left: (distance - 6) + 'px'
+            left: (distance - cursorWidth) + 'px'
+            // left: (percent * 100) + '%'
         });
         _distance = distance;
         _tmpCur = distance;
@@ -106,6 +116,13 @@ module.exports = {
     },
     handleTouchEnd: function (event, ownerInstance) {
         var instance3 = ownerInstance.selectComponent('.toast')
+        var now = event.timeStamp;
+        if (now - touchStartTime <= 200) {
+            var percent = cur / rect.width;
+            console.log('touch end', cur, rect.width);
+            ownerInstance.callMethod('handleMoveEnd', { percent })
+            return;
+        }
         instance3.setStyle({
            display: 'none',
         });
@@ -113,13 +130,23 @@ module.exports = {
         var percent = cur / rect.width;
         ownerInstance.callMethod('handleMoveEnd', { percent })
     },
-    propObserver: function(newValue, oldValue, ownerInstance, instance) {
+    durationObserver: function(newValue, oldValue, ownerInstance, instance) {
         // console.log('prop observer', newValue, oldValue)
         _duration = newValue;
     },
-    getCurTime: function () {
-        _curTime = _duration * _percent;
-        return _curTime;
-    },
+    progressObserver: function (v, _, ownerInstance) {
+        var instance1 = ownerInstance.selectComponent('.progress__bar')
+        var instance2 = ownerInstance.selectComponent('.progress__cursor')
+        var percent = v / _duration;
+        var width = percent * rect.width;
+        cur = width;
+        // console.log('prop observer1', v, percent, width);
+        instance1.setStyle({
+            width: width + 'px'
+        });
+        instance2.setStyle({
+            left: (width - cursorWidth) + 'px'
+        });
+    }
 }
 </wxs>

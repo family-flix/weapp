@@ -63,7 +63,7 @@ type TheTypesOfEvents = {
   [Events.BeforeAdjustCurrentTime]: void;
   [Events.TargetTimeChange]: number;
   [Events.DurationChange]: number;
-  [Events.AfterAdjustCurrentTime]: void;
+  [Events.AfterAdjustCurrentTime]: { time: number };
   [Events.ResolutionChange]: {
     type: MediaResolutionTypes;
     text: string;
@@ -93,10 +93,7 @@ type TheTypesOfEvents = {
   };
   [Events.Preload]: { url: string };
   [Events.BeforeEnded]: void;
-  [Events.End]: {
-    current_time: number;
-    duration: number;
-  };
+  [Events.End]: void;
   [Events.Error]: Error;
   [Events.Resize]: { width: number; height: number };
   [Events.StateChange]: PlayerState;
@@ -445,7 +442,7 @@ export function PlayerCore(props: PlayerProps) {
         time = this._duration;
       }
       this.setCurrentTime(time);
-      event.emit(Events.AfterAdjustCurrentTime);
+      event.emit(Events.AfterAdjustCurrentTime, { time });
     },
     async screenshot(): Promise<Result<string>> {
       return Result.Err("请实现 screenshot 方法");
@@ -551,10 +548,7 @@ export function PlayerCore(props: PlayerProps) {
     handleEnded() {
       state.playing = false;
       this._ended = true;
-      event.emit(Events.End, {
-        current_time: this._currentTime,
-        duration: this._duration,
-      });
+      event.emit(Events.End);
     },
     handleLoadedmetadata(size: { width: number; height: number }) {
       const { width, height } = size;
@@ -576,13 +570,12 @@ export function PlayerCore(props: PlayerProps) {
         this._duration = values.duration;
         event.emit(Events.DurationChange, values.duration);
       }
-      // if (this._canPlay) {
-      //   return;
-      // }
+      if (this._canPlay) {
+        return;
+      }
       this._canPlay = true;
       state.ready = true;
       event.emit(Events.CanPlay);
-      // event.emit(Events.StateChange, { ...this.state });
     },
     handlePlay() {
       // event.emit(Events.Play);

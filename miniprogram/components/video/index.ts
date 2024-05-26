@@ -65,6 +65,9 @@ Component({
         height,
       });
     },
+    handleEnded() {
+      this.triggerEvent("ended", {});
+    },
     handleError(event: { detail: { errMsg: string } }) {
       // const store: ReturnType<typeof PlayerCore> = this.data._store;
       // if (!store) {

@@ -306,6 +306,9 @@ Page({
         },
       });
     });
+    this.onClick('video-ended', () => {
+      $player.handleEnded();
+    });
     this.onClick("video-mounted", (event) => {
       connect($player, event.detail.context);
     });
@@ -370,6 +373,9 @@ Page({
   },
   handleVideoCanPlay(event: { detail: {} }) {
     this.emitClick("video-can-play", event.detail);
+  },
+  handleVideoEnded(event: { detail: {} }) {
+    this.emitClick("video-ended", event.detail);
   },
   handleVideoError(event: { detail: { msg: string } }) {
     // const { msg } = event.detail;

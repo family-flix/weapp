@@ -43,9 +43,6 @@ Component({
             },
           });
         });
-        $player.onCanPlay(() => {
-          console.log($player.state.duration);
-        });
         $player.onDurationChange((v) => {
           this.setData({
             duration: v,
@@ -53,6 +50,11 @@ Component({
               currentTime: "00:00",
               duration: seconds_to_hour(v),
             },
+          });
+        });
+        $player.afterAdjustCurrentTime(({ time }) => {
+          this.setData({
+            curTime: time
           });
         });
         onClick("update-percent", (v) => {
@@ -63,6 +65,7 @@ Component({
   },
   data: {
     duration: 0,
+    curTime: 0,
     virtualCurTime: "00:00",
     progress: 0,
     times: {
