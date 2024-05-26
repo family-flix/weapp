@@ -34,9 +34,16 @@ Component({
         }
         this.mounted = true;
         $player.onProgress((v) => {
-          // console.log('[COMPONENT]$player.onProgress', v);
+          // console.log("[COMPONENT]$player.onProgress", v, this.data.rect);
+          if (this.data.isMoving) {
+            return;
+          }
+          const width = (v.progress / 100) * this.data.rect.width;
           this.setData({
-            progress: v.progress,
+            curTime: v.currentTime,
+            // progress: v.progress,
+            width,
+            left: width,
             times: {
               currentTime: seconds_to_hour(v.currentTime),
               duration: seconds_to_hour(v.duration),
@@ -54,7 +61,7 @@ Component({
         });
         $player.afterAdjustCurrentTime(({ time }) => {
           this.setData({
-            curTime: time
+            curTime: time,
           });
         });
         onClick("update-percent", (v) => {
@@ -64,6 +71,12 @@ Component({
     },
   },
   data: {
+    width: 0,
+    left: -6,
+    rect: {
+      width: 0,
+      left: 0,
+    },
     duration: 0,
     curTime: 0,
     virtualCurTime: "00:00",
@@ -77,25 +90,26 @@ Component({
   moving: false,
   startX: 0,
   methods: {
-    handleTouchStart(event: { changedTouches: { clientX: number; clientY: number; pageX: number; pageY: number }[] }) {
-      this.start = true;
-      const finger = event.changedTouches[0];
-      this.startX = finger.clientX;
+    handleMounted(rect) {
+      this.setData({
+        rect,
+      });
     },
-    handleTouchMove(event: { changedTouches: { clientX: number; clientY: number; pageX: number; pageY: number }[] }) {
-      this.moving = true;
-      const finger = event.changedTouches[0];
-      const instance = finger.clientX - this.startX;
+    tagIsMoving() {
+      this.setData({
+        isMoving: true,
+      });
     },
-    handleTouchEnd() {},
     handleMove(data) {
       this.setData({
+        isMoving: true,
         virtualCurTime: seconds_to_hour(data.percent * this.data.duration),
       });
     },
     handleMoveEnd(data) {
-      // console.log(this);
-      console.log("[COMPONENT]video-progress - handleMoveEnd", data.percent);
+      this.setData({
+        isMoving: false,
+      });
       this.triggerEvent("percent", data);
     },
   },

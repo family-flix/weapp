@@ -95,17 +95,11 @@ Component({
         rect,
       });
     },
-    handleTouchStart(event: { changedTouches: { clientX: number; clientY: number; pageX: number; pageY: number }[] }) {
-      this.start = true;
-      const finger = event.changedTouches[0];
-      this.startX = finger.clientX;
+    tagIsMoving() {
+      this.setData({
+        isMoving: true,
+      });
     },
-    handleTouchMove(event: { changedTouches: { clientX: number; clientY: number; pageX: number; pageY: number }[] }) {
-      this.moving = true;
-      const finger = event.changedTouches[0];
-      const instance = finger.clientX - this.startX;
-    },
-    handleTouchEnd() {},
     handleMove(data) {
       this.setData({
         isMoving: true,
@@ -113,7 +107,6 @@ Component({
       });
     },
     handleMoveEnd(data) {
-      console.log("[COMPONENT]video-progress - handleMoveEnd", data.percent);
       this.setData({
         isMoving: false,
       });
