@@ -37,7 +37,7 @@ const $icon = new DynamicContentCore({
 const $episode = new DynamicContentInListCore({
   value: 1,
 });
-const ui = {
+const $ui = {
   $mask,
   $top,
   $bottom,
@@ -146,7 +146,7 @@ Page({
       currentTime: "00:00",
       duration: "00:00",
     },
-    ui,
+    ui: $ui,
     $player,
     // playerState: null as null | ReturnType<typeof PlayerCore>["state"],
     playerState: $player.state,
@@ -244,54 +244,54 @@ Page({
     });
     this.onClick("fullscreen-menu", () => {
       // ui.$control.hide();
-      ui.$control2.show();
+      $ui.$control2.show();
       $player.requestFullScreen();
     });
     this.onClick("settings-menu", () => {
-      ui.$settings.show();
+      $ui.$settings.show();
     });
     this.onClick("resolution-menu2", () => {
-      ui.$top2.hide();
-      ui.$bottom2.hide();
-      ui.$resolution2.show();
+      $ui.$top2.hide();
+      $ui.$bottom2.hide();
+      $ui.$resolution2.show();
     });
     this.onClick("rate-menu2", () => {
-      ui.$top2.hide();
-      ui.$bottom2.hide();
-      ui.$rate2.show();
+      $ui.$top2.hide();
+      $ui.$bottom2.hide();
+      $ui.$rate2.show();
     });
     this.onClick("episodes-menu2", () => {
-      ui.$top2.hide();
-      ui.$bottom2.hide();
-      ui.$episodes2.show();
+      $ui.$top2.hide();
+      $ui.$bottom2.hide();
+      $ui.$episodes2.show();
     });
     this.onClick("file-menu2", () => {
-      ui.$top2.hide();
-      ui.$bottom2.hide();
-      ui.$file2.show();
+      $ui.$top2.hide();
+      $ui.$bottom2.hide();
+      $ui.$file2.show();
     });
     this.onClick("resolution-overlay", () => {
-      ui.$resolution2.hide();
+      $ui.$resolution2.hide();
     });
     this.onClick("rate-overlay", () => {
-      ui.$rate2.hide();
+      $ui.$rate2.hide();
     });
     this.onClick("episodes-overlay", () => {
-      ui.$episodes2.hide();
+      $ui.$episodes2.hide();
     });
     this.onClick("file-overlay", () => {
-      ui.$file2.hide();
+      $ui.$file2.hide();
     });
     this.onClick("exit-fullscreen", () => {
-      ui.$control2.hide();
+      $ui.$control2.hide();
       $player.exitFullscreen();
-      ui.$control.show();
+      $ui.$control.show();
     });
     this.onClick("exit-fullscreen-and-pause", () => {
-      ui.$control2.hide();
+      $ui.$control2.hide();
       $player.pause();
       $player.exitFullscreen();
-      ui.$control.show();
+      $ui.$control.show();
     });
     this.onClick("screen2", () => {
       methods.prepareToggle2();
@@ -306,7 +306,7 @@ Page({
         },
       });
     });
-    this.onClick('video-ended', () => {
+    this.onClick("video-ended", () => {
       $player.handleEnded();
     });
     this.onClick("video-mounted", (event) => {
@@ -343,14 +343,14 @@ Page({
     const url =
       "http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400";
     setTimeout(() => {
-      ui.$episodes2.hide();
-      ui.$resolution2.hide();
-      ui.$rate2.hide();
-      ui.$file2.hide();
+      $ui.$episodes2.hide();
+      $ui.$resolution2.hide();
+      $ui.$rate2.hide();
+      $ui.$file2.hide();
       // ui.$bottom2.hide();
-      ui.$control3.hide();
+      $ui.$control3.hide();
       // ui.$top2.hide();
-      ui.$control2.hide();
+      $ui.$control2.hide();
       // methods.prepareToggle();
       // methods.prepareToggle2();
       $player.loadSource({
@@ -437,7 +437,7 @@ Page({
     detail: { elm: string } & Record<string, string>;
     currentTarget: { dataset: { elm: string } & Record<string, string> };
   }) {
-    console.log('prevent2', event);
+    console.log("prevent2", event);
     if (event.type === "touchstart") {
       this.handleClickElm(event);
       return;

@@ -4,6 +4,7 @@ import { client } from "@/store/request";
 import { ViewComponentProps } from "@/store/types";
 import { ScrollViewCore, DialogCore, PresenceCore } from "@/domains/ui/index";
 import { SeasonMediaCore } from "@/domains/media/season";
+import { MovieMediaCore } from "@/domains/media/movie";
 import { RefCore } from "@/domains/cur/index";
 import { PlayerCore } from "@/domains/player/index";
 import { RouteViewCore } from "@/domains/route_view/index";
@@ -98,37 +99,6 @@ function SeasonPlayingPageLogic(props: ViewComponentProps) {
     resolution,
   });
   const $player = PlayerCore({ app, volume, rate });
-
-  const $mask = PresenceCore({ mounted: true, visible: true });
-  const $top = PresenceCore({ mounted: true, visible: true });
-  const $bottom = PresenceCore({ mounted: true, visible: true });
-  const $control = PresenceCore({ mounted: true, visible: true });
-  const $control2 = PresenceCore({});
-  const $top2 = PresenceCore({ mounted: true, visible: true });
-  const $bottom2 = PresenceCore({ mounted: true, visible: true });
-  const $time = PresenceCore({});
-  const $subtitle = PresenceCore({});
-  const $settings = DialogCore();
-  const $episodes = DialogCore();
-  const $episodes2 = PresenceCore();
-  const $resolution2 = PresenceCore();
-  const $rate2 = PresenceCore();
-  const $file2 = PresenceCore();
-  const $subtitle2 = PresenceCore();
-  const $nextEpisode = new DynamicContentCore({
-    value: 1,
-  });
-  const $icon = new DynamicContentCore({
-    value: 1,
-  });
-
-  const $episode = new DynamicContentInListCore({
-    value: 1,
-  });
-
-  let visible = true;
-  let timer: null | NodeJS.Timeout = null;
-  let timer2: null | NodeJS.Timeout = null;
 
   app.onHidden(() => {
     $player.pause();
@@ -315,27 +285,7 @@ function SeasonPlayingPageLogic(props: ViewComponentProps) {
     $tv,
     $player,
     $view: view,
-    ui: {
-      $mask,
-      $top,
-      $bottom,
-      $control,
-      $top2,
-      $bottom2,
-      $control2,
-      $time,
-      $subtitle,
-      $episodes,
-      $nextEpisode,
-      $icon,
-      $episode,
-      $settings,
-      $episodes2,
-      $resolution2,
-      $rate2,
-      $file2,
-      $subtitle2,
-    },
+
     ready() {
       // $player.beforeAdjustCurrentTime(() => {
       //   $page.$time.show();
@@ -350,6 +300,60 @@ function SeasonPlayingPageLogic(props: ViewComponentProps) {
       // });
       $tv.fetchProfile(view.query.id);
     },
+  };
+}
+
+export function SeasonPlayingPageView() {
+  const $mask = PresenceCore({ mounted: true, visible: true });
+  const $top = PresenceCore({ mounted: true, visible: true });
+  const $bottom = PresenceCore({ mounted: true, visible: true });
+  const $control = PresenceCore({ mounted: true, visible: true });
+  const $control2 = PresenceCore({});
+  const $top2 = PresenceCore({ mounted: true, visible: true });
+  const $bottom2 = PresenceCore({ mounted: true, visible: true });
+  const $time = PresenceCore({});
+  const $subtitle = PresenceCore({});
+  const $settings = DialogCore();
+  const $episodes = DialogCore();
+  const $episodes2 = PresenceCore();
+  const $resolution2 = PresenceCore();
+  const $rate2 = PresenceCore();
+  const $file2 = PresenceCore();
+  const $subtitle2 = PresenceCore();
+  const $nextEpisode = new DynamicContentCore({
+    value: 1,
+  });
+  const $icon = new DynamicContentCore({
+    value: 1,
+  });
+  const $episode = new DynamicContentInListCore({
+    value: 1,
+  });
+
+  let visible = true;
+  let timer: null | NodeJS.Timeout = null;
+  let timer2: null | NodeJS.Timeout = null;
+
+  return {
+    $mask,
+    $top,
+    $bottom,
+    $control,
+    $top2,
+    $bottom2,
+    $control2,
+    $time,
+    $subtitle,
+    $episodes,
+    $nextEpisode,
+    $icon,
+    $episode,
+    $settings,
+    $episodes2,
+    $resolution2,
+    $rate2,
+    $file2,
+    $subtitle2,
     show() {
       $top.show();
       $bottom.show();

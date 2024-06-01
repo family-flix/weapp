@@ -3,10 +3,9 @@ import { app, history, storage, client } from "@/store/index";
 import { RouteViewCore } from "@/domains/route_view/index";
 import { connect } from "@/domains/player/connect.weapp";
 import { MediaRates } from "@/domains/media/constants";
+import { seconds_to_hour } from "@/utils/index";
 
-import { SeasonPlayingPageLogic } from "./store";
-
-let _$logic: null | ReturnType<typeof SeasonPlayingPageLogic> = null;
+import { SeasonPlayingPageLogic, SeasonPlayingPageView } from "./store";
 
 Page({
   data: {
@@ -14,6 +13,7 @@ Page({
     menuWidth: app.screen.menuButton?.width || 0,
     orientation: "vertical",
     $logic: null as null | ReturnType<typeof SeasonPlayingPageLogic>,
+    $ui: null as null | ReturnType<typeof SeasonPlayingPageView>,
     MediaRates,
 
     playerState: null as null | ReturnType<typeof SeasonPlayingPageLogic>["$player"]["state"],
@@ -28,7 +28,7 @@ Page({
     }
     this.event.on(elm, handler);
   },
-  emitClick<T extends Record<string, string>>(elm: string, payload: T) {
+  emitClick<T extends Record<string, string | number>>(elm: string, payload: T) {
     this.event.emit(elm, payload);
   },
   onLoad(query) {
@@ -44,9 +44,10 @@ Page({
         query,
       }),
     });
-    _$logic = $logic;
+    const $ui = SeasonPlayingPageView();
     this.setData({
       $logic,
+      $ui,
       playerState: $logic.$player.state,
       state: $logic.$tv.state,
       curSource: $logic.$tv.$source.profile,
@@ -81,11 +82,18 @@ Page({
     // $logic.$player.onTargetTimeChange((v) => {
     //   setTargetTime(seconds_to_hour(v));
     // });
+    this.onClick("unload", () => {
+      $ui.prepareHide();
+      $logic.$tv.destroy();
+      for (let i = 0; i < this.events.length; i += 1) {
+        this.event.off(this.events[i]);
+      }
+    });
     this.onClick("arrow-left", () => {
       history.back();
     });
     this.onClick("screen", () => {
-      $logic.prepareToggle();
+      $ui.prepareToggle();
     });
     this.onClick("pause", () => {
       $logic.$player.pause();
@@ -103,53 +111,53 @@ Page({
       $logic.$player.speedUp();
     });
     this.onClick("episodes-menu", () => {
-      $logic.ui.$episodes.show();
+      $ui.$episodes.show();
     });
     this.onClick("next-episode-menu", () => {
       $logic.$tv.playNextEpisode();
     });
     this.onClick("fullscreen-menu", () => {
-      $logic.ui.$control2.show();
+      $ui.$control2.show();
       $logic.$player.requestFullScreen();
     });
     this.onClick("settings-menu", () => {
-      $logic.ui.$settings.show();
+      $ui.$settings.show();
     });
     this.onClick("fullscreen-menu", () => {
-      $logic.ui.$control2.show();
+      $ui.$control2.show();
       $logic.$player.requestFullScreen();
     });
     this.onClick("resolution-menu2", () => {
-      $logic.ui.$top2.hide();
-      $logic.ui.$bottom2.hide();
-      $logic.ui.$resolution2.show();
+      $ui.$top2.hide();
+      $ui.$bottom2.hide();
+      $ui.$resolution2.show();
     });
     this.onClick("rate-menu2", () => {
-      $logic.ui.$top2.hide();
-      $logic.ui.$bottom2.hide();
-      $logic.ui.$rate2.show();
+      $ui.$top2.hide();
+      $ui.$bottom2.hide();
+      $ui.$rate2.show();
     });
     this.onClick("episodes-menu2", () => {
-      $logic.ui.$top2.hide();
-      $logic.ui.$bottom2.hide();
-      $logic.ui.$episodes2.show();
+      $ui.$top2.hide();
+      $ui.$bottom2.hide();
+      $ui.$episodes2.show();
     });
     this.onClick("file-menu2", () => {
-      $logic.ui.$top2.hide();
-      $logic.ui.$bottom2.hide();
-      $logic.ui.$file2.show();
+      $ui.$top2.hide();
+      $ui.$bottom2.hide();
+      $ui.$file2.show();
     });
     this.onClick("resolution-overlay", () => {
-      $logic.ui.$resolution2.hide();
+      $ui.$resolution2.hide();
     });
     this.onClick("rate-overlay", () => {
-      $logic.ui.$rate2.hide();
+      $ui.$rate2.hide();
     });
     this.onClick("episodes-overlay", () => {
-      $logic.ui.$episodes2.hide();
+      $ui.$episodes2.hide();
     });
     this.onClick("file-overlay", () => {
-      $logic.ui.$file2.hide();
+      $ui.$file2.hide();
     });
     this.onClick("episode", (payload: { id: string }) => {
       const { id } = payload;
@@ -189,11 +197,10 @@ Page({
       storage.merge("player_settings", {
         rate: v,
       });
-      $logic.ui.$rate2.hide();
+      $ui.$rate2.hide();
     });
     this.onClick("file", (payload: { id: string }) => {
       const { id } = payload;
-      console.log('payload', payload);
       const matched = $logic.$tv.curSource?.files.find((f) => f.id === id);
       if (!matched) {
         app.tip({
@@ -204,40 +211,104 @@ Page({
       $logic.$tv.changeSourceFile(matched);
     });
     this.onClick("exit-screen", () => {
-      $logic.ui.$control2.hide();
+      $ui.$control2.hide();
       $logic.$player.exitFullscreen();
       $logic.$player.updateCurTime();
     });
     this.onClick("exit-fullscreen", () => {
-      $logic.ui.$control2.hide();
+      $ui.$control2.hide();
       $logic.$player.exitFullscreen();
+      $ui.$control.show();
     });
     this.onClick("exit-fullscreen-and-pause", () => {
-      $logic.ui.$control2.hide();
+      $ui.$control2.hide();
       $logic.$player.pause();
       $logic.$player.exitFullscreen();
+      $ui.$control.show();
     });
     this.onClick("screen2", () => {
-      $logic.prepareToggle2();
+      $ui.prepareToggle2();
+    });
+    this.onClick("video-can-play", (values) => {
+      console.log("emit player canPlay", values);
+      $logic.$player.handleCanPlay(values);
+      this.setData({
+        times: {
+          currentTime: "00:00",
+          duration: seconds_to_hour($logic.$player._duration),
+        },
+      });
+    });
+    this.onClick("video-ended", () => {
+      $logic.$player.handleEnded();
+    });
+    this.onClick("video-mounted", (event) => {
+      connect($logic.$player, event.detail.context);
+    });
+    this.onClick("video-progress", (v) => {
+      const { currentTime, duration } = v;
+      $logic.$player.handleTimeUpdate({ currentTime, duration });
+    });
+    this.onClick("video-virtual-set-current-time", (v) => {
+      let virtual = $logic.$player._currentTime + v.percent * $logic.$player._duration;
+      console.log("video-virtual-set-current-time", v.percent * $logic.$player._duration);
+      if (virtual < 0) {
+        virtual = 0;
+      }
+      if (virtual > $logic.$player._duration) {
+        virtual = $logic.$player._duration;
+      }
+      this.setData({
+        virtualCurTime: seconds_to_hour(virtual),
+      });
+    });
+    this.onClick("update-percent", (v) => {
+      const { percent } = v;
+      let targetTime = percent * $logic.$player._duration;
+      $logic.$player.adjustCurrentTime(targetTime);
+    });
+    this.onClick("update-percent-added", (v) => {
+      const { percent } = v;
+      const targetTime = $logic.$player._currentTime + percent * 60;
+      // console.log("target time is", targetTime);
+      $logic.$player.adjustCurrentTime(targetTime);
     });
     app.onReady(() => {
       // console.log("[PAGE]tv_play - before $logic.$tv.fetchProfile", media_id);
       $logic.ready();
       // $logic.prepareToggle();
-      // $logic.ui.$control2.show();
+      // $ui.$control2.show();
     });
   },
   onUnload() {
-    const $logic = _$logic;
-    if (!$logic) {
-      return;
-    }
-    $logic.prepareHide();
-    $logic.$tv.destroy();
-    for (let i = 0; i < this.events.length; i += 1) {
-      this.event.off(this.events[i]);
-    }
-    _$logic = null;
+    this.emitClick("unload", {});
+  },
+  handleUpdatePercent(event: { detail: { percent: number } }) {
+    this.emitClick("update-percent", event.detail);
+  },
+  handleMove(data: { percent: number }) {
+    this.emitClick("video-virtual-set-current-time", data);
+  },
+  handleMoveEnd(data: { percent: number }) {
+    // console.log(this);
+    // console.log("[COMPONENT]video-progress - handleMoveEnd", data.percent);
+    // this.triggerEvent("percent", data);
+    this.emitClick("update-percent-added", data);
+  },
+  handleVideoCanPlay(event: { detail: {} }) {
+    this.emitClick("video-can-play", event.detail);
+  },
+  handleVideoEnded(event: { detail: {} }) {
+    this.emitClick("video-ended", event.detail);
+  },
+  handleVideoError(event: { detail: { msg: string } }) {
+    // const { msg } = event.detail;
+    // $logic.$player.handleError(msg);
+  },
+  handleError(event: { detail: { msg: string } }) {
+    app.tip({
+      text: [event.detail.msg],
+    });
   },
   handleVideoProgress(event: {
     detail: {
@@ -245,39 +316,10 @@ Page({
       duration: number;
     };
   }) {
-    const $logic = _$logic;
-    if (!$logic) {
-      return;
-    }
-    const { currentTime, duration } = event.detail;
-    $logic.$player.handleTimeUpdate({ currentTime, duration });
-  },
-  handleVideoCanPlay(event: { detail: {} }) {
-    const $logic = _$logic;
-    if (!$logic) {
-      return;
-    }
-    $logic.$player.handleCanPlay();
-  },
-  handleVideoError(event: { detail: { msg: string } }) {
-    const $logic = _$logic;
-    if (!$logic) {
-      return;
-    }
-    const { msg } = event.detail;
-    $logic.$player.handleError(msg);
-  },
-  handleError(event: { detail: { msg: string } }) {
-    app.tip({
-      text: [event.detail.msg],
-    });
+    this.emitClick("video-progress", event.detail);
   },
   handleVideoMounted(event: { detail: { context: unknown } }) {
-    const $logic = _$logic;
-    if (!$logic) {
-      return;
-    }
-    connect($logic.$player, event.detail.context);
+    this.emitClick("video-mounted", event as any);
   },
   handleClickElm(event: {
     detail: { elm: string } & Record<string, string>;
