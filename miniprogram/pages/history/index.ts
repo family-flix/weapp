@@ -108,21 +108,21 @@ function HistoryPageLogic(props: ViewComponentProps) {
     },
     handleClickHistory(record: { id: string; media_id: string; type: MediaTypes }) {
       const { id, media_id, type } = record;
-      if (app.$user.permissions.includes("002")) {
-        if (type === MediaTypes.Season) {
-          history.push("root.season_playing", { id: media_id, type });
-          return;
-        }
-        if (type === MediaTypes.Movie) {
-          history.push("root.movie_playing", { id: media_id, type });
-          return;
-        }
-        app.tip({
-          text: ["未知的媒体类型"],
-        });
+      // if (!app.$user.permissions.includes("002")) {
+      //   history.push("root.profile", { id: media_id, type });
+      //   return;
+      // }
+      if (type === MediaTypes.Season) {
+        history.push("root.season_playing", { id: media_id, type });
         return;
       }
-      history.push("root.profile", { id: media_id, type });
+      if (type === MediaTypes.Movie) {
+        history.push("root.movie_playing", { id: media_id, type });
+        return;
+      }
+      app.tip({
+        text: ["未知的媒体类型"],
+      });
     },
   };
 }

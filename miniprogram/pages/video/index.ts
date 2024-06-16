@@ -340,6 +340,16 @@ Page({
       // console.log("target time is", targetTime);
       $player.adjustCurrentTime(targetTime);
     });
+    this.onClick("long-press", () => {
+      app.tip({
+        text: ["长按"],
+      });
+    });
+    this.onClick("finish-long-press", () => {
+      app.tip({
+        text: ["取消长按"],
+      });
+    });
     const url =
       "http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400";
     setTimeout(() => {
@@ -370,6 +380,12 @@ Page({
     // console.log("[COMPONENT]video-progress - handleMoveEnd", data.percent);
     // this.triggerEvent("percent", data);
     this.emitClick("update-percent-added", data);
+  },
+  handleLongPress() {
+    this.emitClick("long-press", {});
+  },
+  handleFinishLongPress() {
+    this.emitClick("finish-long-press", {});
   },
   handleVideoCanPlay(event: { detail: {} }) {
     this.emitClick("video-can-play", event.detail);

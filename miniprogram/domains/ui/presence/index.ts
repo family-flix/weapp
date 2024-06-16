@@ -178,13 +178,13 @@ export function PresenceCore(props: PresenceProps = {}) {
       this.pending = 3;
       state.pending = 3;
       // event.emit(Events.StateChange, { ...snapshot(state) });
-      // setTimeout(() => {
-      //   state.visible = false;
-      //   this.pending = 1;
-      //   state.pending = 1;
-      //   event.emit(Events.Hidden);
-      //   this.unmount();
-      // }, 3000);
+      setTimeout(() => {
+        state.visible = false;
+        this.pending = 1;
+        state.pending = 1;
+        event.emit(Events.Hidden);
+        this.unmount();
+      }, 300);
     },
     handleAnimationEnd() {
       // console.log('handleAnimationEnd', state.pending);

@@ -98,16 +98,16 @@
         <cover-view class="__a screen2 absolute top-0 left-0 w-full h-full" style="z-index: 100;" data-elm="screen2" bind:touchstart="{{m1.handleTouchStart}}" bind:touchmove="{{m1.handleTouchMove}}" bind:touchend="{{m1.handleTouchEnd}}" bind:animationend="{{m1.handleAnimationEnd}}"></cover-view>
         <presence _store="{{ui.$top2}}" cover="{{true}}" style="z-index: 110; position: absolute; top: 0; width: 100%; min-height: 67px;" enter-class="slide-in-from-top fade-in" exit-class="slide-out-to-top fade-out">
             <cover-view class="absolute left-0 top-0 w-full" style="z-index: 110;" catch:tap="prevent">
-                <cover-view class="operation__mask absolute top-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
-                <cover-view class="z-10 relative flex items-center justify-between z-20 p-4 px-8 text-w-white">
-                    <cover-view class="flex items-center" data-elm="exit-fullscreen" catch:tap="handleClickElm">
+                <cover-view class="operation__mask operation__mask--top absolute top-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%;"></cover-view>
+                <cover-view class="z-10 relative flex items-center justify-between z-20 text-w-white">
+                    <cover-view class="flex items-center p-4" data-elm="exit-fullscreen" catch:tap="handleClickElm">
                         <cover-view class="inline-block mr-2">返回</cover-view>
                         <cover-view class="">
                             {{state.curSource.order}}、{{state.curSource.name}}
                         </cover-view>
                     </cover-view>
-                    <cover-view class="relative p-2 rounded-md" data-elm="exit-fullscreen-and-pause">
-                        <cover-view class="">退出全屏</cover-view>
+                    <cover-view class="relative p-4 rounded-md" data-elm="exit-fullscreen-and-pause">
+                        退出全屏
                     </cover-view>
                 </cover-view>
             </cover-view>
@@ -118,17 +118,13 @@
                 <cover-view class="pt-4 px-8" style="z-index: 3; position: relative;">
                     <cover-video-progress _store="{{$player}}" bind:percent="handleUpdatePercent" />
                 </cover-view>
-                <cover-view class="flex items-center justify-between px-8 py-4 text-w-white" style="z-index: 2; position: relative;">
+                <cover-view class="flex items-center justify-between px-8 py-2 text-w-white" style="z-index: 2; position: relative;">
                     <cover-view class="flex items-center" style="">
                         <block wx:if="{{playerState.playing}}">
-                            <cover-view class="p-2" data-elm="pause" catch:tap="handleClickElm">
-                                <cover-view style="width: 48px;">暂停</cover-view>
-                            </cover-view>
+                            <cover-view data-elm="pause" catch:tap="handleClickElm">暂停</cover-view>
                         </block>
                         <block wx:else>
-                            <cover-view class="p-2" data-elm="play" catch:tap="handleClickElm">
-                                <cover-view style="width: 48px;">播放</cover-view>
-                            </cover-view>
+                            <cover-view data-elm="play" catch:tap="handleClickElm">播放</cover-view>
                         </block>
                     </cover-view>
                     <cover-view class="flex items-center space-x-4 px-2">
@@ -255,7 +251,14 @@
     </cover-view>
 </root-portal>
 <wxs module="m1">
+var abs = function(value) {
+  if (value >= 0) {
+    return value;
+  }
+  return -value;
+}
 var startX = 0;
+var startY = 0;
 var touchStartTime = 0;
 var length = 0;
 var rect =  {
@@ -267,15 +270,22 @@ var rect2 =  {
     width: 0,
 };
 var _distance = 0;
+var _distanceY = 0;
 var pos = {
     clientX: 0,
 };
+var pressing = 0;
+/** 正触发长按 */
+var longPressing = 0;
+/** 正在移动 */
+var moving = 0;
 var _tmpCur = 0;
 var _percent = 0;
 var cur = 0;
 var _curTime = 0;
 var _duration = 0;
 var hasShow = 0;
+var timer = 0;
 module.exports = {
     handleAnimationEnd: function (event, ownerInstance) {
         var instance1 = ownerInstance.selectComponent('.screen2')
@@ -286,24 +296,40 @@ module.exports = {
         var touches = event.touches;
         var finger = touches[0];
         startX = finger.clientX;
+        startY = finger.clientY;
         cur = startX - rect.left;
         touchStartTime = event.timeStamp;
+        pressing = 1;
+        timer = ownerInstance.setTimeout(function() {
+            console.log('before pressing === 0', pressing, abs(_distance), abs(_distanceY));
+            if (pressing === 0) {
+                return;
+            }
+            if (abs(_distance) > 10 || abs(_distanceY) > 10) {
+                return;
+            }
+            longPressing = 1;
+            ownerInstance.callMethod('handleLongPress');
+        }, 800);
         return false;
     },
     handleTouchMove: function(event, ownerInstance) {
         var instance3 = ownerInstance.selectComponent('.toast')
         var now = event.timeStamp;
-        if (now - touchStartTime > 200) {
-            if (!hasShow) {
-                hasShow = 1;
-                instance3.setStyle({
-                    display: 'block',
-                });
-            }
+        if (longPressing) {
+            return;
         }
         var touches = event.touches;
         var finger = touches[0];
         var distance = finger.clientX - startX;
+        var distanceY = finger.clientY - startY;
+        moving = 1;
+        if (abs(distance) > 10 && !hasShow) {
+            hasShow = 1;
+            instance3.setStyle({
+                display: 'block',
+            });
+        }
         var percent = distance / rect.width;
         console.log('move distance', distance, percent);
         if (percent < -1) {
@@ -313,6 +339,7 @@ module.exports = {
             percent = 1;
         }
         _distance = distance;
+        _distancY = distanceY;
         _tmpCur = distance;
         _percent = percent;
         pos = finger;
@@ -321,6 +348,18 @@ module.exports = {
     },
     handleTouchEnd: function (event, ownerInstance) {
         var now = event.timeStamp;
+        pressing = 0;
+        moving = 0;
+        _distance = 0;
+        if (timer) {
+            ownerInstance.clearTimeout(timer);
+            timer = 0;
+        }
+        if (longPressing) {
+            longPressing = 0;
+            ownerInstance.callMethod('handleFinishLongPress');
+            return;
+        }
         console.log(now - touchStartTime);
         if (now - touchStartTime <= 200) {
             ownerInstance.callMethod('handleClickElm', { detail: { elm: 'screen2' } });

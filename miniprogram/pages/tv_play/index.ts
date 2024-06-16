@@ -15,6 +15,9 @@ Page({
     $logic: null as null | ReturnType<typeof SeasonPlayingPageLogic>,
     $ui: null as null | ReturnType<typeof SeasonPlayingPageView>,
     MediaRates,
+    icons: {
+      play: "../../assets/play.png",
+    },
 
     playerState: null as null | ReturnType<typeof SeasonPlayingPageLogic>["$player"]["state"],
     state: null as null | ReturnType<typeof SeasonPlayingPageLogic>["$tv"]["state"],
@@ -250,8 +253,8 @@ Page({
       $logic.$player.handleTimeUpdate({ currentTime, duration });
     });
     this.onClick("video-virtual-set-current-time", (v) => {
-      let virtual = $logic.$player._currentTime + v.percent * $logic.$player._duration;
-      console.log("video-virtual-set-current-time", v.percent * $logic.$player._duration);
+      const { percent } = v;
+      let virtual = $logic.$player._currentTime + percent * 60;
       if (virtual < 0) {
         virtual = 0;
       }
@@ -269,7 +272,10 @@ Page({
     });
     this.onClick("update-percent-added", (v) => {
       const { percent } = v;
-      const targetTime = $logic.$player._currentTime + percent * 60;
+      let targetTime = $logic.$player._currentTime + percent * 60;
+      if (targetTime > $logic.$player._duration) {
+        targetTime = $logic.$player._duration;
+      }
       // console.log("target time is", targetTime);
       $logic.$player.adjustCurrentTime(targetTime);
     });

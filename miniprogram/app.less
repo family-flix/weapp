@@ -189,19 +189,22 @@ input,
   height: constant(safe-area-inset-right);
   // background-color: green;
 }
+// 全屏时左边安全距离
 .safe-block3 {
   width: env(safe-area-inset-bottom);
   width: constant(safe-area-inset-bottom);
-  height: env(safe-area-inset-bottom);
-  height: constant(safe-area-inset-bottom);
+  height: 1rpx;
+  // height: env(safe-area-inset-bottom);
+  // height: constant(safe-area-inset-bottom);
   background-color: yellow;
 }
 .safe-block4 {
   width: env(safe-area-inset-left);
   width: constant(safe-area-inset-left);
-  height: env(safe-area-inset-left);
-  height: constant(safe-area-inset-left);
-  // background-color: pink;
+  height: 1rpx;
+  // height: env(safe-area-inset-left);
+  // height: constant(safe-area-inset-left);
+  background-color: pink;
 }
 .episode:nth-child(5n) {
   margin-right: 0;
@@ -521,6 +524,9 @@ input,
   padding-left: 2rem;
   padding-right: 2rem;
 }
+.pr-4 {
+  padding-right: 1rem;
+}
 .pl-4 {
   padding-left: 1rem;
 }
@@ -542,12 +548,18 @@ input,
 .pb-6 {
   padding-bottom: 1.5rem;
 }
-.pb-24 {
-  padding-bottom: 6rem;
+.pl-8 {
+  padding-left: 2rem;
+}
+.pr-8 {
+  padding-right: 2rem;
 }
 .px-8 {
   padding-left: 2rem;
   padding-right: 2rem;
+}
+.pb-24 {
+  padding-bottom: 6rem;
 }
 
 .max-w-full {
