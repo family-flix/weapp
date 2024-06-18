@@ -3,12 +3,12 @@ import { storage } from "@/store/storage";
 import { client } from "@/store/request";
 import { ViewComponentProps } from "@/store/types";
 import { ScrollViewCore, DialogCore, PresenceCore } from "@/domains/ui/index";
-import { SeasonMediaCore } from "@/domains/media/season";
-import { MovieMediaCore } from "@/domains/media/movie";
+import { SeasonMediaCore } from "@/biz/media/season";
+import { MovieMediaCore } from "@/biz/media/movie";
 import { RefCore } from "@/domains/cur/index";
 import { PlayerCore } from "@/domains/player/index";
 import { RouteViewCore } from "@/domains/route_view/index";
-import { createVVTSubtitle } from "@/domains/subtitle/utils";
+// import { createVVTSubtitle } from "@/biz/subtitle/utils";
 import { OrientationTypes } from "@/domains/app/index";
 import { DynamicContentCore, DynamicContentInListCore } from "@/domains/ui/dynamic-content/index";
 
@@ -98,7 +98,7 @@ function SeasonPlayingPageLogic(props: ViewComponentProps) {
     client,
     resolution,
   });
-  const $player = PlayerCore({ app, volume, rate });
+  const $player = new PlayerCore({ app, volume, rate });
 
   app.onHidden(() => {
     $player.pause();
@@ -153,9 +153,9 @@ function SeasonPlayingPageLogic(props: ViewComponentProps) {
     $player.setCurrentTime(curEpisode.currentTime);
     // bottomOperation.show();
   });
-  $tv.$source.onSubtitleLoaded((subtitle) => {
-    $player.showSubtitle(createVVTSubtitle(subtitle));
-  });
+  // $tv.$source.onSubtitleLoaded((subtitle) => {
+  //   $player.showSubtitle(createVVTSubtitle(subtitle));
+  // });
   $tv.onEpisodeChange((curEpisode) => {
     app.setTitle($tv.getTitle().join(" - "));
     const { currentTime } = curEpisode;
@@ -263,7 +263,6 @@ function SeasonPlayingPageLogic(props: ViewComponentProps) {
       const nextIndex = curFileIndex + 1;
       const nextFile = files[nextIndex];
       if (!nextFile) {
-        app.tip({ text: ["视频加载错误", error.message] });
         $player.setInvalid(error.message);
         return;
       }

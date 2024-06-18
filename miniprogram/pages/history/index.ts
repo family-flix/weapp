@@ -6,7 +6,7 @@ import {
   deleteHistory,
   fetchPlayingHistories,
   fetchPlayingHistoriesProcess,
-} from "@/domains/media/services";
+} from "@/biz/media/services";
 import { DialogCore, ImageInListCore, NodeInListCore, ScrollViewCore } from "@/domains/ui/index";
 import { RequestCore } from "@/domains/request/index";
 import { ListCore } from "@/domains/list/index";

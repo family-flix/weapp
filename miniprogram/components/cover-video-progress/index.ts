@@ -1,19 +1,5 @@
-import mitt from "mitt";
-
 import { PlayerCore } from "@/domains/player/index";
 import { seconds_to_hour } from "@/utils/index";
-
-const event = mitt();
-const events = [] as string[];
-const onClick = (elm: string, handler: (payload: any) => void) => {
-  if (!events.includes(elm)) {
-    events.push(elm);
-  }
-  event.on(elm, handler);
-};
-const emitClick = <T extends Record<string, string | number | undefined>>(elm: string, payload: T) => {
-  event.emit(elm, payload);
-};
 
 Component({
   mounted: false,
@@ -24,7 +10,7 @@ Component({
   properties: {
     _store: {
       type: Object,
-      observer(store: ReturnType<typeof PlayerCore>) {
+      observer(store: PlayerCore) {
         const $player = store;
         if (!$player) {
           return;
@@ -51,6 +37,7 @@ Component({
           });
         });
         $player.onDurationChange((v) => {
+          $player._duration = v;
           this.setData({
             duration: v,
             times: {
@@ -63,9 +50,6 @@ Component({
           this.setData({
             curTime: time,
           });
-        });
-        onClick("update-percent", (v) => {
-          $player.adjustProgressManually(v.percent);
         });
       },
     },
@@ -110,7 +94,11 @@ Component({
       this.setData({
         isMoving: false,
       });
-      this.triggerEvent("percent", data);
+      const $player = this.data._store;
+      const { percent } = data;
+      let targetTime = percent * $player._duration;
+      // console.log('inner onClick("update-percent",', data, $player._duration, targetTime);
+      $player.adjustCurrentTime(targetTime);
     },
   },
 });

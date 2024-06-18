@@ -147,7 +147,11 @@ export function bytes_to_size(bytes: number) {
   }
   return `${remove_zero(size.toFixed(2))}${unit}`;
 }
-
+export function seconds_to_minute(value: number) {
+  const minutes = Math.floor(value / 60);
+  const seconds = Math.floor(value - minutes * 60);
+  return [minutes, "分", seconds, "秒"].join("");
+}
 /**
  * 秒数转时分秒
  * @param value

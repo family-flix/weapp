@@ -4,7 +4,7 @@ import { app } from "@/store/index";
 import { storage } from "@/store/storage";
 import { client } from "@/store/request";
 import { TVGenresOptions, TVSourceOptions } from "@/constants/index";
-import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/domains/media/services";
+import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/biz/media/services";
 import { ButtonCore, CheckboxGroupCore, DialogCore, InputCore } from "@/domains/ui/index";
 import { RequestCore } from "@/domains/request/index";
 import { ListCore } from "@/domains/list/index";

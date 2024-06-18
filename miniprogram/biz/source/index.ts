@@ -2,9 +2,10 @@
  * @file 视频文件播放
  * 提供获取播放地址、切换分辨率、字幕展示等功能
  */
+import { SubtitleCore } from "@/biz/subtitle/index";
+import { media_request } from "@/biz/requests/index";
 import { BaseDomain, Handler } from "@/domains/base";
-import { SubtitleCore } from "@/domains/subtitle/index";
-import { SubtitleFileResp } from "@/domains/subtitle/types";
+import { SubtitleFileResp } from "@/biz/subtitle/types";
 import { RequestCore } from "@/domains/request/index";
 import { HttpClientCore } from "@/domains/http_client/index";
 import { MediaOriginCountry } from "@/constants/index";
@@ -169,7 +170,7 @@ export class MediaSourceFileCore extends BaseDomain<TheTypesOfEvents> {
     }
     const subtitles = extraSubtitleFiles.concat(this.profile.subtitles).filter(Boolean);
     this.subtitles = subtitles;
-    console.log("[DOMAIN]tv/index - loadSubtitle2 ", subtitles);
+    console.log("[DOMAIN]source/index - loadSubtitle2 ", subtitles);
     const subtitleFile = (() => {
       const matched = subtitles.find((s) => {
         return s.language.join("&") === MediaOriginCountry.CN;
@@ -179,7 +180,7 @@ export class MediaSourceFileCore extends BaseDomain<TheTypesOfEvents> {
       }
       return subtitles[0] ?? null;
     })();
-    // console.log("[DOMAIN]tv/index - no matched subtitle?", subtitleFile);
+    console.log("[DOMAIN]source/index - matched subtitle?", subtitleFile);
     if (!subtitleFile) {
       return Result.Err("没有可加载的字幕文件");
     }
@@ -187,6 +188,7 @@ export class MediaSourceFileCore extends BaseDomain<TheTypesOfEvents> {
     return this.loadSubtitleFile(subtitleFile, currentTime);
   }
   async loadSubtitleFile(subtitleFile: SubtitleFileResp, currentTime: number) {
+    console.log("[DOMAIN]source/index - loadSubtitleFile");
     if (subtitleFile.url === this.subtitle?.url) {
       return Result.Err("已经是当前字幕了");
     }
@@ -196,10 +198,11 @@ export class MediaSourceFileCore extends BaseDomain<TheTypesOfEvents> {
     this.$subtitle = null;
     const r = await SubtitleCore.New(subtitleFile, {
       currentTime,
+      hostname: media_request.getHostname(),
       client: this.$client,
     });
     if (r.error) {
-      return Result.Err("实例化字幕失败");
+      return Result.Err(["实例化字幕失败，因为", r.error].join(""));
     }
     this.$subtitle = r.data;
     const { curLine } = r.data;
@@ -207,10 +210,10 @@ export class MediaSourceFileCore extends BaseDomain<TheTypesOfEvents> {
       url: subtitleFile.url,
       visible: true,
       index: curLine?.line ?? "0",
-      texts: curLine?.texts ?? [],
+      texts: curLine?.texts.filter(Boolean) ?? [],
     };
     this.subtitle = subtitle;
-    console.log("[DOMAIN]movie/index - before emit Events.SubtitleChange", this.subtitle);
+    console.log("[DOMAIN]source/index - before emit Events.SubtitleChange", this.subtitle);
     this.emit(Events.SubtitleLoaded, this.$subtitle);
     this.emit(Events.SubtitleChange, { ...subtitle });
     this.$subtitle.onStateChange((nextState) => {

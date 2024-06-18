@@ -25,7 +25,7 @@
                                 <view>{{season.air_date}}</view>
                                 <block wx:if="{{season.episode_count_text}}">
                                     <view class="mx-2 ">·</view>
-                                    <view class="relative flex items-center bg-gray-100 rounded-md dark:bg-gray-800" style="padding: 2px 4px; font-size: 12px;">
+                                    <view class="relative flex items-center rounded-md" style="padding: 2px 4px; font-size: 12px;">
                                         {{season.episode_count_text}}
                                     </view>
                                 </block>

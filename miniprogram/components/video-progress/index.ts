@@ -3,20 +3,25 @@ import mitt from "mitt";
 import { PlayerCore } from "@/domains/player/index";
 import { seconds_to_hour } from "@/utils/index";
 
-const event = mitt();
-const events = [] as string[];
-const onClick = (elm: string, handler: (payload: any) => void) => {
-  if (!events.includes(elm)) {
-    events.push(elm);
-  }
-  event.on(elm, handler);
-};
-const emitClick = <T extends Record<string, string | number | undefined>>(elm: string, payload: T) => {
-  event.emit(elm, payload);
-};
-
 Component({
   mounted: false,
+  event: mitt(),
+  events: [] as string[],
+  onClick(elm: string, handler: (payload: any) => void) {
+    if (!this.events.includes(elm)) {
+      this.events.push(elm);
+    }
+    this.event.on(elm, handler);
+  },
+  emitClick<T extends Record<string, string | number | undefined>>(elm: string, payload: T) {
+    this.event.emit(elm, payload);
+  },
+  clearClick() {
+    for (let i = 0; i < this.events.length; i += 1) {
+      const e = this.events[i];
+      this.event.off(e);
+    }
+  },
   options: {
     virtualHost: true,
     addGlobalClass: true,
@@ -24,8 +29,9 @@ Component({
   properties: {
     _store: {
       type: Object,
-      observer(store: ReturnType<typeof PlayerCore>) {
+      observer(store: PlayerCore) {
         const $player = store;
+        // console.log("[COMPONENT]$player - _store observer", this, store);
         if (!$player) {
           return;
         }
@@ -34,7 +40,7 @@ Component({
         }
         this.mounted = true;
         $player.onProgress((v) => {
-          // console.log("[COMPONENT]$player.onProgress", v, this.data.rect);
+          // console.log("[COMPONENT]$player.onProgress", v, $player._duration);
           if (this.data.isMoving) {
             return;
           }
@@ -51,6 +57,7 @@ Component({
           });
         });
         $player.onDurationChange((v) => {
+          $player._duration = v;
           this.setData({
             duration: v,
             times: {
@@ -63,9 +70,6 @@ Component({
           this.setData({
             curTime: time,
           });
-        });
-        onClick("update-percent", (v) => {
-          $player.adjustProgressManually(v.percent);
         });
       },
     },
@@ -110,7 +114,12 @@ Component({
       this.setData({
         isMoving: false,
       });
-      this.triggerEvent("percent", data);
+      const $player: PlayerCore = this.data._store;
+      const { percent } = data;
+      let targetTime = percent * $player._duration;
+      $player.adjustCurrentTime(targetTime);
+      // this.emitClick("update-percent", data);
+      // this.triggerEvent("percent", data);
     },
   },
 });

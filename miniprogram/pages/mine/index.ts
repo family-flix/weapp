@@ -6,7 +6,7 @@ import { bindExistingMember, reportSomething } from "@/services/index";
 import { ButtonCore, DialogCore, ImageCore, InputCore, ScrollViewCore } from "@/domains/ui/index";
 import { RequestCore } from "@/domains/request/index";
 import { RouteViewCore } from "@/domains/route_view/index";
-import { CalendarCore } from "@/domains/calendar/index";
+import { CalendarCore } from "@/biz/calendar/index";
 import { ReportTypes } from "@/constants/index";
 
 function MinePageLogic(props: ViewComponentProps) {

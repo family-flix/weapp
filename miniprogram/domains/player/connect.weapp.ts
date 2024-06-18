@@ -4,27 +4,27 @@ import type { VideoContext } from "miniprogram-api-typings";
 import { PlayerCore } from "@/domains/player/index";
 
 /** 连接 $video 标签和 player 领域 */
-export function connect(store: ReturnType<typeof PlayerCore>, $video: VideoContext) {
+export function connect(store: PlayerCore, $video: VideoContext) {
   // store.name = "------ update update update";
-  console.log("[COMPONENT]VideoPlayer/connect", store.uid);
+  // console.log("[COMPONENT]VideoPlayer/connect", store.uid);
   $video.onloadstart = () => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.onloadstart");
   };
-  $video.onloadedmetadata = (event: { detail: { width: number; height: number } }) => {
+  $video.onloadedmetadata = (event: { detail: { width: number; height: number; duration: number } }) => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.onloadedmetadata");
-    const { width, height } = event.detail;
-    store.handleLoadedmetadata({ width, height });
+    // const { width, height, duration } = event.detail;
+    // store.handleLoadedmetadata({ width, height, duration });
   };
   $video.onload = () => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.onload");
-    store.handleLoad();
+    // store.handleLoad();
   };
   // 这个居然会在调整时间进度后调用？？？
   $video.oncanplay = () => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.oncanplay");
     // const { duration } = event.currentTarget as HTMLVideoElement;
     // console.log("[COMPONENT]VideoPlayer/connect - listen $video can play");
-    store.handleCanPlay();
+    // store.handleCanPlay();
   };
   $video.onplay = () => {
     // console.log("[COMPONENT]VideoPlayer/connect - $video.onplay");
@@ -83,7 +83,6 @@ export function connect(store: ReturnType<typeof PlayerCore>, $video: VideoConte
     // })();
     // player.handleError(msg.message);
   };
-  store.uid = 100;
   store.bindAbstractNode({
     $node: $video,
     async play() {

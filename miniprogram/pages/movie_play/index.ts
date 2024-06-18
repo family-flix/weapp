@@ -2,7 +2,7 @@ import mitt from "mitt";
 import { app, history, storage, client } from "@/store/index";
 import { RouteViewCore } from "@/domains/route_view/index";
 import { connect } from "@/domains/player/connect.weapp";
-import { MediaRates } from "@/domains/media/constants";
+import { MediaRates } from "@/biz/media/constants";
 import { seconds_to_hour } from "@/utils/index";
 
 import { SeasonPlayingPageLogic, SeasonPlayingPageView } from "./store";

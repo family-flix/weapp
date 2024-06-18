@@ -1,11 +1,15 @@
 import mitt from "mitt";
+
 import { app, history, storage, client } from "@/store/index";
-import { connect } from "@/domains/player/connect.weapp";
-import { MediaRates } from "@/domains/media/constants";
+import { MediaRates } from "@/biz/media/constants";
+import { SubtitleCore } from "@/biz/subtitle/index";
 import { PlayerCore } from "@/domains/player/index";
 import { DialogCore, PresenceCore } from "@/domains/ui/index";
 import { DynamicContentCore, DynamicContentInListCore } from "@/domains/ui/dynamic-content/index";
 import { seconds_to_hour } from "@/utils/index";
+import { MediaOriginCountry } from "@/constants/index";
+
+import { subtitleContent } from "./contents";
 
 // import { SeasonPlayingPageLogic } from "./store";
 
@@ -59,7 +63,7 @@ const $ui = {
   $subtitle2,
   $control3,
 };
-const $player = PlayerCore({ app, volume: 1, rate: 1 });
+const $player = new PlayerCore({ app, volume: 1, rate: 1 });
 let visible = false;
 let timer: null | NodeJS.Timeout = null;
 let timer2: null | NodeJS.Timeout = null;
@@ -221,6 +225,51 @@ Page({
         progress: v.currentTime,
       });
     });
+    (() => {
+      const r = SubtitleCore.NewWithContent(
+        {
+          content: subtitleContent,
+          name: "hello.vtt",
+        },
+        {
+          language: [MediaOriginCountry.CN],
+          currentTime: 0,
+        }
+      );
+      if (r.error) {
+        console.log("rrr", r.error.message);
+        return;
+      }
+      const $subtitle = r.data;
+      const { curLine } = r.data;
+      const subtitle = {
+        url: "",
+        visible: true,
+        index: curLine?.line ?? "0",
+        texts: curLine?.texts ?? [],
+      };
+      this.setData({
+        subtitle,
+      });
+      console.log("[DOMAIN]movie/index - before emit Events.SubtitleChange");
+      $subtitle.onStateChange((nextState) => {
+        const { curLine } = nextState;
+        const subtitle = {
+          url: "",
+          visible: true,
+          index: curLine?.line ?? "0",
+          texts: curLine?.texts ?? [],
+        };
+        this.setData({
+          subtitle,
+        });
+      });
+      $player.onProgress((v) => {
+        if (subtitle.visible) {
+          $subtitle.handleTimeChange(v.currentTime);
+        }
+      });
+    })();
     this.onClick("arrow-left", () => {
       history.back();
     });
@@ -296,29 +345,9 @@ Page({
     this.onClick("screen2", () => {
       methods.prepareToggle2();
     });
-    this.onClick("video-can-play", (values) => {
-      console.log("emit player canPlay", values);
-      $player.handleCanPlay(values);
-      this.setData({
-        times: {
-          currentTime: "00:00",
-          duration: seconds_to_hour($player._duration),
-        },
-      });
-    });
-    this.onClick("video-ended", () => {
-      $player.handleEnded();
-    });
-    this.onClick("video-mounted", (event) => {
-      connect($player, event.detail.context);
-    });
-    this.onClick("video-progress", (v) => {
-      const { currentTime, duration } = v;
-      $player.handleTimeUpdate({ currentTime, duration });
-    });
     this.onClick("video-virtual-set-current-time", (v) => {
       let virtual = $player._currentTime + v.percent * $player._duration;
-      console.log("video-virtual-set-current-time", v.percent * $player._duration);
+      // console.log("video-virtual-set-current-time", v.percent * $player._duration);
       if (virtual < 0) {
         virtual = 0;
       }
@@ -341,14 +370,10 @@ Page({
       $player.adjustCurrentTime(targetTime);
     });
     this.onClick("long-press", () => {
-      app.tip({
-        text: ["长按"],
-      });
+      $player.changeRateTmp(2);
     });
     this.onClick("finish-long-press", () => {
-      app.tip({
-        text: ["取消长按"],
-      });
+      $player.recoverRate();
     });
     const url =
       "http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400";
@@ -438,6 +463,9 @@ Page({
       };
     })();
     console.log("click elm is", elm, payload);
+    app.tip({
+      text: [elm!],
+    });
     if (elm === null) {
       console.warn("缺少 data-elm 属性");
       return false;

@@ -15,6 +15,9 @@ Component({
     style: {
       type: String,
     },
+    color: {
+      type: String,
+    },
     size: {
       type: Number,
       value: 32,

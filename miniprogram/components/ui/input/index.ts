@@ -25,10 +25,10 @@ Component({
           },
         });
         this.mounted = true;
-        const { focus, loading, value, placeholder, disabled, allowClear, type } = store;
-        console.log("[DOMAIN]ui/input - observer store", focus);
+        const { autoFocus, loading, value, placeholder, disabled, allowClear, type } = store;
+        console.log("[DOMAIN]ui/input - observer store");
         this.setData({
-          focus,
+          focus: autoFocus,
           loading,
           value,
           placeholder,
@@ -37,8 +37,9 @@ Component({
           type,
         });
         store.onStateChange((nextState) => {
-          const { loading, value, placeholder, disabled, allowClear, type } = nextState;
+          const { loading, value, placeholder, disabled, allowClear, autoFocus, type } = nextState;
           this.setData({
+            focus: autoFocus,
             loading,
             value,
             placeholder,
@@ -47,13 +48,13 @@ Component({
             type,
           });
         });
-        // store.onFocus(() => {
-        //   console.log("[COMPONENT]ui/input - store.onFocus");
-        //   this.setData({ focus: true });
-        // });
-        // store.onBlur(() => {
-        //   this.setData({ focus: false });
-        // });
+        store.onFocus(() => {
+          console.log("[COMPONENT]ui/input - store.onFocus");
+          this.setData({ focus: true });
+        });
+        store.onBlur(() => {
+          this.setData({ focus: false });
+        });
       },
     },
     style: {
@@ -73,34 +74,15 @@ Component({
     value: "",
     focus: false,
   },
-  lifetimes: {
-    attached() {
-      const store = this.data._store as InputCore;
-      // console.log("[COMPONENT]ui/input - ready", store);
-      if (!store) {
-        return;
-      }
-    },
-  },
+  lifetimes: {},
   methods: {
     handleChange(event) {
-      const store = this.data._store as InputCore;
-      console.log("[COMPONENT]ui/input - handleChange", store);
-      if (!store) {
-        return;
-      }
+      const store: InputCore = this.data._store;
       const { value } = event.detail;
       store.change(value);
     },
     handleConfirm() {
-      // wx.showToast({
-      //   title: "handleConfirm",
-      // });
-      const store = this.data._store as InputCore;
-      if (!store) {
-        return;
-      }
-      // const { value } = event.detail;
+      const store: InputCore = this.data._store;
       store.handleEnter();
     },
   },

@@ -1,4 +1,4 @@
-import { CalendarCore } from "@/domains/calendar/index";
+import { CalendarCore } from "@/biz/calendar/index";
 
 Component({
   externalClasses: ["class-name"],

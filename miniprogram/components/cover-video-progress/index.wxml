@@ -1,7 +1,7 @@
 <cover-view class="flex items-center user-select-none" bind:touchstart="{{m1.handleTouchStart}}" bind:touchmove="{{m1.handleTouchMove}}" bind:touchend="{{m1.handleTouchEnd}}">
     <cover-view class="text-sm" style="min-width: 80px;">{{times.currentTime}}</cover-view>
     <cover-view class="__a progress__wrap relative mx-4 w-full py-4 bg-gray-300 cursor-pointer rounded-md" style="overflow: unset;" change:duration="{{m1.durationObserver}}" change:cur="{{m1.progressObserver}}" duration="{{duration}}" cur="{{curTime}}" bind:animationend="{{m1.handleAnimationEnd}}">
-        <cover-view class="progress__mask absolute left-0" style="top: 50%; width: 100%; height: 4px; background-color: #333; transform: translateY(-50%);"></cover-view>
+        <cover-view class="progress__mask absolute left-0" style="top: 50%; width: 100%; height: 4px; background-color: #333; opacity: 0.6; transform: translateY(-50%);"></cover-view>
         <cover-view class="progress__bar absolute left-0 bg-green-500" style="top: 50%; width: {{width}}px; height: 4px; transform: translateY(-50%);"></cover-view>
         <cover-view class="progress__cursor absolute" style="left: {{left}}px; top: 50%; width: 12px; height: 12px; border-radius: 50%; background-color: #fff; transform: translate(0px, -50%);"></cover-view>
     </cover-view>

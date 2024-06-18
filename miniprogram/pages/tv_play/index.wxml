@@ -2,14 +2,26 @@
     <view class="fixed top-0 w-screen h-screen bg-w-bg-0" data-elm="screen" bind:tap="handleClickElm">
         <bar class-name=""></bar>
         <view class="z-10 absolute w-full" style="z-index: 999; top: 36%; left: 50%; min-height: 120rpx; transform: translate(-50%, -50%);">
-            <f-video class-name="z-10 relative" style="width: 100%;" _store="{{$logic.$player}}" bind:load="handleVideoMounted" bind:progress="handleVideoProgress" bind:canplay="handleVideoCanPlay" bind:ended="handleVideoEnded" bind:error="handleVideoError"></f-video>
+            <f-video class-name="z-10 relative" style="width: 100%;" _store="{{$logic.$player}}"></f-video>
             <view class="page__mask absolute z-20 inset-0">
                 <presence class-name="" enter-class="animate-in fade-in" exit-class="animate-out fade-out" _store="{{$ui.$mask}}">
-                    <view class="absolute inset-0 bg-w-fg-1 dark:bg-black opacity-20" style="background-color: black;"></view>
+                    <view class="absolute inset-0 opacity-20" style="background-color: black;"></view>
                 </presence>
             </view>
-            <view class="z-30 absolute text-w-bg-0 dark:text-w-fg-0" style="left: 50%; top: 50%; min-height: 64px; transform: translate(-50%, -50%);">
-                <presence enter-class="animate-in fade-in" exit-class="animate-out fade-out" _store="{{$ui.$control}}">
+            <view class="absolute z-20" style="display: flex; flex-direction: column; left: 50%; width: 100%; bottom: 12px; transform: translateX(-50%);">
+                <presence _store="{{$ui.$subtitle}}" enter-class="animate-in fade-in" exit-class="animate-out fade-out">
+                    <block wx:for="{{subtitleState.texts}}" wx:for-item="text" wx:for-index="index">
+                        <view class="relative px-2 mb-1" style="display: inline-block; width: 100%;">
+                            <view class="absolute bottom-0 w-full rounded-lg" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></view>
+                            <view class="relative text-center text-white" style="z-index: 2;">
+                                {{text}}
+                            </view>
+                        </view>
+                    </block>
+                </presence>
+            </view>
+            <view class="z-30 absolute" style="left: 50%; top: 50%; min-height: 64px; color: #fff; transform: translate(-50%, -50%);">
+                <presence _store="{{$ui.$control}}" enter-class="animate-in fade-in" exit-class="animate-out fade-out">
                     <block wx:if="{{!playerState.error}}">
                         <block wx:if="{{!!playerState.ready}}">
                             <view class="flex items-center space-x-8">
@@ -73,12 +85,9 @@
                 </presence>
             </view>
             <view class="z-40 absolute bottom-0 w-full safe-bottom">
-                <presence _store="{{$ui.$time}}">
-                    <view class="text-center text-xl">{{state.targetTime}}</view>
-                </presence>
                 <presence class="" _store="{{$ui.$bottom}}" enter-class="animate-in fade-in slide-in-from-bottom" exit-class="animate-out slide-out-to-bottom fade-out">
                     <view class="px-4" catch:tap="prevent">
-                        <video-progress _store="{{$logic.$player}}" bind:percent="handleUpdatePercent" />
+                        <video-progress _store="{{$logic.$player}}" />
                     </view>
                     <view class="flex items-center flex-reverse space-x-4 mt-6 w-full px-2 py-4 safe-padding-bottom">
                         <view class="flex items-center p-2 rounded-md space-x-2" data-elm="episodes-menu" catch:tap="handleClickElm">
@@ -115,57 +124,70 @@
                     </cover-view>
                     <cover-view class="relative flex items-center p-4 rounded-md" data-elm="exit-fullscreen-and-pause" catch:tap="handleClickElm">
                         <cover-view style="">退出全屏</cover-view>
-                        <cover-view class="safe-block safe-block4"></cover-view>
                     </cover-view>
                 </cover-view>
             </cover-view>
         </presence>
-        <presence _store="{{$ui.$bottom2}}" cover="{{true}}" style="z-index: 120; position: absolute; bottom: 0; width: 100%; min-height: 115px;" enter-class="slide-in-form-bottom fade-in" exit-class="slide-out-to-bottom fade-out">
-            <cover-view class="absolute left-0 bottom-0 w-full" style="z-index: 120;" catch:tap="prevent">
-                <cover-view class="operation__mask absolute bottom-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
-                <cover-view class="pt-4 px-8" style="z-index: 3; position: relative;">
-                    <cover-video-progress _store="{{$logic.$player}}" bind:percent="handleUpdatePercent" />
-                </cover-view>
-                <cover-view class="flex items-center justify-between px-8 py-4 text-w-white" style="z-index: 2; position: relative;">
-                    <cover-view class="flex items-center" style="">
-                        <cover-view class="safe-block safe-block3"></cover-view>
-                        <block wx:if="{{playerState.playing}}">
-                            <cover-view data-elm="pause" catch:tap="handleClickElm">暂停</cover-view>
-                        </block>
-                        <block wx:else>
-                            <cover-view class="" data-elm="play" catch:tap="handleClickElm">
-                                播放
+        <cover-view style="z-index: 120; position: absolute; bottom: 0; width: 100%;">
+            <cover-view style="display: flex; flex-direction: column;">
+                <block wx:for="{{subtitleState.texts}}" wx:for-item="text" wx:for-index="index">
+                    <cover-view class="relative px-2 mb-1" style="display: inline-block; width: 100%;">
+                        <cover-view class="absolute bottom-0 w-full rounded-lg" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
+                        <cover-view class="relative text-center text-white text-2xl" style="z-index: 2; white-space: normal;">
+                            {{text}}
+                        </cover-view>
+                    </cover-view>
+                </block>
+            </cover-view>
+            <placeholder _store="{{$ui.$bottom2}}" cover="{{true}}">
+                <cover-view style="height: 24px;"></cover-view>
+            </placeholder>
+            <presence _store="{{$ui.$bottom2}}" cover="{{true}}" style="z-index: 120; position: relative; width: 100%;" enter-class="slide-in-form-bottom fade-in" exit-class="slide-out-to-bottom fade-out">
+                <cover-view class="" style="z-index: 130; min-height: 115px;" catch:tap="prevent">
+                    <cover-view class="operation__mask absolute bottom-0 w-full" style="z-index: 1; left: 0; width: 100%; height: 100%; background-color: black; opacity: 0.5;"></cover-view>
+                    <cover-view class="pt-4 px-8" style="z-index: 3; position: relative;">
+                        <cover-video-progress _store="{{$logic.$player}}" />
+                    </cover-view>
+                    <cover-view class="flex items-center justify-between px-8 py-4 text-w-white" style="z-index: 2; position: relative;">
+                        <cover-view class="flex items-center" style="">
+                            <cover-view class="safe-block safe-block3"></cover-view>
+                            <block wx:if="{{playerState.playing}}">
+                                <cover-view data-elm="pause" catch:tap="handleClickElm">
+                                    暂停
+                                </cover-view>
+                            </block>
+                            <block wx:else>
+                                <cover-view class="" data-elm="play" catch:tap="handleClickElm">
+                                    播放
+                                </cover-view>
+                            </block>
+                            <cover-view class="relative ml-4" data-elm="next-episode" catch:tap="handleClickElm">
+                                <cover-view class="">下一集</cover-view>
                             </cover-view>
-                        </block>
-                        <cover-view class="relative ml-4" data-elm="next-episode" catch:tap="handleClickElm">
-                            <cover-view class="">下一集</cover-view>
                         </cover-view>
-                    </cover-view>
-                    <cover-view class="flex items-center space-x-4 px-2">
-                        <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="resolution-menu2" catch:tap="handleClickElm">
-                            <cover-view class="">{{curSource.typeText || '分辨率'}}</cover-view>
-                        </cover-view>
-                        <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="rate-menu2" catch:tap="handleClickElm">
-                            <cover-view class="">{{playerState.rate}}x</cover-view>
-                        </cover-view>
-                        <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="episodes-menu2" catch:tap="handleClickElm">
-                            <cover-view class="">选集</cover-view>
-                        </cover-view>
-                        <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="file-menu2" catch:tap="handleClickElm">
-                            <cover-view class="">切换源</cover-view>
+                        <cover-view class="flex items-center space-x-4 px-2">
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="resolution-menu2" catch:tap="handleClickElm">
+                                <cover-view class="">{{curSource.typeText || '分辨率'}}</cover-view>
+                            </cover-view>
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="rate-menu2" catch:tap="handleClickElm">
+                                <cover-view class="">{{playerState.rate}}x</cover-view>
+                            </cover-view>
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="episodes-menu2" catch:tap="handleClickElm">
+                                <cover-view class="">选集</cover-view>
+                            </cover-view>
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="file-menu2" catch:tap="handleClickElm">
+                                <cover-view class="">切换源</cover-view>
+                            </cover-view>
                         </cover-view>
                     </cover-view>
                 </cover-view>
-            </cover-view>
-        </presence>
+            </presence>
+        </cover-view>
         <presence _store="{{$ui.$episodes2}}" cover="{{true}}" style="z-index: 130;" enter-class="fade-in" exit-class="fade-out">
             <cover-view class="absolute inset-0" style="z-index: 130;" data-elm="episodes-overlay" catch:tap="handleClickElm">
                 <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
                     <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
-                        <cover-view class="safe-block safe-block1"></cover-view>
-                        <cover-view class="safe-block safe-block2"></cover-view>
                         <cover-view class="safe-block safe-block3"></cover-view>
-                        <cover-view class="safe-block safe-block4"></cover-view>
                     </cover-view>
                     <cover-view class="flex-1 safe-margin-left safe-margin-right">
                         <cover-view class="flex space-x-2 max-w-full overflow-x-auto">
@@ -210,10 +232,7 @@
             <cover-view class="absolute inset-0" style="z-index: 150;" data-elm="rate-overlay" catch:tap="handleClickElm">
                 <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
                     <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
-                        <cover-view class="safe-block safe-block1"></cover-view>
-                        <cover-view class="safe-block safe-block2"></cover-view>
                         <cover-view class="safe-block safe-block3"></cover-view>
-                        <cover-view class="safe-block safe-block4"></cover-view>
                     </cover-view>
                     <cover-view class="flex-1 safe-margin-left safe-margin-right">
                         <cover-view class="" style="">
@@ -234,10 +253,7 @@
             <cover-view class="absolute inset-0" style="z-index: 160;" data-elm="file-overlay" catch:tap="handleClickElm">
                 <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
                     <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
-                        <cover-view class="safe-block safe-block1"></cover-view>
-                        <cover-view class="safe-block safe-block2"></cover-view>
                         <cover-view class="safe-block safe-block3"></cover-view>
-                        <cover-view class="safe-block safe-block4"></cover-view>
                     </cover-view>
                     <cover-view class="flex-1 safe-margin-left safe-margin-right">
                         <cover-view class="" style="">
@@ -320,6 +336,7 @@ var cur = 0;
 var _curTime = 0;
 var _duration = 0;
 var hasShow = 0;
+var timer = 0;
 module.exports = {
     handleAnimationEnd: function (event, ownerInstance) {
         var instance1 = ownerInstance.selectComponent('.screen2')
@@ -334,7 +351,8 @@ module.exports = {
         cur = startX - rect.left;
         touchStartTime = event.timeStamp;
         pressing = 1;
-        ownerInstance.setTimeout(function() {
+        timer = ownerInstance.setTimeout(function() {
+            console.log('before pressing === 0', pressing, abs(_distance), abs(_distanceY));
             if (pressing === 0) {
                 return;
             }
@@ -343,7 +361,7 @@ module.exports = {
             }
             longPressing = 1;
             ownerInstance.callMethod('handleLongPress');
-        }, 300);
+        }, 800);
         return false;
     },
     handleTouchMove: function(event, ownerInstance) {
@@ -356,11 +374,8 @@ module.exports = {
         var finger = touches[0];
         var distance = finger.clientX - startX;
         var distanceY = finger.clientY - startY;
-        if (abs(distance) < 10) {
-            return;
-        }
         moving = 1;
-        if (!hasShow) {
+        if (abs(distance) > 10 && !hasShow) {
             hasShow = 1;
             instance3.setStyle({
                 display: 'block',
@@ -375,6 +390,7 @@ module.exports = {
             percent = 1;
         }
         _distance = distance;
+        _distancY = distanceY;
         _tmpCur = distance;
         _percent = percent;
         pos = finger;
@@ -385,6 +401,11 @@ module.exports = {
         var now = event.timeStamp;
         pressing = 0;
         moving = 0;
+        _distance = 0;
+        if (timer) {
+            ownerInstance.clearTimeout(timer);
+            timer = 0;
+        }
         if (longPressing) {
             longPressing = 0;
             ownerInstance.callMethod('handleFinishLongPress');

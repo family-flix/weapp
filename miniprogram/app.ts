@@ -50,6 +50,6 @@ App<IAppOption>({
       },
     });
     connect(app);
-    // app.start({ width, height });
+    app.start({ width, height });
   },
 });

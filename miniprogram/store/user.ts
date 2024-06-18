@@ -1,4 +1,4 @@
-import { UserCore } from "@/domains/user/index";
+import { UserCore } from "@/biz/user/index";
 
 import { storage } from "./storage";
 import { client } from "./request";

@@ -6,6 +6,8 @@ import { MediaOriginCountry } from "@/constants/index";
 import { parseSubtitleContent, parseSubtitleUrl, timeStrToSeconds } from "./utils";
 import { SubtitleFileSuffix, SubtitleFileTypes, SubtitleParagraph } from "./types";
 
+// [DOMAIN]player - load https://ccp-bj29-video-preview.oss-enet.aliyuncs.com/lt/344D6FD24209239ADF04D6958742C1412DE68210_9552465454__sha1_bj29_e78ad19a/QHD/media.m3u8?di=bj29&dr=2549939630&f=6656f6d170830ae9fa6b46f3b17d51ef075906fb&pds-params=%7B%22ap%22%3A%22pJZInNHN2dZWk8qg%22%7D&security-token=CAISvgJ1q6Ft5B2yfSjIr5fFBdXng451wPSvbBfIjzYWRttrhJL4kDz2IHhMf3NpBOkZvvQ1lGlU6%2Fcalq5rR4QAXlDfNTO8XEO9q1HPWZHInuDox55m4cTXNAr%2BIhr%2F29CoEIedZdjBe%2FCrRknZnytou9XTfimjWFrXWv%2Fgy%2BQQDLItUxK%2FcCBNCfpPOwJms7V6D3bKMuu3OROY6Qi5TmgQ41Uh1jgjtPzkkpfFtkGF1GeXkLFF%2B97DRbG%2FdNRpMZtFVNO44fd7bKKp0lQLs0ARrv4r1fMUqW2X543AUgFLhy2KKMPY99xpFgh9a7j0iCbSGyUu%2FhcRm5sw9%2Byfo34lVYneo3xWZ4tbObP7AhWvDNQ3S7jN6YihvSt3zmA4YsrdqJPW1dKDogPIx4aBwHbHMFKlwddMkwuiQothevXtuMkagAFpyPNYYT4%2BsAKSIRaJkc5HgAry3gkOJ2WquZ2sENghBA4dOwezQAWptVCbrmV5e2EzVVxiI8f%2FNZoDk7JnzJ81Fq5E%2Bkqlx1dMgMymjb7b9jsyCCcb29wZptdQly1TIdA77UN97zI2%2FCy3CXqsxh1uGZj8rPWA4enlvm574PEMqCAA&u=f4f8b630dbfa41c1be2de2ba904bacc5&x-oss-access-key-id=STS.NTpNoSnQTw6Dn1yk6CJTGkWSr&x-oss-expires=1718538097&x-oss-process=hls%2Fsign%2Cparams_ZGksZHIsZix1LHBkcy1wYXJhbXM%3D&x-oss-signature=mZUuOpHgDvuPxHL1yuncNXRvFpro%2F7U9aP4MANFvJC8%3D&x-oss-signature-version=OSS2 {"$node": {"play": "<Function: bound p>", "pause": "<Function: bound p>", "stop": "<Function: bound p>", "seek": "<Function: bound p>", "sendDanmu": "<Function: bound p>", "playbackRate": "<Function: bound p>", "requestFullScreen": "<Function: bound p>", "exitFullScreen": "<Function: bound p>", "showStatusBar": "<Function: bound p>", "hideStatusBar": "<Function: bound p>", "exitPictureInPicture": "<Function: bound p>", "requestBackgroundPlayback": "<Function: bound p>", "exitBackgroundPlayback": "<Function: bound p>", "hidePoster": "<Function: bound p>", "startCasting": "<Function: bound p>", "switchCasting": "<Function: bound p>", "reconnectCasting": "<Function: bound p>", "exitCasting": "<Function: bound p>", "_videoId": "<Undefined>", "_webviewId": "<Undefined>", "onloadstart": "<Function>", "onloadedmetadata": "<Function>", "onload": "<Function>", "oncanplay": "<Function>", "onplay": "<Function>", "onplaying": "<Function>", "ontimeupdate": "<Function>", "onpause": "<Function>", "onwaiting": "<Function>", "onended": "<Function>", "onvolumechange": "<Function>", "onresize": "<Function>", "onerror": "<Function>"}, "play": "<Function: play>", "pause": "<Function: pause>", "canPlayType": "<Function: canPlayType>", "load": "<Function: load>", "setCurrentTime": "<Function: setCurrentTime>", "setRate": "<Function: setRate>", "setVolume": "<Function: setVolume>", "requestFullscreen": "<Function: requestFullscreen>", "exitFullscreen": "<Function: exitFullscreen>", "disableFullscreen": "<Function: disableFullscreen>", "enableFullscreen": "<Function: enableFullscreen>", "showSubtitle": "<Function: showSubtitle>", "hideSubtitle": "<Function: hideSubtitle>", "showAirplay": "<Function: showAirplay>", "pictureInPicture": "<Function: pictureInPicture>"}
+
 enum Events {
   StateChange,
 }
@@ -26,15 +28,23 @@ type SubtitleState = {
 export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
   static async New(
     subtitle: { id: string; type: SubtitleFileTypes; url: string; name: string; language: MediaOriginCountry[] },
-    extra: { currentTime?: number; client: HttpClientCore }
+    extra: { currentTime?: number; hostname?: string; proxy?: boolean; client: HttpClientCore }
   ) {
     const { id, name, type, url, language } = subtitle;
     const { client } = extra;
+    // console.log('[DOMAIN]biz/subtitle/index - New function', type, url);
     const content_res = await (async () => {
       if (type === SubtitleFileTypes.MediaInnerFile) {
         const r = await (async () => {
           try {
-            const r = await client.fetch<string>({ url, method: "GET" });
+            const r = await client.fetch<string>({
+              // url: ["https://media.funzm.com/api/v2/wechat/proxy?url=", encodeURIComponent(url)].join(""),
+              url,
+              method: "GET",
+              headers: {
+                Referer: "",
+              },
+            });
             return Result.Ok(r.data);
           } catch (err) {
             const e = err as Error;
@@ -51,7 +61,15 @@ export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
       }
       if (type === SubtitleFileTypes.LocalFile) {
         try {
-          const r = await client.fetch<string>({ url, method: "GET" });
+          const r = await client.fetch<string>({
+            url: (() => {
+              if (url.startsWith("http")) {
+                return url;
+              }
+              return [extra.hostname, url].filter(Boolean).join("");
+            })(),
+            method: "GET",
+          });
           return Result.Ok({
             name,
             content: r.data,
@@ -66,13 +84,19 @@ export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
     if (content_res.error) {
       return Result.Err(content_res.error);
     }
-    const { content, name: subtitle_name } = content_res.data;
+    return SubtitleCore.NewWithContent(content_res.data, { language, currentTime: extra.currentTime });
+  }
+  static NewWithContent(
+    data: { content: string; name: string },
+    extra: { language: MediaOriginCountry[]; currentTime?: number }
+  ) {
+    const { content, name: subtitle_name } = data;
     const suffix = parseSubtitleUrl(subtitle_name);
     const paragraphs = parseSubtitleContent(content, suffix);
-    // console.log("[DOMAIN]subtitle/index - paragraphs", paragraphs);
+    console.log("[DOMAIN]subtitle/index - paragraphs", paragraphs.length);
     const store = new SubtitleCore({
       filename: subtitle_name,
-      language,
+      language: extra.language,
       suffix,
       lines: paragraphs,
     });
@@ -145,7 +169,7 @@ export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
     this.targetLine = nextTargetLine;
   }
   handleTimeChange(currentTime: number) {
-    // console.log("[DOMAIN]subtitle/index - handleTimeChange", currentTime, this.curTime, this.targetLine);
+    console.log("[DOMAIN]subtitle/index - handleTimeChange", currentTime, this.curTime, this.targetLine);
     if (Math.abs(currentTime - this.curTime) >= 1) {
       this.curLine = null;
       this.curLineIndex = null;

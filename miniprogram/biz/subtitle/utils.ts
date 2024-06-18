@@ -220,28 +220,28 @@ const VVTLanguageLangMaps = {
   [MediaOriginCountry.US]: "en",
   "chi&eng": "zh",
 };
-export function createVVTSubtitle(store: SubtitleCore) {
-  const { lines } = store;
-  const content = [
-    "WEBVTT",
-    "",
-    ...lines.map((line, i) => {
-      const { start, end, texts } = line;
-      return [`${formatHourNumCount(start)} --> ${formatHourNumCount(end)}`, ...texts].join("\n");
-    }),
-  ].join("\r\n\r\n");
-  const blob = new Blob([content], { type: "text/vtt" });
-  const url = URL.createObjectURL(blob);
-  return {
-    src: url,
-    label: store.lang
-      ? VVTLanguageLabelMaps[store.lang.join("&") as keyof typeof VVTLanguageLabelMaps]
-      : store.filename,
-    lang: (() => {
-      if (!store.lang) {
-        return "zh";
-      }
-      return VVTLanguageLangMaps[store.lang.join("&") as keyof typeof VVTLanguageLangMaps] || "zh";
-    })(),
-  };
-}
+// export function createVVTSubtitle(store: SubtitleCore) {
+//   const { lines } = store;
+//   const content = [
+//     "WEBVTT",
+//     "",
+//     ...lines.map((line, i) => {
+//       const { start, end, texts } = line;
+//       return [`${formatHourNumCount(start)} --> ${formatHourNumCount(end)}`, ...texts].join("\n");
+//     }),
+//   ].join("\r\n\r\n");
+//   const blob = new Blob([content], { type: "text/vtt" });
+//   const url = URL.createObjectURL(blob);
+//   return {
+//     src: url,
+//     label: store.lang
+//       ? VVTLanguageLabelMaps[store.lang.join("&") as keyof typeof VVTLanguageLabelMaps]
+//       : store.filename,
+//     lang: (() => {
+//       if (!store.lang) {
+//         return "zh";
+//       }
+//       return VVTLanguageLangMaps[store.lang.join("&") as keyof typeof VVTLanguageLangMaps] || "zh";
+//     })(),
+//   };
+// }

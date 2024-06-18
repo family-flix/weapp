@@ -5,6 +5,7 @@
     "bar": "/components/ui/navigation-bar",
     "icon": "/components/ui/icon/index",
     "presence": "/components/ui/presence/index",
+    "placeholder": "/components/ui/placeholder/index",
     "media-settings": "/components/media-settings",
     "video-progress": "/components/video-progress/index",
     "cover-video-progress": "/components/cover-video-progress/index",

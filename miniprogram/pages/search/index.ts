@@ -3,7 +3,7 @@ import mitt from "mitt";
 import { app, client, storage, history } from "@/store/index";
 import { ViewComponentProps } from "@/store/types";
 import { ListCore } from "@/domains/list/index";
-import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/domains/media/services";
+import { SeasonItem, fetchSeasonList, fetchSeasonListProcess } from "@/biz/media/services";
 import { ButtonCore, CheckboxGroupCore, DialogCore, InputCore } from "@/domains/ui/index";
 import { RequestCore } from "@/domains/request/index";
 import { RouteViewCore } from "@/domains/route_view/index";
@@ -40,6 +40,10 @@ function SearchPageLogic(props: ViewComponentProps) {
     autoFocus: true,
     placeholder: "请输入关键字搜索电视剧",
     onEnter(v) {
+      wx.showToast({
+        icon: "none",
+        title: "test",
+      });
       $list.search({
         name: v,
       });
@@ -202,7 +206,6 @@ Page({
       }),
     });
     $page.ui.$input.onChange((v) => {
-      console.log(v);
       this.setData({
         keyword: v,
       });
