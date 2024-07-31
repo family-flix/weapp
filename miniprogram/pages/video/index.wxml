@@ -127,7 +127,7 @@
                 </cover-view>
             </cover-view>
         </presence>
-        <cover-view style="z-index: 120; position: absolute; bottom: 0; width: 100%; background-color: yellow;">
+        <cover-view style="z-index: 120; position: absolute; bottom: 0; width: 100%;">
             <cover-view style="display: flex; flex-direction: column;">
                 <block wx:for="{{subtitle.texts}}" wx:for-item="text" wx:for-index="index">
                     <cover-view class="relative px-2 mb-1" style="display: inline-block; width: 100%;">
@@ -141,8 +141,8 @@
             <placeholder _store="{{$ui.$bottom2}}" cover="{{true}}">
                 <cover-view style="height: 24px;"></cover-view>
             </placeholder>
-            <presence _store="{{ui.$bottom2}}" cover="{{true}}" style="z-index: 120; position: relative; width: 100%; background-color: red;">
-                <cover-view style="z-index: 130; min-height: 115px; background-color: blue;" catch:tap="prevent">
+            <presence _store="{{ui.$bottom2}}" cover="{{true}}" style="z-index: 120; position: relative; width: 100%;">
+                <cover-view style="z-index: 130; min-height: 115px;" catch:tap="prevent">
                     <cover-view class="pt-4 px-8" style="z-index: 3; position: relative;">
                         <cover-video-progress _store="{{$player}}" />
                     </cover-view>
@@ -211,11 +211,11 @@
                         <cover-view class="safe-block safe-block3"></cover-view>
                         <cover-view class="safe-block safe-block4"></cover-view>
                     </cover-view>
-                    <cover-view class="flex-1 safe-margin-left safe-margin-right" style="height: 375px; overflow-y: scroll;">
+                    <cover-view class="flex-1 p-4 space-y-2" style="height: {{screen.width}}; overflow-y: scroll;">
                         <block wx:for="{{resolutions}}" wx:for-item="r" wx:key="typeText">
-                            <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="resolution" data-type="{{r.type}}" bind:tap="handleClickElm">
-                                <cover-view>{{r.typeText}}</cover-view>
-                                <cover-view wx:if="{{curSource.type === r.type}}">选中</cover-view>
+                            <cover-view class="flex items-center justify-between mb-4 px-4 py-2 rounded-md cursor-pointer" style="" data-elm="resolution" data-type="{{r.type}}" bind:tap="handleClickElm">
+                                <cover-view style="color: #fff;">{{r.typeText}}</cover-view>
+                                <cover-view wx:if="{{curSource.type === r.type}}" style="color: #fff;">选中</cover-view>
                             </cover-view>
                         </block>
                     </cover-view>
@@ -258,9 +258,9 @@
                     <cover-view class="flex-1 safe-margin-left safe-margin-right">
                         <cover-view class="" style="">
                             <block wx:for="{{state.curSource.files}}" wx:for-item="file" wx:key="id">
-                                <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="file" data-id="{{file.id}}" bind:tap="handleClickElm">
-                                    <cover-view>{{file.name}}</cover-view>
-                                    <cover-view wx:if="{{curSource.id === file.id}}">选中</cover-view>
+                                <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" style="background-color: #f8f9fa;" data-elm="file" data-id="{{file.id}}" bind:tap="handleClickElm">
+                                    <cover-view style="color: #fff;">{{file.name}}</cover-view>
+                                    <cover-view wx:if="{{curSource.id === file.id}}" style="color: #fff;">选中</cover-view>
                                 </cover-view>
                             </block>
                         </cover-view>

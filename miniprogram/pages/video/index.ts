@@ -154,6 +154,7 @@ Page({
     $player,
     // playerState: null as null | ReturnType<typeof PlayerCore>["state"],
     playerState: $player.state,
+    screen: app.screen,
     resolutions: [
       {
         typeText: "普清",

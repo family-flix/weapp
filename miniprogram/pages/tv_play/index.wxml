@@ -1,11 +1,11 @@
 <page-meta page-style="flex flex-col overflow-hidden;" background-color="{{backgroundBottomColor}}">
     <view class="fixed top-0 w-screen h-screen bg-w-bg-0" data-elm="screen" bind:tap="handleClickElm">
         <bar class-name=""></bar>
-        <view class="z-10 absolute w-full" style="z-index: 999; top: 36%; left: 50%; min-height: 120rpx; transform: translate(-50%, -50%);">
+        <view class="z-10 absolute w-full" style="z-index: 999; display: inline-flex; top: 36%; left: 50%; min-height: 120rpx; transform: translate(-50%, -50%);">
             <f-video class-name="z-10 relative" style="width: 100%;" _store="{{$logic.$player}}"></f-video>
             <view class="page__mask absolute z-20 inset-0">
-                <presence class-name="" enter-class="animate-in fade-in" exit-class="animate-out fade-out" _store="{{$ui.$mask}}">
-                    <view class="absolute inset-0 opacity-20" style="background-color: black;"></view>
+                <presence class-name="absolute inset-0" enter-class="animate-in fade-in" exit-class="animate-out fade-out" _store="{{$ui.$mask}}">
+                    <view class="absolute inset-0 opacity-50" style="background-color: black;"></view>
                 </presence>
             </view>
             <view class="absolute z-20" style="display: flex; flex-direction: column; left: 50%; width: 100%; bottom: 12px; transform: translateX(-50%);">
@@ -26,24 +26,24 @@
                         <block wx:if="{{!!playerState.ready}}">
                             <view class="flex items-center space-x-8">
                                 <view class="text-center" style="width: 160rpx;" data-elm="rewind" catch:tap="handleClickElm">
-                                    <view>倒退</view>
-                                    <view class="">10s</view>
+                                    <view style="color: #fff;">倒退</view>
+                                    <view style="color: #fff;" class="">10s</view>
                                 </view>
                                 <view class="p-2">
                                     <block wx:if="{{playerState.playing}}">
                                         <view data-elm="pause" catch:tap="handleClickElm">
-                                            <icon name="pause" size="{{64}}" />
+                                            <icon name="pause" size="{{64}}" color="#fff" />
                                         </view>
                                     </block>
                                     <block wx:else>
                                         <view data-elm="play" catch:tap="handleClickElm">
-                                            <icon name="play" size="{{64}}" />
+                                            <icon name="play" size="{{64}}" color="#fff" />
                                         </view>
                                     </block>
                                 </view>
                                 <view class="text-center" style="width: 160rpx;" data-elm="fast-forward" catch:tap="handleClickElm">
-                                    <view>快进</view>
-                                    <view class="">10s</view>
+                                    <view style="color: #fff;">快进</view>
+                                    <view class="" style="color: #fff;">10s</view>
                                 </view>
                             </view>
                         </block>
@@ -55,8 +55,10 @@
                     </block>
                     <block wx:else>
                         <view class="flex flex-col justify-center items-center">
-                            <icon name="alert-triangle" size="{{64}}" />
-                            <view class="mt-4 text-center">{{playerState.error}}</view>
+                            <icon name="alert-triangle" size="{{64}}" color="#fff" />
+                            <view class="mt-4 text-center" style="color: #fff;">
+                                {{playerState.error}}
+                            </view>
                         </view>
                     </block>
                 </presence>
@@ -117,13 +119,13 @@
                 <cover-view class="z-10 relative flex items-center justify-between z-20 px-4 text-w-white">
                     <cover-view class="flex items-center p-4" data-elm="exit-fullscreen" catch:tap="handleClickElm">
                         <cover-view class="safe-block safe-block3"></cover-view>
-                        <cover-view class="inline-block mr-2">返回</cover-view>
-                        <cover-view class="">
+                        <cover-view class="inline-block mr-2" style="color: #fff;">返回</cover-view>
+                        <cover-view class="" style="color: #fff;">
                             {{state.curSource.order}}、{{state.curSource.name}}
                         </cover-view>
                     </cover-view>
                     <cover-view class="relative flex items-center p-4 rounded-md" data-elm="exit-fullscreen-and-pause" catch:tap="handleClickElm">
-                        <cover-view style="">退出全屏</cover-view>
+                        <cover-view style="color: #fff;">退出全屏</cover-view>
                     </cover-view>
                 </cover-view>
             </cover-view>
@@ -152,30 +154,30 @@
                         <cover-view class="flex items-center" style="">
                             <cover-view class="safe-block safe-block3"></cover-view>
                             <block wx:if="{{playerState.playing}}">
-                                <cover-view data-elm="pause" catch:tap="handleClickElm">
+                                <cover-view style="color: #fff;" data-elm="pause" catch:tap="handleClickElm">
                                     暂停
                                 </cover-view>
                             </block>
                             <block wx:else>
-                                <cover-view class="" data-elm="play" catch:tap="handleClickElm">
+                                <cover-view class="" style="color: #fff;" data-elm="play" catch:tap="handleClickElm">
                                     播放
                                 </cover-view>
                             </block>
-                            <cover-view class="relative ml-4" data-elm="next-episode" catch:tap="handleClickElm">
+                            <cover-view class="relative ml-4" style="color: #fff;" data-elm="next-episode" catch:tap="handleClickElm">
                                 <cover-view class="">下一集</cover-view>
                             </cover-view>
                         </cover-view>
                         <cover-view class="flex items-center space-x-4 px-2">
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="resolution-menu2" catch:tap="handleClickElm">
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" style="color: #fff;" data-elm="resolution-menu2" catch:tap="handleClickElm">
                                 <cover-view class="">{{curSource.typeText || '分辨率'}}</cover-view>
                             </cover-view>
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="rate-menu2" catch:tap="handleClickElm">
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" style="color: #fff;" data-elm="rate-menu2" catch:tap="handleClickElm">
                                 <cover-view class="">{{playerState.rate}}x</cover-view>
                             </cover-view>
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="episodes-menu2" catch:tap="handleClickElm">
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" style="color: #fff;" data-elm="episodes-menu2" catch:tap="handleClickElm">
                                 <cover-view class="">选集</cover-view>
                             </cover-view>
-                            <cover-view class="flex items-center p-2 rounded-md space-x-2" data-elm="file-menu2" catch:tap="handleClickElm">
+                            <cover-view class="flex items-center p-2 rounded-md space-x-2" style="color: #fff;" data-elm="file-menu2" catch:tap="handleClickElm">
                                 <cover-view class="">切换源</cover-view>
                             </cover-view>
                         </cover-view>
@@ -185,22 +187,24 @@
         </cover-view>
         <presence _store="{{$ui.$episodes2}}" cover="{{true}}" style="z-index: 130;" enter-class="fade-in" exit-class="fade-out">
             <cover-view class="absolute inset-0" style="z-index: 130;" data-elm="episodes-overlay" catch:tap="handleClickElm">
-                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
+                <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 364px; background-color: black; opacity: 0.8;" catch:tap="prevent">
                     <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
                         <cover-view class="safe-block safe-block3"></cover-view>
                     </cover-view>
-                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                    <cover-view class="flex-1 p-4 space-y-2" style="height: {{screen.width}}; overflow-y: scroll;">
                         <cover-view class="flex space-x-2 max-w-full overflow-x-auto">
                             <block wx:for="{{state.groups}}" wx:for-item="group" wx:key="id">
-                                <cover-view class="py-4 {{state.curGroup.text === group.text ? 'underline' : ''}}" data-elm="group" data-id="{{group.id}}" catch:tap="handleClickElm">
+                                <cover-view class="py-2 {{state.curGroup.text === group.text ? 'underline' : ''}}" style="color: #fff;" data-elm="group" data-id="{{group.id}}" catch:tap="handleClickElm">
                                     {{group.text}}
                                 </cover-view>
                             </block>
                         </cover-view>
-                        <cover-view class="flex flex-wrap mt-4" style="">
+                        <cover-view class="flex flex-wrap mt-2" style="">
                             <block wx:for="{{state.curGroup.list}}" wx:for-item="episode" wx:key="id">
-                                <cover-view class="episode relative flex justify-center items-center p-4 rounded-md  {{state.curSource.id === episode.id ? 'bg-w-fg-1' : 'bg-w-fg-3'}}" style="margin-right: 12px; margin-bottom: 12px; width: 48px; height:48px; box-sizing: border-box;" data-elm="episode" data-id="{{episode.id}}" catch:tap="handleClickElm">
-                                    <cover-view class="text-w-fg-1">{{episode.order}}</cover-view>
+                                <cover-view class="episode relative flex justify-center items-center rounded-md  {{state.curSource.id === episode.id ? 'bg-w-fg-1' : 'bg-w-fg-3'}}" style="margin-right: 8px; margin-bottom: 8px; width: 36px; height:36px; box-sizing: border-box;" data-elm="episode" data-id="{{episode.id}}" catch:tap="handleClickElm">
+                                    <cover-view class="text-w-fg-1" style="color: #fff;">
+                                        {{episode.order}}
+                                    </cover-view>
                                 </cover-view>
                             </block>
                         </cover-view>
@@ -212,16 +216,15 @@
             <cover-view class="absolute" style="z-index: 140; left: 0; top: 0; width: 100%; height: 100%;" data-elm="resolution-overlay" catch:tap="handleClickElm">
                 <cover-view class="absolute left-0 top-0 pt-4 flex h-full" style="width: 358px; background-color: black; opacity: 0.8;" catch:tap="prevent">
                     <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
-                        <cover-view class="safe-block safe-block1"></cover-view>
-                        <cover-view class="safe-block safe-block2"></cover-view>
                         <cover-view class="safe-block safe-block3"></cover-view>
-                        <cover-view class="safe-block safe-block4"></cover-view>
                     </cover-view>
-                    <cover-view class="flex-1 safe-margin-left safe-margin-right" style="height: 375px; overflow-y: scroll;">
+                    <cover-view class="flex-1 p-4 space-y-2" style="height: {{screen.width}}; overflow-y: scroll;">
                         <block wx:for="{{curSource.resolutions}}" wx:for-item="r" wx:key="typeText">
-                            <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="resolution" data-type="{{r.type}}" bind:tap="handleClickElm">
-                                <cover-view>{{r.typeText}}</cover-view>
-                                <cover-view wx:if="{{curSource.type === r.type}}">选中</cover-view>
+                            <cover-view class="flex items-center justify-between mb-4 px-4 py-2 rounded-md cursor-pointer" style="" data-elm="resolution" data-type="{{r.type}}" bind:tap="handleClickElm">
+                                <cover-view style="color: #fff;">{{r.typeText}}</cover-view>
+                                <cover-view wx:if="{{curSource.type === r.type}}" style="color: #fff;">
+                                    选中
+                                </cover-view>
                             </cover-view>
                         </block>
                     </cover-view>
@@ -234,12 +237,12 @@
                     <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
                         <cover-view class="safe-block safe-block3"></cover-view>
                     </cover-view>
-                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                    <cover-view class="flex-1 p-4 space-y-2" style="height: {{screen.width}}; overflow-y: scroll;">
                         <cover-view class="" style="">
                             <block wx:for="{{MediaRates}}" wx:for-item="rate" wx:key="self">
                                 <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="rate" data-rate="{{rate}}" bind:tap="handleClickElm">
-                                    <cover-view>{{rate}}</cover-view>
-                                    <cover-view wx:if="{{playerState.rate === rate}}">
+                                    <cover-view style="color: #fff;">{{rate}}</cover-view>
+                                    <cover-view wx:if="{{playerState.rate === rate}}" style="color: #fff;">
                                         选中
                                     </cover-view>
                                 </cover-view>
@@ -255,12 +258,14 @@
                     <cover-view class="safe-block1 safe-block2 safe-block3 safe-block4">
                         <cover-view class="safe-block safe-block3"></cover-view>
                     </cover-view>
-                    <cover-view class="flex-1 safe-margin-left safe-margin-right">
+                    <cover-view class="flex-1 p-4 space-y-2" style="height: {{screen.width}}; overflow-y: scroll;">
                         <cover-view class="" style="">
                             <block wx:for="{{state.curSource.files}}" wx:for-item="file" wx:key="id">
                                 <cover-view class="flex items-center justify-between p-4 rounded-md cursor-pointer" data-elm="file" data-id="{{file.id}}" bind:tap="handleClickElm">
-                                    <cover-view>{{file.name}}</cover-view>
-                                    <cover-view wx:if="{{curSource.id === file.id}}">选中</cover-view>
+                                    <cover-view style="color: #fff;">{{file.name}}</cover-view>
+                                    <cover-view wx:if="{{curSource.id === file.id}}" style="color: #fff;">
+                                        选中
+                                    </cover-view>
                                 </cover-view>
                             </block>
                         </cover-view>
@@ -273,15 +278,17 @@
         <view class="relative box-border h-full px-4 safe-bottom">
             <view class="flex space-x-2 max-w-full overflow-x-auto scroll--hidden">
                 <block wx:for="{{state.groups}}" wx:for-item="group" wx:key="id">
-                    <view class="p-2 {{state.curGroup.text === group.text ? 'underline' : ''}}" data-elm="group" data-id="{{group.id}}" bind:tap="handleClickGroup">
+                    <view class="p-2 {{state.curGroup.text === group.text ? 'underline' : ''}}" data-elm="group" data-id="{{group.id}}" bind:tap="handleClickElm">
                         {{group.text}}
                     </view>
                 </block>
             </view>
             <view class="grid gap-2 grid-cols-6">
                 <block wx:for="{{state.curGroup.list}}" wx:for-item="episode" wx:key="id">
-                    <view class="relative flex justify-center items-center w-12 h-12 p-2 rounded-md  {{state.curSource.id === episode.id ? 'bg-w-fg-1' : 'bg-w-fg-3'}}" data-elm="episode" data-id="{{episode.id}}" bind:tap="handleClickElm">
-                        <view class="absolute right-1 top-1 text-w-fg-1">{{episode.order}}</view>
+                    <view class="relative flex justify-center border items-center w-12 h-12 p-2 rounded-md {{state.curSource.id === episode.id ? 'bg-w-fg-1' : 'bg-w-fg-3'}}" style="background: #f8f9fa;" data-elm="episode" data-id="{{episode.id}}" bind:tap="handleClickElm">
+                        <view class="absolute right-1 top-1 text-w-fg-1">
+                            {{episode.order}}
+                        </view>
                     </view>
                 </block>
             </view>
@@ -295,7 +302,7 @@
     <cover-view class="fixed toast p-4 rouned-md" style="display: none; top: 32%; left: 50%; width: 240px; transform: translate(-50%, -50%);">
         <cover-view class="z-0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px; background-color: #000; opacity: 0.8;"></cover-view>
         <cover-view class="z-10 relative" style="">
-            <cover-view class="text-md text-w-fg-1 text-center" style="width: 100%; font-size: 24px; color: #898989;">
+            <cover-view class="text-md text-w-fg-1 text-center" style="width: 100%; font-size: 24px; color: #fff;">
                 {{virtualCurTime}}/{{times.duration}}
             </cover-view>
         </cover-view>
@@ -351,17 +358,17 @@ module.exports = {
         cur = startX - rect.left;
         touchStartTime = event.timeStamp;
         pressing = 1;
-        timer = ownerInstance.setTimeout(function() {
-            console.log('before pressing === 0', pressing, abs(_distance), abs(_distanceY));
-            if (pressing === 0) {
-                return;
-            }
-            if (abs(_distance) > 10 || abs(_distanceY) > 10) {
-                return;
-            }
-            longPressing = 1;
-            ownerInstance.callMethod('handleLongPress');
-        }, 800);
+        // timer = ownerInstance.setTimeout(function() {
+            // console.log('before pressing === 0', pressing, abs(_distance), abs(_distanceY));
+            // if (pressing === 0) {
+                // return;
+            // }
+            // if (abs(_distance) > 10 || abs(_distanceY) > 10) {
+                // return;
+            // }
+            // longPressing = 1;
+            // ownerInstance.callMethod('handleLongPress');
+        // }, 800);
         return false;
     },
     handleTouchMove: function(event, ownerInstance) {
@@ -375,12 +382,12 @@ module.exports = {
         var distance = finger.clientX - startX;
         var distanceY = finger.clientY - startY;
         moving = 1;
-        if (abs(distance) > 10 && !hasShow) {
-            hasShow = 1;
-            instance3.setStyle({
-                display: 'block',
-            });
-        }
+        // if (abs(distance) > 10 && !hasShow) {
+            // hasShow = 1;
+            // instance3.setStyle({
+                // display: 'block',
+            // });
+        // }
         var percent = distance / rect.width;
         console.log('move distance', distance, percent);
         if (percent < -1) {

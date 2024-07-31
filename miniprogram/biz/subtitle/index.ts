@@ -169,7 +169,7 @@ export class SubtitleCore extends BaseDomain<TheTypesOfEvents> {
     this.targetLine = nextTargetLine;
   }
   handleTimeChange(currentTime: number) {
-    console.log("[DOMAIN]subtitle/index - handleTimeChange", currentTime, this.curTime, this.targetLine);
+    // console.log("[DOMAIN]subtitle/index - handleTimeChange", currentTime, this.curTime, this.targetLine);
     if (Math.abs(currentTime - this.curTime) >= 1) {
       this.curLine = null;
       this.curLineIndex = null;

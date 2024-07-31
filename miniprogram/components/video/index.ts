@@ -63,7 +63,7 @@ Component({
     handleTimeupdate(event) {
       const { currentTime, duration } = event.detail;
       const $player: PlayerCore = this.data._store;
-      console.log("[COMPONENT]video / handleTimeUpdate", $player._duration);
+      // console.log("[COMPONENT]video / handleTimeUpdate", $player._duration);
       $player.handleTimeUpdate({ currentTime, duration });
     },
     handleLoadedmetadata(event) {
@@ -71,7 +71,7 @@ Component({
       const $player: PlayerCore = this.data._store;
       // console.log("[COMPONENT]video / handleLoadedmetadata", $player, duration);
       $player._duration = duration;
-      console.log("[COMPONENT]video / handleLoadedmetadata", $player, duration);
+      // console.log("[COMPONENT]video / handleLoadedmetadata", $player, duration);
       $player.handleCanPlay({ duration });
     },
     handleEnded() {

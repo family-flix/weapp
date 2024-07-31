@@ -2,7 +2,6 @@ import mitt from "mitt";
 
 import { app, history, storage, client } from "@/store/index";
 import { RouteViewCore } from "@/domains/route_view/index";
-import { connect } from "@/domains/player/connect.weapp";
 import { MediaRates } from "@/biz/media/constants";
 import { seconds_to_hour } from "@/utils/index";
 
@@ -12,14 +11,11 @@ Page({
   data: {
     backgroundBottomColor: "#111111",
     menuWidth: app.screen.menuButton?.width || 0,
+    screen: app.screen,
     orientation: "vertical",
     $logic: null as null | ReturnType<typeof SeasonPlayingPageLogic>,
     $ui: null as null | ReturnType<typeof SeasonPlayingPageView>,
     MediaRates,
-    icons: {
-      play: "../../assets/play.png",
-    },
-
     playerState: null as null | ReturnType<typeof SeasonPlayingPageLogic>["$player"]["state"],
     subtitleState: null as null | ReturnType<typeof SeasonPlayingPageLogic>["$tv"]["$source"]["subtitle"],
     state: null as null | ReturnType<typeof SeasonPlayingPageLogic>["$tv"]["state"],

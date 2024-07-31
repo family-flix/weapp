@@ -48,8 +48,8 @@ Component({
           this.setData({
             curTime: v.currentTime,
             // progress: v.progress,
-            width,
-            left: width,
+            // width,
+            // left: width,
             times: {
               currentTime: seconds_to_hour(v.currentTime),
               duration: seconds_to_hour(v.duration),
